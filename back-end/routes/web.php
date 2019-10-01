@@ -12,5 +12,8 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return response()->json([
+        'title' => 'Welcome to our web application',
+        'body' => 'Hello World!'
+    ]);
 });
