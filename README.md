@@ -22,3 +22,6 @@ To run the project, you will need both a backend server and a frontend server to
 2. Next, you need to install *[Yarn](https://yarnpkg.com/lang/en/docs/install)*
 3. After you installed ***Yarn***, enter the front-end folder, run the following command `yarn install` to install / update the packages
 4. Finally, run `yarn start` to start the frontend on localhost:3000.
+
+## Project Proposal
+[Click Here](https://docs.google.com/document/d/1-w7v9Rlvemvw2kY4GCaXRQ8yOQIgn346m-cODJI7PaI/edit?fbclid=IwAR2crQ6EXDGjrtEJXbBRhCDmGm6dFGwlbCzKYWsvFdRtyqRheAEuMT31vbI) to access the project proposal.
