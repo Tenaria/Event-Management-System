@@ -9,8 +9,12 @@ use Response;
 class eventController extends Controller
 {
 	public function test() {
+		$test = $request->input('test');
+		
 		$users = DB::table('users')
-			->get();
+			->insert([
+				'users_fname' => $test
+			]);
 
 		//var_dump('hi');
 		die(var_dump($users));
