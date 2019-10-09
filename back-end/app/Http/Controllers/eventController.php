@@ -24,6 +24,22 @@ class eventController extends Controller
         	'body' => 'Hello World!'
 		], 200);
 	}
+	
+	public function editAccountTest($email) {
+		
+		/*
+		check user is active
+		
+		*/
+		$fnameInput = $request->input('fname');
+		$lnameInput = $request->input('lname');
+		$passInput = $request->input('password');
+		$test= $request->input('password_confirm');
+		
+		 DB::table('users_email')
+			->where('users_email',1);
+			
+	}
 
 
 }
