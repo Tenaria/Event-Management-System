@@ -8,7 +8,7 @@ if (!function_exists('validate_jwt')) {
             $decoded = JWT::decode($token, env('JWT_KEY'), ['HS256']);
             $decoded = (array) $decoded;
 
-            if($decoded['expiration'] < time()) {
+            if($decoded['expiration'] > time()) {
                 return $decoded;
             }
         }
