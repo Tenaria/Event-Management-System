@@ -12,8 +12,11 @@
 */
 
 Route::get('/', function () {
+    error_log('Test!');
     return response()->json([
         'title' => 'Welcome to our web application',
         'body' => 'Hello World!'
     ]);
 });
+
+Route::post('/test', 'eventAjaxController@test');

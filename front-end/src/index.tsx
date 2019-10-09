@@ -3,6 +3,9 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import * as serviceWorker from './serviceWorker';
 
+// Import your custom components
+import Card from './components/cardexample';
+
 interface IndexState {
   title: string,
   body: string
@@ -17,18 +20,36 @@ class Index extends React.Component<{}, IndexState> {
   componentDidMount = async () => {
     // Very basic fetch request. We are getting the title and body from the backend.
     const res = await fetch('http://localhost:8000/', {});
-    const data = await res.json();
+    if (res.status === 400) {
+      this.setState({title: "400", body: "Rejected!"});
+    } else {
+      const data = await res.json();
+      this.setState({title: data.title, body: data.body});
+    }
+  }
 
-    this.setState({title: data.title, body: data.body});
+  testInput = async () => {
+    const res = await fetch('http://localhost:8000/test', {
+      method: 'POST',
+      mode: 'cors',
+      headers: {
+        'Content-Type' : 'application/json'
+      },
+      body: JSON.stringify({'name': 'yo'})
+    });
   }
 
   render() {
     const { title, body } = this.state;
 
     return (
-      <div>
+      <div id='hello'>
         <div>{ title }</div>
         <div>{ body }</div>
+        <button onClick={this.testInput}>Hello</button>
+        <Card name={'Bob'} email={'test@test'}/>
+        <Card name={'Alice'} email={'test@test'}/>
+        <Card name={'Smith'} email={'test@test'}/>
       </div>
     )
   }
