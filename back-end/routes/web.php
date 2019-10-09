@@ -11,12 +11,9 @@
 |
 */
 
-Route::get('/', function () {
-    error_log('Test!');
-    return response()->json([
-        'title' => 'Welcome to our web application',
-        'body' => 'Hello World!'
-    ]);
-});
+//AUTHENTICATION ROUTES
+Route::post('/log_in', 'eventAjaxController@log_in');
+
+Route::get('/', 'eventAjaxController@log_in');
 
 Route::post('/test', 'eventAjaxController@test');
