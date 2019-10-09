@@ -13,7 +13,7 @@ class eventController extends Controller
 			->get();
 
 		//var_dump('hi');
-		//die(var_dump($users));
+		die(var_dump($users));
 
 		return Response::json([
 			'title' => 'Nice',
