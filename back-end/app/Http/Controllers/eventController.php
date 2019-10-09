@@ -27,19 +27,45 @@ class eventController extends Controller
 	
 	public function editAccountTest($email) {
 		
-		/*
-		check user is active
+		$passInput = $request->input('password');
+		$test= $request->input('password_confirm'); 
 		
-		*/
 		$fnameInput = $request->input('fname');
 		$lnameInput = $request->input('lname');
-		$passInput = $request->input('password');
-		$test= $request->input('password_confirm');
-		
-		 DB::table('users_email')
-			->where('users_email',1);
-			
-	}
+		$token = . $request->input('token');
+		$token_data = validate_jwt($token);
 
+		//make sure password are correct
+		if ($passInput === $test) {
+			//success
+		} else {
+			//failed
+			//send message to the frontend?
+		}
+		if($token_data) {
+			$user_data = DB::table()
+			->where([
+				['users_active', 1],
+				['users_id', $token_data['user_data']]
+				])
+			->first();
+			
+		if(!is_null($user_data)) {
+			DB::table()
+			->where([
+				[''],
+				['users_id', $token_data['user_data']]
+			])
+			->update(['users_fname' => $fnameInput],
+				['users_lname' => $lnameInput],
+				['users_password' => $passInput]
+			);
+		
+		return the success (with code 200)
+		}
+	}
+	return the error (with code 401)
+
+		
 
 }
