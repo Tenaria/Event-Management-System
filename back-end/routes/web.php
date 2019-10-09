@@ -11,9 +11,11 @@
 |
 */
 
-Route::get('/', function () {
-    return response()->json([
-        'title' => 'Welcome to our web application',
-        'body' => 'Hello World!'
-    ]);
-});
+// Route::get('/', function () {
+//     return response()->json([
+//         'title' => 'Welcome to our web application',
+//         'body' => 'Hello World!'
+//     ]);
+// });
+
+Route::get('/', 'eventController@test');
