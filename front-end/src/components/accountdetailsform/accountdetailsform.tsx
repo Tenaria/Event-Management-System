@@ -2,6 +2,12 @@ import React from 'react';
 
 class AccountDetailsForm extends React.Component<{}, {}> {
   submitForm = async () => {
+    const fname = document.querySelector('#account_form[name=fname]');
+    const lname = document.querySelector('#account_form[name=lname]');
+    const email = document.querySelector('#account_form[name=email]');
+    const pass = document.querySelector('#account_form[name=password]');
+    const pass_confirm = document.querySelector('#account_form[name=password_confirm]');
+    
     const res = await fetch('http://localhost:8000/create_account', {
       method: 'POST',
       mode: 'cors',
@@ -9,11 +15,11 @@ class AccountDetailsForm extends React.Component<{}, {}> {
         'Content-Type' : 'application/json'
       },
       body: JSON.stringify({
-        'fname': document.querySelector('#account_form[name=fname]'), 
-        'lname': document.querySelector('#account_form[name=lname]'), 
-        'email': document.querySelector('#account_form[name=email]'), 
-        'password': document.querySelector('#account_form[name=password]'),
-        'password_confirm': document.querySelector('#account_form[name=password_confirm]')
+        'fname': fname, 
+        'lname': lname, 
+        'email': email, 
+        'password': pass,
+        'password_confirm': pass_confirm
         })
     });
   }

@@ -35,36 +35,40 @@ class eventController extends Controller
 		$token = $request->input('token');
 		$token_data = validate_jwt($token);
 
-		//make sure password are correct
-		if ($passInput === $test) {
-			//success
-		} else {
-			//failed
-			//send message to the frontend?
-		}
-		if($token_data) {
-			$user_data = DB::table()
-			->where([
-				['users_active', 1],
-				['users_id', $token_data['user_id']]
-				])
-			->first();
-			
-		if(!is_null($user_data)) {
-			DB::table()
-			->where([
-				[''],
-				['users_id', $token_data['user_id']]
-			])
-			->update(['users_fname' => $fnameInput],
-				['users_lname' => $lnameInput],
-				['users_password' => $passInput]
-			);
-		
-		return the success (with code 200)
-		}
+		error_log($fnameInput);
 
-		return the error (with code 401)
+    	return Response::json([], 200);
+
+		// //make sure password are correct
+		// if ($passInput === $test) {
+		// 	//success
+		// } else {
+		// 	//failed
+		// 	//send message to the frontend?
+		// }
+		// if($token_data) {
+		// 	$user_data = DB::table()
+		// 	->where([
+		// 		['users_active', 1],
+		// 		['users_id', $token_data['user_id']]
+		// 		])
+		// 	->first();
+			
+		// if(!is_null($user_data)) {
+		// 	DB::table()
+		// 	->where([
+		// 		[''],
+		// 		['users_id', $token_data['user_id']]
+		// 	])
+		// 	->update(['users_fname' => $fnameInput],
+		// 		['users_lname' => $lnameInput],
+		// 		['users_password' => $passInput]
+		// 	);
+		
+		// return the success (with code 200)
+		// }
+
+		// return the error (with code 401)
 	}
 	
 
