@@ -2,11 +2,26 @@ import React from 'react';
 
 class AccountDetailsForm extends React.Component<{}, {}> {
   submitForm = async () => {
-    const fname = document.querySelector('#account_form[name=fname]');
-    const lname = document.querySelector('#account_form[name=lname]');
-    const email = document.querySelector('#account_form[name=email]');
-    const pass = document.querySelector('#account_form[name=password]');
-    const pass_confirm = document.querySelector('#account_form[name=password_confirm]');
+    let fname = this.ref.querySelector('#account_form input[name="fname"]');
+    if(fname != null) {
+      fname = fname.value;
+    }
+    let lname = this.ref.querySelector('#account_form input[name="lname"]');
+    if(lname != null) {
+      lname = lname.value;
+    }
+    let email = this.ref.querySelector('#account_form input[name="email"]');
+    if(email != null) {
+      email = email.value;
+    }
+    let pass = this.ref.querySelector('#account_form input[name="password"]');
+    if(pass != null) {
+      pass = pass.value;
+    }
+    let pass_confirm = this.ref.querySelector('#account_form input[name="password_confirm"]');
+    if(pass_confirm != null) {
+      pass_confirm = pass_confirm.value;
+    }
     
     const res = await fetch('http://localhost:8000/create_account', {
       method: 'POST',
