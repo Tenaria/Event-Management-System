@@ -46,7 +46,7 @@ class eventController extends Controller
 			$user_data = DB::table()
 			->where([
 				['users_active', 1],
-				['users_id', $token_data['user_data']]
+				['users_id', $token_data['user_id']]
 				])
 			->first();
 			
@@ -54,7 +54,7 @@ class eventController extends Controller
 			DB::table()
 			->where([
 				[''],
-				['users_id', $token_data['user_data']]
+				['users_id', $token_data['user_id']]
 			])
 			->update(['users_fname' => $fnameInput],
 				['users_lname' => $lnameInput],

@@ -45,6 +45,32 @@ class eventAjaxController extends Controller
         return Response::json([], 401);
 	}
 
+	public function get_account_details(Request $request) {
+		$token = $request->input('token');
+
+		if(isset($token) && !empty($oken)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				$user_data = DB::table('users')
+								 ->where([
+									['users_active', 1],
+									['users_id', $token_data['user_id']]
+								])
+								->first();
+
+				if(!is_null($user_data)) {
+					return Response::json([
+		        		'users_fname' => $user_data->users_fname,
+		        		'users_lname' => $user_data->users_lname,
+		        		'users_email' => $user_data->users_email
+		        	], 200);
+				}
+			}
+		}
+
+		return Response::json([], 401);
+	}
+
 	public function test (Request $request) {
     $name = $request->input('name');
     error_log($name);
