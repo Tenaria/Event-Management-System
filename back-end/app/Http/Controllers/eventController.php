@@ -71,6 +71,49 @@ class eventController extends Controller
 		// return the error (with code 401)
 	}
 	
+	public function edit_account(Request $request) {
+		$token = $request->input('token');
+		$fnameInput = $request->input('fname');
+		$lnameInput = $request->input('lname');
+		$passInput = $request->input('password');
+		$test= $request->input('password_confirm'); 
+		
+		//testing zone
+		$fnameInput = 'Pua';
+		$lnameInput = 'Pao';
+		$passInput = 'banana';
+		$test = 'banana';
+		//var_dump($fnameInput);
+		//var_dump($lnameInput);
+		//var_dump('Pass is ' .$passInput);
+		//var_dump('test is '  .$test);
+		
+		/*$user_data = DB::table('users')
+								 ->where([
+									['users_active', 1],
+									//['users_id', $token_data['user_id']]
+								])
+								->first();
+		$user_data->users_fname = $fnameInput;
+		
+		var_dump($user_data->users_fname);	*/				
+		DB::table('users')
+					->where([
+						['users_active', 1],
+						//['users_id', $token_data['user_id']]
+					])
+					->update([
+						'users_fname' => $fnameInput, 
+						'users_lname' => $lnameInput,
+						
+					]);
+			
+
+		
+		return Response::json([], 401);
+	}
+
+	
 
 
 		

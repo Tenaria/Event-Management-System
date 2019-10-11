@@ -15,8 +15,8 @@
 Route::post('/log_in', 'eventAjaxController@log_in');
 Route::post('/get_account_details', 'eventAjaxController@get_account_details');
 Route::post('/create_account', 'eventController@create_account');
-
-Route::get('/', 'eventAjaxController@get_account_details');
+Route::get('/','eventController@edit_account');
+Route::post('/get_account_details', 'eventAjaxController@get_account_details');
 
 Route::post('/create_account', 'eventController@create_account');
 

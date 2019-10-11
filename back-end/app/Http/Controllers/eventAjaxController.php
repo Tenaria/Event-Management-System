@@ -48,7 +48,7 @@ class eventAjaxController extends Controller
 	public function get_account_details(Request $request) {
 		$token = $request->input('token');
 
-		if(isset($token) && !empty($oken)) {
+		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
 				$user_data = DB::table('users')
