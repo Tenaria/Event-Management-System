@@ -25,14 +25,14 @@ class eventController extends Controller
 		], 200);
 	}
 	
-	public function editAccountTest($email) {
+	public function create_account($email) {
 		
 		$passInput = $request->input('password');
 		$test= $request->input('password_confirm'); 
 		
 		$fnameInput = $request->input('fname');
 		$lnameInput = $request->input('lname');
-		$token = . $request->input('token');
+		$token = $request->input('token');
 		$token_data = validate_jwt($token);
 
 		//make sure password are correct
@@ -63,8 +63,11 @@ class eventController extends Controller
 		
 		return the success (with code 200)
 		}
+
+		return the error (with code 401)
 	}
-	return the error (with code 401)
+	
+
 
 		
 

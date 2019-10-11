@@ -5,6 +5,7 @@ import * as serviceWorker from './serviceWorker';
 
 // Import your custom components
 import Card from './components/cardexample';
+import AccountDetailsForm from './components/accountdetailsform';
 
 interface IndexState {
   title: string,
@@ -44,6 +45,7 @@ class Index extends React.Component<{}, IndexState> {
 
     return (
       <div id='hello'>
+        <AccountDetailsForm/>
         <div>{ title }</div>
         <div>{ body }</div>
         <button onClick={this.testInput}>Hello</button>
