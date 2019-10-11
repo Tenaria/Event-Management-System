@@ -36,7 +36,9 @@ class eventAjaxController extends Controller
 
 	        	$jwt = JWT::encode($token, $key);
 
-	        	return Response::json([], 200);
+	        	return Response::json([
+	        		'token' => $token
+	        	], 200);
 	        }
         }
 
