@@ -25,7 +25,7 @@ class eventController extends Controller
 		], 200);
 	}
 	
-	public function create_account($email) {
+	public function create_account(Request $request) {
 		
 		$passInput = $request->input('password');
 		$test= $request->input('password_confirm'); 
