@@ -39,77 +39,39 @@ class eventController extends Controller
 
     	return Response::json([], 200);
 
-		// //make sure password are correct
-		// if ($passInput === $test) {
-		// 	//success
-		// } else {
-		// 	//failed
-		// 	//send message to the frontend?
-		// }
-		// if($token_data) {
-		// 	$user_data = DB::table()
-		// 	->where([
-		// 		['users_active', 1],
-		// 		['users_id', $token_data['user_id']]
-		// 		])
-		// 	->first();
-			
-		// if(!is_null($user_data)) {
-		// 	DB::table()
-		// 	->where([
-		// 		[''],
-		// 		['users_id', $token_data['user_id']]
-		// 	])
-		// 	->update(['users_fname' => $fnameInput],
-		// 		['users_lname' => $lnameInput],
-		// 		['users_password' => $passInput]
-		// 	);
-		
-		// return the success (with code 200)
-		// }
-
-		// return the error (with code 401)
 	}
 	
 	public function edit_account(Request $request) {
-		$token = $request->input('token');
 		$fnameInput = $request->input('fname');
 		$lnameInput = $request->input('lname');
 		$passInput = $request->input('password');
 		$test= $request->input('password_confirm'); 
 		
-		//testing zone
-		$fnameInput = 'Pua';
-		$lnameInput = 'Pao';
-		$passInput = 'banana';
-		$test = 'banana';
-		//var_dump($fnameInput);
-		//var_dump($lnameInput);
-		//var_dump('Pass is ' .$passInput);
-		//var_dump('test is '  .$test);
-		
-		/*$user_data = DB::table('users')
+		$token = $request->input('token');
+
+		if(isset($token) && !empty($token)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				$user_data = DB::table('users')
 								 ->where([
 									['users_active', 1],
-									//['users_id', $token_data['user_id']]
+									['users_id', $token_data['user_id']]
 								])
 								->first();
-		$user_data->users_fname = $fnameInput;
-		
-		var_dump($user_data->users_fname);	*/				
-		DB::table('users')
-					->where([
-						['users_active', 1],
-						//['users_id', $token_data['user_id']]
-					])
-					->update([
+				if(!is_null($user_data)) {
+					DB::table('users')
+						->where([
+							['users_active', 1],
+							['users_id', $token_data['user_id']]
+						])
+						->update([
 						'users_fname' => $fnameInput, 
 						'users_lname' => $lnameInput,
-						
-					]);
-			
-
-		
+						'users_password' => $passInput,	
+						]);
+				}
+			}
+		}
 		return Response::json([], 401);
 	}
 
