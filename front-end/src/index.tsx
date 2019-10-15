@@ -6,6 +6,7 @@ import './index.scss';
 
 // Import your custom components
 import AccountDetailsForm from './components/AccountDetailsForm';
+import LoginForm from './components/LoginPage';
 
 interface IndexState {}
 
@@ -13,7 +14,7 @@ class Index extends React.Component<{}, IndexState> {
   render() {
     return (
       <div id='hello'>
-        <AccountDetailsForm />
+        <LoginForm />
       </div>
     )
   }

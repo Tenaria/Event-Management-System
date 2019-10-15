@@ -28,7 +28,7 @@ class RegisterForm extends React.Component<FormComponentProps, {}> {
     const { getFieldDecorator } = this.props.form;
 
     return (
-      <div id="form-wrapper">
+      <div className="form-wrapper">
         <Form onSubmit={this.handleSubmit}>
           <Title level={2}>REGISTER FORM</Title>
           <Row gutter={24}>
