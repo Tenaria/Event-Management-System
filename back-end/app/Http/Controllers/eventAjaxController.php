@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use DB;
 use Response;
 use Firebase\JWT\JWT;
+use Illuminate\Support\Facades\Hash;
 
 class eventAjaxController extends Controller
 {
