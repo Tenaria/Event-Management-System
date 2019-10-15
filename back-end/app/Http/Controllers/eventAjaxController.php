@@ -32,7 +32,7 @@ class eventAjaxController extends Controller
 			                            	'users_lname' => $lname, 
 			                            	'users_email' => $email, 
 			                                'users_password' => Hash::make($password),
-			                                'users_active' => 0
+			                                'users_active' => 1
 			                            ]);
 			        
 			        return Response::json([], 200);
