@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use DB;
 use Response;
 use Firebase\JWT\JWT;
+use Hash;
 
 class eventAjaxController extends Controller
 {
@@ -80,7 +81,7 @@ class eventAjaxController extends Controller
 	        	$jwt = JWT::encode($token, $key);
 
 	        	return Response::json([
-	        		'token' => $token
+	        		'token' => $jwt
 	        	], 200);
 	        }
         }
