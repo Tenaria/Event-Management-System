@@ -173,15 +173,48 @@ class eventAjaxController extends Controller
 	}
 
 	public function edit_event(Request $request) {
+		$token = $request->input('token');
+		
+		if(isset($token) && !empty($token)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				//TODO
 
+				return Response::json([], 400);
+			}
+		}
+		
+		return Response::json([], 401);
 	}
 
 	public function get_event_details(Request $request) {
+		$token = $request->input('token');
+		
+		if(isset($token) && !empty($token)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				//TODO
 
+				return Response::json([], 400);
+			}
+		}
+		
+		return Response::json([], 401);
 	}
 
 	public function cancel_event(Request $request) {
+		$token = $request->input('token');
+		
+		if(isset($token) && !empty($token)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				//TODO
 
+				return Response::json([], 400);
+			}
+		}
+		
+		return Response::json([], 401);
 	}
 
 	// public function test (Request $request) {

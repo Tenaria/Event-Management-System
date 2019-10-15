@@ -16,7 +16,6 @@ class eventController extends Controller
 				'users_fname' => $test
 			]);
 
-		//var_dump('hi');
 		die(var_dump($users));
 
 		return Response::json([
@@ -40,9 +39,4 @@ class eventController extends Controller
     	return Response::json([], 200);
 
 	}
-	
-
-
-		
-
 }
