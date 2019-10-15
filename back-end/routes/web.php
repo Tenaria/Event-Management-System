@@ -13,6 +13,7 @@
 
 //AUTHENTICATION ROUTES
 Route::post('/log_in', 'eventAjaxController@log_in');
+Route::post('/sign_up', 'eventAjaxController@sign_up');
 Route::post('/get_account_details', 'eventAjaxController@get_account_details');
 Route::post('/create_account', 'eventController@create_account');
 Route::get('/','eventController@edit_account');

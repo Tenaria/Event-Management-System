@@ -9,6 +9,46 @@ use Firebase\JWT\JWT;
 
 class eventAjaxController extends Controller
 {
+	public function sign_up(Request $request) {
+        $fname = $request->input('fname');
+        $lname = $request->input('lname');
+        $email = $request->input('email');
+        $password = $request->input('password');
+        $password_confirm = $request->input('password_confirm');
+
+        if(!empty($fname) && !empty($lname) && !empty($email) && !empty($password) && !empty($password_confirm)) {
+             $check = DB::table('users')
+	                        ->where([
+	                            ['users_email', $email],
+	                            ['users_active', 1]
+	                        ])
+	                        ->first();
+
+	        if(!is_null($check)) {
+	           	if($password == $password_confirm) {
+		            $user_id = DB::table('users')
+			                            ->insertGetId([
+			                            	'users_fname' => $fname, 
+			                            	'users_lname' => $lname, 
+			                            	'users_email' => $email, 
+			                                'users_password' => Hash::make($password),
+			                                'users_active' => 0
+			                            ]);
+			        
+			        return Response::json([], 200);
+		        }
+
+		        return Response::json([
+		        	'status' => 'no_match'
+		        ], 200);
+	        }
+        }
+
+       	return Response::json([
+        	'status' => 'missing_input'
+        ], 200);
+    }
+
 	public function log_in(Request $request) {
 		$email = $request->input('email');
         $password = $request->input('password');
