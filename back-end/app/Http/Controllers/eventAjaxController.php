@@ -70,7 +70,29 @@ class eventAjaxController extends Controller
 
 		return Response::json([], 401);
 	}
-
+	public function create_account(Request $request){
+		$users_fname = $request->input('users_fname');
+		$users_lname = $request->input('users_lname');
+		$users_email = $request->input('users_email');
+		$users_password = $request->input('users_password');
+		if(isset($users_fname) && !is_null($users_fname) && 
+			isset($users_lname) && !is_null($users_lname) && 
+			isset($users_email) && !is_null($users_email) && 
+			isset($users_password) && !is_null($users_password)){
+			/**check if email exists in DB**/
+			if(DB::table('users')->where(['users_email',$users_email])->exists()){
+				//TODO: not sure what to return, so I just returned empty and 400
+				return Response::json([],400);
+			}else{
+				DB::table('users')->insert(['users_fname'=>$users_fname,
+										'users_lname'=>$users_lname,
+										'users_email'=>$users_email,
+										'users_password'=>Hash::make($users_password)]);
+				return Respnse::json([],200);
+			}
+		}
+		return Response::json([],400);
+	}
 	public function test (Request $request) {
     $name = $request->input('name');
     error_log($name);
