@@ -69,6 +69,8 @@ class eventController extends Controller
 						'users_lname' => $lnameInput,
 						'users_password' => $passInput,	
 						]);
+
+					return Response::json([], 200);
 				}
 			}
 		}
