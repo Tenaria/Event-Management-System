@@ -24,7 +24,7 @@ class eventAjaxController extends Controller
 	                        ])
 	                        ->first();
 
-	        if(!is_null($check)) {
+	        if(is_null($check)) {
 	           	if($password == $password_confirm) {
 		            $user_id = DB::table('users')
 			                            ->insertGetId([
@@ -40,17 +40,17 @@ class eventAjaxController extends Controller
 
 		        return Response::json([
 		        	'status' => 'no_match'
-		        ], 200);
+		        ], 400);
 	        }
 
 	        return Response::json([
 	        	'status' => 'email_in_use'
-	        ], 200);
+	        ], 400);
         }
 
        	return Response::json([
         	'status' => 'missing_input'
-        ], 200);
+        ], 400);
     }
 
 	public function log_in(Request $request) {
