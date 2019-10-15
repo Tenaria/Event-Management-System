@@ -42,6 +42,10 @@ class eventAjaxController extends Controller
 		        	'status' => 'no_match'
 		        ], 200);
 	        }
+
+	        return Response::json([
+	        	'status' => 'email_in_use'
+	        ], 200);
         }
 
        	return Response::json([
