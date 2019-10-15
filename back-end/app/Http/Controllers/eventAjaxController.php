@@ -59,7 +59,6 @@ class eventAjaxController extends Controller
 
         if(isset($email) && !is_null($email) && isset($password) && !is_null($password)) {
         	$user = DB::table('users')
-	                    ->select('users_id', 'users_password')
 	                    ->where([
 	                    	['users_email', $email],
 	                    	['users_active', 1]
