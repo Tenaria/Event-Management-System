@@ -15,6 +15,7 @@ class Index extends React.Component<{}, IndexState> {
     return (
       <div id='hello'>
         <LoginForm />
+        <AccountDetailsForm />
       </div>
     )
   }

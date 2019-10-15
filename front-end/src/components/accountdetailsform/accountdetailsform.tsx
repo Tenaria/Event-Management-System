@@ -8,9 +8,20 @@ class RegisterForm extends React.Component<FormComponentProps, {}> {
 
   handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    this.props.form.validateFieldsAndScroll((err, values) => {
+    this.props.form.validateFieldsAndScroll( async (err, values) => {
       if (!err) {
         console.log('Received values of: ', values);
+
+        const res = await fetch('http://localhost:8000/sign_up', {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+            'Content-Type' : 'application/json'
+          },
+          body: JSON.stringify(values)
+        });
+
+        console.log(res);
       }
     })
   }
@@ -34,7 +45,7 @@ class RegisterForm extends React.Component<FormComponentProps, {}> {
           <Row gutter={24}>
             <Col span={12}>
               <Form.Item label="First Name">
-                {getFieldDecorator('first_name', {
+                {getFieldDecorator('fname', {
                   rules: [{
                     required: true,
                     message: 'Please enter your first name!',
@@ -47,7 +58,7 @@ class RegisterForm extends React.Component<FormComponentProps, {}> {
             </Col>
             <Col span={12}>
               <Form.Item label="Last Name">
-                {getFieldDecorator('last_name', {
+                {getFieldDecorator('lname', {
                   rules: [{
                     required: true,
                     message: 'Please enter your last name!',
@@ -82,7 +93,7 @@ class RegisterForm extends React.Component<FormComponentProps, {}> {
             })(<Input.Password />)}
           </Form.Item>
           <Form.Item label="Confirm Password" hasFeedback>
-            {getFieldDecorator('confirm_password', {
+            {getFieldDecorator('password_confirm', {
               rules: [{
                 required: true,
                 message: 'Please confirm your password!',
