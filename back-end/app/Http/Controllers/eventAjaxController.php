@@ -66,16 +66,16 @@ class eventAjaxController extends Controller
 	                    ])
 	                    ->first();
 
-	        if (!is_null($user) && !is_null($password) && Hash::check($password, $user_data->users_password)) {
+	        if (!is_null($user) && !is_null($password) && Hash::check($password, $user->users_password)) {
 	        	$key = env('JWT_KEY');
 
-	        	$timestamp = strtotime('+3 days', $timestamp);
+	        	$timestamp = strtotime('+3 days', time());
 
 	        	$token = [
 	        		'user_id' => $user->users_id,
 	        		'expiration' => $timestamp,
-	        		'email' => $users->users_email,
-	        		'name' => $users->users_fname." ".$users->users_lname
+	        		'email' => $user->users_email,
+	        		'name' => $user->users_fname." ".$user->users_lname
 	        	];
 
 	        	$jwt = JWT::encode($token, $key);
