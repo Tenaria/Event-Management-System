@@ -24,7 +24,7 @@ class eventAjaxController extends Controller
 	                        ])
 	                        ->first();
 
-	        if(!is_null($check)) {
+	        if(is_null($check)) {
 	           	if($password == $password_confirm) {
 		            $user_id = DB::table('users')
 			                            ->insertGetId([
