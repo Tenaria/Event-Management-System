@@ -4,4 +4,4 @@
  * directory itself.
  */
 
-export { default } from './accountdetailsform';
+export { default } from './AccountDetailsForm';
