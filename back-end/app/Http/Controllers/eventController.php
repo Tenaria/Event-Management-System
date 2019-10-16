@@ -16,7 +16,6 @@ class eventController extends Controller
 				'users_fname' => $test
 			]);
 
-		//var_dump('hi');
 		die(var_dump($users));
 
 		return Response::json([
@@ -40,46 +39,4 @@ class eventController extends Controller
     	return Response::json([], 200);
 
 	}
-	
-	public function edit_account(Request $request) {
-		$fnameInput = $request->input('fname');
-		$lnameInput = $request->input('lname');
-		$passInput = $request->input('password');
-		$test= $request->input('password_confirm'); 
-		
-		$token = $request->input('token');
-
-		if(isset($token) && !empty($token)) {
-			$token_data = validate_jwt($token);
-			if($token_data == true) {
-				$user_data = DB::table('users')
-								 ->where([
-									['users_active', 1],
-									['users_id', $token_data['user_id']]
-								])
-								->first();
-				if(!is_null($user_data)) {
-					DB::table('users')
-						->where([
-							['users_active', 1],
-							['users_id', $token_data['user_id']]
-						])
-						->update([
-						'users_fname' => $fnameInput, 
-						'users_lname' => $lnameInput,
-						'users_password' => $passInput,	
-						]);
-
-					return Response::json([], 200);
-				}
-			}
-		}
-		return Response::json([], 401);
-	}
-
-	
-
-
-		
-
 }
