@@ -5,7 +5,7 @@ import * as serviceWorker from './serviceWorker';
 import './index.scss';
 
 // Import your custom components
-import AccountDetailsForm from './components/AccountDetailsForm';
+import AccountDetailsForm from './components/RegisterForm';
 import LoginForm from './components/LoginPage';
 
 interface IndexState {}
