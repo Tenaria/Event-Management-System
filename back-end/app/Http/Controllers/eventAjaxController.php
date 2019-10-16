@@ -155,13 +155,24 @@ class eventAjaxController extends Controller
 	public function create_event(Request $request) {
 		$token = $request->input('token');
 		$event_name = $request->input('event');
-		$event_desc = $request->inpu('desc');
+		$event_desc = $request->input('desc');
 		
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
 				if(isset($event_name) && !empty($event_name)) {
 					//TODO: INSERT EVENT NAME AND DESCRIPTION INTO DATABASE
+					$currentTimeInSeconds = time();
+					$currentDate = date('Y-m-d', $currentTimeInSeconds)
+					DB::table('events')
+							->insert([
+								'events_active' => 1,
+								'events_name' => $event_name,
+								'events_desc' => $event_desc,
+								'events_createdat' => $currentDate,
+								'events_createdby' => $token_data['name']
+								
+							]);
 
 					return Response::json([], 200);
 				}
@@ -175,17 +186,39 @@ class eventAjaxController extends Controller
 
 	public function edit_event(Request $request) {
 		$token = $request->input('token');
-		
+		$new_event_name = $request->input('event_name');
+		$new_event_desc = $request->input('event_desc');
+		$new_event_public = $request->input('event_public');
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
+			
+			
 			if($token_data == true) {
-				//TODO
-
+				$event_data = DB::table('events')
+								->where ([
+									['events_active', 1],
+									['events_createdby',$token_data['name']]
+								])
+								->first();
+				if(!is_null($event_data)) {
+					DB::table('events')
+						->where([
+							['events_active', 1],
+							['events_createdby',$token_data['name']]
+						])
+						->update([
+							'events_name' => $new_event_name,
+							'events_public' => $new_event_public,
+							'events_desc' => $new_event_desc,
+						]);
+						
+					return Response::json([], 200);
+				}
 				return Response::json([], 400);
-			}
-		}
+			} 
 		
 		return Response::json([], 401);
+		}	
 	}
 
 	public function get_event_details(Request $request) {
@@ -194,8 +227,22 @@ class eventAjaxController extends Controller
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
-				//TODO
-
+				$event_data = DB::table('events')
+								->where ([
+									['events_active', 1],
+									['events_createdby',$token_data['name']]
+									
+								])
+								->first();
+				if(!is_null($event_data)) {
+					return Response::json([
+		        		'events_name' => $event_data->events_name,
+		        		'events_public' => $event_data->events_public,
+		        		'events_createdby' => $event_data->events_createdby,
+						'events_createdat' => $event_data->events_createdat,
+						'events_desc' => $event_data->events_desc
+		        	], 200);
+				}
 				return Response::json([], 400);
 			}
 		}

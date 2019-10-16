@@ -16,14 +16,14 @@ Route::post('/log_in', 'eventAjaxController@log_in');
 Route::post('/sign_up', 'eventAjaxController@sign_up');
 Route::post('/get_account_details', 'eventAjaxController@get_account_details');
 Route::post('/create_account', 'eventController@create_account');
-Route::get('/','eventAjaxController@edit_account');
+Route::post('/edit_account','eventAjaxController@edit_account');
 Route::post('/edit_account', 'eventAjaxController@edit_account');
 Route::post('/get_account_details', 'eventAjaxController@get_account_details');
 
 // SPRINT 2 (EVENT ROUTES)
 Route::post('/create_event', 'eventAjaxController@create_event');
 Route::post('/edit_event', 'eventAjaxController@edit_event');
-Route::post('/get_event_details', 'eventAjaxController@get_event_details');
+Route::get('/', 'eventAjaxController@get_event_details');
 Route::post('/cancel_event', 'eventAjaxController@cancel_event');
 
 // SPRINT 3 (ROUTES)
