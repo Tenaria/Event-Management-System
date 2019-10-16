@@ -163,7 +163,7 @@ class eventAjaxController extends Controller
 				if(isset($event_name) && !empty($event_name)) {
 					//TODO: INSERT EVENT NAME AND DESCRIPTION INTO DATABASE
 					$currentTimeInSeconds = time();
-					$currentDate = date('Y-m-d', $currentTimeInSeconds)
+					$currentDate = date('Y-m-d', $currentTimeInSeconds);
 					DB::table('events')
 							->insert([
 								'events_active' => 1,
