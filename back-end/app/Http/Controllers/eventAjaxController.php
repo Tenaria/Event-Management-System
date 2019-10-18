@@ -291,9 +291,41 @@ class eventAjaxController extends Controller
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
-				//TODO
+				//TODO: CLAIRE: TEST
+				$events_array = [];
+				$event_data = DB::table('events AS e')
+								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s dd WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"))
+								->where ([
+									['e.events_active', 1],
+									['e.events_createdby',$token_data['user_id']],
+									['e.events_status', 0]
+									
+								])
+								->havingRaw('dates_latest > '.time())
+								->get();
 
-				return Response::json([], 400);
+				if(!is_null($event_data)) {
+					foreach($event_data as $event) {
+						$event_status = "ONGOING";
+						// if($event_status == 1) {
+						// 	$event_status = "CANCELLED";
+						// }
+
+						$public = "PRIVATE";
+						if($events_public == 1) {
+							$public = "PUBLIC";
+						}
+
+						$events_array[] = [
+							'events_name' => htmlspecialchars($event->events_name),
+							'events_desc' => htmlspecialchars($event->events_status),
+							'events_status' => $event_status,
+							'events_public' => $public
+						];
+					}
+				}
+
+				return Response::json(['events' => $events_array], 200);
 			}
 		}
 		
@@ -351,9 +383,41 @@ class eventAjaxController extends Controller
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
-				//TODO
+				//TODO: CLAIRE: TEST
+				$events_array = [];
+				$event_data = DB::table('events AS e')
+								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s dd WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'dates_earliest'"))
+								->where ([
+									['e.events_active', 1],
+									['e.events_createdby',$token_data['user_id']],
+									['e.events_status', 0]
+									
+								])
+								->havingRaw('dates_earliest > '.time())
+								->get();
 
-				return Response::json([], 400);
+				if(!is_null($event_data)) {
+					foreach($event_data as $event) {
+						$event_status = "PAST";
+						// if($event_status == 1) {
+						// 	$event_status = "CANCELLED";
+						// }
+
+						$public = "PRIVATE";
+						if($events_public == 1) {
+							$public = "PUBLIC";
+						}
+
+						$events_array[] = [
+							'events_name' => htmlspecialchars($event->events_name),
+							'events_desc' => htmlspecialchars($event->events_status),
+							'events_status' => $event_status,
+							'events_public' => $public
+						];
+					}
+				}
+
+				return Response::json(['events' => $events_array], 200);
 			}
 		}
 		
