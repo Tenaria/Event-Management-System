@@ -86,7 +86,7 @@ class eventAjaxController extends Controller
 	        }
         }
 
-        return Response::json([], 401);
+        return Response::json([], 400);
 	}
 
 	public function get_account_details(Request $request) {
@@ -112,7 +112,7 @@ class eventAjaxController extends Controller
 			}
 		}
 
-		return Response::json([], 401);
+		return Response::json([], 400);
 	}
 
 	public function edit_account(Request $request) {
@@ -148,7 +148,7 @@ class eventAjaxController extends Controller
 				}
 			}
 		}
-		return Response::json([], 401);
+		return Response::json([], 400);
 	}
 
 	// S P R I N T 2 S T A R T //
@@ -181,7 +181,7 @@ class eventAjaxController extends Controller
 			}
 		}
 		
-		return Response::json([], 401);
+		return Response::json([], 400);
 	}
 
 	public function edit_event(Request $request) {
@@ -217,7 +217,7 @@ class eventAjaxController extends Controller
 				return Response::json([], 400);
 			} 
 		
-		return Response::json([], 401);
+		return Response::json([], 400);
 		}	
 	}
 
@@ -247,22 +247,42 @@ class eventAjaxController extends Controller
 			}
 		}
 		
-		return Response::json([], 401);
+		return Response::json([], 400);
 	}
 
 	public function cancel_event(Request $request) {
 		$token = $request->input('token');
+		$event_id = $request->input('event_id');
 		
-		if(isset($token) && !empty($token)) {
+		if(isset($token) && !empty($token) && isset($event_id) && !empty($event_id)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
-				//TODO
+				$event_data = DB::table('events')
+								->where ([
+									['events_active', 1],
+									['events_createdby',$token_data['user_id']],
+									['events_id', $event_id]
+									
+								])
+								->first();
+				if(!is_null($event_data)) {
+					DB::table('events')
+								->where ([
+									['events_active', 1],
+									['events_createdby',$token_data['user_id']],
+									['events_id', $event_id]
+									
+								])
+								->update(['events_status' => 1]);
+
+					return Response::json([], 200);
+				}
 
 				return Response::json([], 400);
 			}
 		}
 		
-		return Response::json([], 401);
+		return Response::json([], 400);
 	}
 	// S P R I N T 2 E N D //
 
@@ -309,7 +329,7 @@ class eventAjaxController extends Controller
 			}
 		}
 		
-		return Response::json([], 401);
+		return Response::json([], 400);
 	}
 
 	public function load_event_sessions(Request $request) {
@@ -324,7 +344,7 @@ class eventAjaxController extends Controller
 			}
 		}
 		
-		return Response::json([], 401);
+		return Response::json([], 400);
 	}
 
 	public function save_event_sessions(Request $request) {
@@ -339,7 +359,7 @@ class eventAjaxController extends Controller
 			}
 		}
 		
-		return Response::json([], 401);
+		return Response::json([], 400);
 	}
 	// S P R I N T 3 E N D //
 
