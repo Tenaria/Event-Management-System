@@ -317,7 +317,7 @@ class eventAjaxController extends Controller
 
 				if(!is_null($event_data)) {
 					foreach($event_data as $event) {
-						$event_status = "";
+						$event_status = "ONGOING";
 						if($event_status == 1) {
 							$event_status = "CANCELLED";
 						}
