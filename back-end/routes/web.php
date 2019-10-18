@@ -25,6 +25,7 @@ Route::post('/create_event', 'eventAjaxController@create_event');
 Route::post('/edit_event', 'eventAjaxController@edit_event');
 Route::get('/', 'eventAjaxController@get_event_details');
 Route::post('/cancel_event', 'eventAjaxController@cancel_event');
+Route::post('/get_upcoming_events', 'eventAjaxController@get_upcoming_events');
 
 // SPRINT 3 (ROUTES)
 Route::post('/get_past_events', 'eventAjaxController@get_past_events');

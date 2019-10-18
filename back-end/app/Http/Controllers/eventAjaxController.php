@@ -284,6 +284,64 @@ class eventAjaxController extends Controller
 		
 		return Response::json([], 400);
 	}
+
+	public function get_upcoming_events(Request $request) {
+		$token = $request->input('token');
+		
+		if(isset($token) && !empty($token)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				//TODO
+
+				return Response::json([], 400);
+			}
+		}
+		
+		return Response::json([], 400);
+	}
+
+	public function get_events_managed_by_user(Request $request) {
+		$token = $request->input('token');
+		
+		if(isset($token) && !empty($token)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				$events_array = [];
+				$event_data = DB::table('events')
+								->where ([
+									['events_active', 1],
+									['events_createdby',$token_data['user_id']]
+									
+								])
+								->get();
+
+				if(!is_null($event_data)) {
+					foreach($event_data as $event) {
+						$event_status = "";
+						if($event_status == 1) {
+							$event_status = "CANCELLED";
+						}
+
+						$public = "PRIVATE";
+						if($events_public == 1) {
+							$public = "PUBLIC";
+						}
+
+						$events_array[] = [
+							'events_name' => htmlspecialchars($event->events_name),
+							'events_desc' => htmlspecialchars($event->events_status),
+							'events_status' => $event_status,
+							'events_public' => $public
+						];
+					}
+				}
+
+				return Response::json(['events' => $events_array], 200);
+			}
+		}
+		
+		return Response::json([], 400);
+	}
 	// S P R I N T 2 E N D //
 
 	// S P R I N T 3 S T A R T //
@@ -299,7 +357,7 @@ class eventAjaxController extends Controller
 			}
 		}
 		
-		return Response::json([], 401);
+		return Response::json([], 400);
 	}
 
 	public function get_timetable_details(Request $request) {
@@ -314,7 +372,7 @@ class eventAjaxController extends Controller
 			}
 		}
 		
-		return Response::json([], 401);
+		return Response::json([], 400);
 	}
 
 	public function save_timetable_details(Request $request) {
