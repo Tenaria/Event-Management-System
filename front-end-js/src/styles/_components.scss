@@ -1,0 +1,12 @@
+.form-wrapper {
+  background-color: $PRIMARY_COLOUR;
+  form {
+    background-color: white;
+    height: 100vh;
+    max-width: 720px;
+    margin: auto;
+    padding: 1em 2em;
+  }
+}
+
+.login-form-button { width: 100%; }

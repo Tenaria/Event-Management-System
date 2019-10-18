@@ -1,10 +1,25 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
 import * as serviceWorker from './serviceWorker';
 
-ReactDOM.render(<App />, document.getElementById('root'));
+import './index.scss';
+
+// Import your custom components
+import AccountDetailsForm from './components/RegisterForm';
+import LoginForm from './components/LoginPage';
+
+class Index extends React.Component {
+  render() {
+    return (
+      <div id='hello'>
+        <LoginForm />
+        <AccountDetailsForm />
+      </div>
+    )
+  }
+};
+
+ReactDOM.render(<Index />, document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
