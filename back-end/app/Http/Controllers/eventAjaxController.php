@@ -207,7 +207,7 @@ class eventAjaxController extends Controller
 						DB::table('events')
 						->where([
 							['events_active', 1],
-							['events_createdby',$token_data['users_id']]
+							['events_createdby',$token_data['users_id']],
 							['events_id', $event_id]
 						])
 						->update([
@@ -237,7 +237,7 @@ class eventAjaxController extends Controller
 				$event_data = DB::table('events')
 								->where ([
 									['events_active', 1],
-									['events_id',$token_data['users_id']]
+									['events_id',$token_data['users_id']],
 									['events_id', $event_id]
 									
 								])
