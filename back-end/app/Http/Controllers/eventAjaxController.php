@@ -296,7 +296,9 @@ class eventAjaxController extends Controller
 						}
 
 						//UPDATE THE ATTENDEES
-						//$new_event_attendees
+						if(!isset($new_event_attendees) || empty($new_event_attendees)) {
+							$new_event_attendees= [];
+						}
 						$attendees = DB::table('events_access')
 										->where([
 											//['access_active', 1],
