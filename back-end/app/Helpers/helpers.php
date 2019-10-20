@@ -16,3 +16,10 @@ if (!function_exists('validate_jwt')) {
         return false;
     }
 }
+
+if (!function_exists('proper_empty_check')) {
+    function proper_empty_check($string="") {
+       return (str_replace(' ', '', $string) != '');
+    }
+}
+

@@ -118,8 +118,8 @@ class eventAjaxController extends Controller
 	public function edit_account(Request $request) {
 		$fnameInput = $request->input('fname');
 		$lnameInput = $request->input('lname');
-		$passInput = $request->input('password');
-		$test= $request->input('password_confirm'); 
+		$password = $request->input('password');
+		$password_confirm= $request->input('password_confirm'); 
 		
 		$token = $request->input('token');
 
@@ -132,18 +132,31 @@ class eventAjaxController extends Controller
 									['users_id', $token_data['user_id']]
 								])
 								->first();
-				if(!is_null($user_data)) {
-					DB::table('users')
-						->where([
-							['users_active', 1],
-							['users_id', $token_data['user_id']]
-						])
-						->update([
-						'users_fname' => $fnameInput, 
-						'users_lname' => $lnameInput,
-						'users_password' => $passInput,	
-						]);
 
+				if(!is_null($user_data)) {
+					if(!is_null($password) && $password == $password_confirm && proper_empty_check($password)) {
+						DB::table('users')
+							->where([
+								['users_active', 1],
+								['users_id', $token_data['user_id']]
+							])
+							->update([
+								'users_fname' => $fnameInput, 
+								'users_lname' => $lnameInput,
+								'users_password' => Hash::make($password)	
+							]);
+					} else {
+						DB::table('users')
+							->where([
+								['users_active', 1],
+								['users_id', $token_data['user_id']]
+							])
+							->update([
+								'users_fname' => $fnameInput, 
+								'users_lname' => $lnameInput
+							]);
+					}
+					
 					return Response::json([], 200);
 				}
 			}
