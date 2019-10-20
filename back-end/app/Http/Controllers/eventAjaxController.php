@@ -509,10 +509,10 @@ class eventAjaxController extends Controller
 			$token_data = validate_jwt($token);
 			if($token_data == true){
 				$events_array = [];
-				$event_data = DB::table('events_access as a')
-					->select('a.*', DB::raw("IFNULL((SELECT e.events_id, e.events_name FROM events AS e WHERE
-						e.events_id = a.access_events_id AND e.events_status=1),0)"))
-					->where([["a.access_user_id", $token_data['user_id']],["a.access_active", 1]])
+				$event_data = DB::table('events_access')
+					->join('events', 'events_access.access_events_id', '=', 'events.events_id')
+					->select('events.events_id', 'events.events_name')
+					->where([["a.access_user_id", $token_data['user_id']],["a.access_active", 1], ["a.access_accepted", 0]])
 					->get();
 				if(!is_null($event_data)){
 					foreach($event_data as $event){
@@ -522,7 +522,7 @@ class eventAjaxController extends Controller
 						];
 					}
 				}
-				return $Response::json(['events'=>$events_array],200);
+				return Response::json(['events'=>$events_array],200);
 			}
 			return Response::json([],400);
 		}
