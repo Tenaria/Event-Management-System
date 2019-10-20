@@ -267,7 +267,7 @@ class eventAjaxController extends Controller
 												->get();
 
 						$current_attributes_array = [];
-						if(count($event_attributes) > 0) {
+						if(!is_null($event_attributes)) {
 							foreach($event_attributes as $attribute) {
 								$attribute_id = $attribute->attributes_values_attributes_id;
 								$attribute_value = $attribute->attributes_values_value;
@@ -323,13 +323,45 @@ class eventAjaxController extends Controller
 									
 								])
 								->first();
+
 				if(!is_null($event_data)) {
+					$attributes_name_to_id = get_event_attributes_pk();
+
+					$event_attributes = DB::table('events_attributes_values')
+												->where([
+													['attribute_values_events_id', $event_id],
+													['attributes_values_active', 1]
+												])
+												->get();
+
+					$current_attributes_array = [];
+					$id_to_name_array = [];
+					if(!empty($attributes_name_to_id)) {
+						foreach($attributes_name_to_id as $name => $id) {
+							$current_attributes_array[$name] = null;
+							$id_to_name_array[$id] = $name;
+						}
+					}
+
+					if(!is_null($event_attributes)) {
+						foreach($event_attributes as $attribute) {
+							$attribute_id = $attribute->attributes_values_attributes_id;
+							$attribute_value = $attribute->attributes_values_value;
+
+							$attribute_name = $id_to_name_array[$attribute_id];
+
+							$current_attributes_array[$attribute_name] = $attribute_value;
+						}
+					}
+
 					return Response::json([
 		        		'events_name' => $event_data->events_name,
 		        		'events_public' => $event_data->events_public,
 		        		//'events_createdby' => $event_data->events_createdby,
 						'events_createdat' => $event_data->events_createdat,
-						'events_desc' => $event_data->events_desc
+						'events_desc' => $event_data->events_desc,
+						'attributes' => $current_attributes_array
+						//attributes['location'] WILL GIVE YOU THE LOCATION
 		        	], 200);
 				}
 				return Response::json([], 400);
