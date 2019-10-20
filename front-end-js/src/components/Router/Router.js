@@ -9,8 +9,9 @@ import {
 
 // Import our components to show via the routing
 import AccountDetail from '../AccountDetail';
+import Dashboard from '../Dashboard';
 
-const { Header, Content, Footer, Sider } = Layout;
+const {  Content, Sider } = Layout;
 
 class RouterComponent extends React.PureComponent {
   render() {
@@ -38,11 +39,11 @@ class RouterComponent extends React.PureComponent {
             <Content>
               <div style={{ padding: 24, background: '#fff', minHeight: 360 }}>
                 <Switch>
-                  <Route path='/'>
-                    <AccountDetail />
-                  </Route>
                   <Route path='/account'>
                     <AccountDetail />
+                  </Route>
+                  <Route path='/'>
+                    <Dashboard />
                   </Route>
                 </Switch>
               </div>

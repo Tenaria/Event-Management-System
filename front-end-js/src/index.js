@@ -9,6 +9,9 @@ import AccountDetailsForm from './components/RegisterForm';
 import LoginForm from './components/LoginPage';
 import RouterComponent from './components/Router';
 
+// Import contexts
+import TokenContext from './context/TokenContext';
+
 class Index extends React.Component {
   state = {
     token: null,
@@ -21,16 +24,15 @@ class Index extends React.Component {
     // TODO: Validate token is still valid.
 
     // Change this to get the token from the session storage
-    this.setState({ token: true });
+    this.setState({ token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHBpcmF0aW9uIjoxNTcxODA0NjMyLCJlbWFpbCI6ImxvbEBsb2wuY29tIiwibmFtZSI6ImxvbCBsb2wifQ.0EJlm3wrEgpMN-NKVFV7bHbKIxbuj1FBY8kOZKmxBRg' });
   }
 
-  toggleRegister = () => {
-    this.setState({ register: !this.state.register });
-  }
+  toggleRegister = () => this.setState({ register: !this.state.register });
+  onLogin = (token) => this.setState({ token });
 
   render() {
     const { token, register } = this.state;
-    let displayElm = <LoginForm toggleRegister={this.toggleRegister} />;
+    let displayElm = <LoginForm toggleRegister={this.toggleRegister} onLogin={this.onLogin} />;
 
     if (register) {
       displayElm = <AccountDetailsForm toggleRegister={this.toggleRegister} />;
@@ -40,7 +42,9 @@ class Index extends React.Component {
 
     return (
       <React.Fragment>
-        {displayElm}
+        <TokenContext.Provider value={this.state.token}>
+          {displayElm}
+        </TokenContext.Provider>
       </React.Fragment>
     )
   }

@@ -1,20 +1,72 @@
-import { Avatar, Row, Typography  } from 'antd';
+import { Skeleton } from 'antd';
 import React from 'react';
 
-const { Title } = Typography;
+import AccountEdit from './AccountEdit';
+import AccountInfo from './AccountInfo';
+
+import TokenContext from '../../context/TokenContext';
 
 class AccountDetail extends React.Component {
+  state = {
+    fName: 'John',
+    lName: 'Smith',
+    email: 'johnsmith@temp.com',
+    editing: false,
+    loading: false,
+  }
+
+  componentDidMount = () => {
+    this.loadInfo();
+  }
+
+  loadInfo = async () => {
+    const token = this.context;
+
+    const res = await fetch('http://localhost:8000/get_account_details', {
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({token})
+    });
+
+    const data = await res.json();
+
+    this.setState({
+      fName: data.users_fname,
+      lName: data.users_lname,
+      email: data.users_email,
+      loading: true
+    });
+  }
+
+  toggleEdit = () => {
+    this.loadInfo();
+    this.setState({ editing: !this.state.editing });
+  }
+
   render() {
+    const { fName, lName, email, editing, loading } = this.state;
+    let displayElm = <Skeleton avatar active paragraph={{ rows: 14 }} />;
+    
+    if (loading) {
+      if (editing) {
+        displayElm = <AccountEdit fName={fName} lName={lName} toggleEdit={this.toggleEdit} />;
+      } else {
+        displayElm = <AccountInfo fName={fName} lName={lName} email={email} toggleEdit={this.toggleEdit} />;
+      }
+    }
+
     return (
-      <Row type="flex">
-        <Avatar size={64} icon="user" />
-        <div style={{margin: "0.5em"}}></div>
-        <Row type="flex" align="middle">
-          <Title level={3} style={{margin: 0}}>My Wife</Title>
-        </Row>
-      </Row>
+      <React.Fragment>
+        { displayElm }
+      </React.Fragment>
     );
   }
 }
+
+AccountDetail.contextType = TokenContext;
 
 export default AccountDetail;
