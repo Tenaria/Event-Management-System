@@ -1,0 +1,12 @@
+// Antd
+@import '~antd/dist/antd.css';
+
+// Import our scss variables and styles
+@import './styles/variables';
+@import './styles/components';
+
+.logo {
+  height: 32px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 16px;
+}

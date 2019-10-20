@@ -1,12 +1,11 @@
 import { Form, Button, Icon, Input, Col, Row, Typography } from 'antd';
-import { FormComponentProps } from 'antd/lib/form/Form';
 import React from 'react';
 
 const { Title } = Typography;
 
-class RegisterForm extends React.Component<FormComponentProps, {}> {
+class RegisterForm extends React.Component {
 
-  handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  handleSubmit = e => {
     e.preventDefault();
     this.props.form.validateFieldsAndScroll( async (err, values) => {
       if (!err) {
@@ -26,7 +25,7 @@ class RegisterForm extends React.Component<FormComponentProps, {}> {
     })
   }
 
-  compareToFirstPassword = (rule : any, value : any, callback : any) => {
+  compareToFirstPassword = (rule, value, callback) => {
     const { form } = this.props;
     if (value && value !== form.getFieldValue('password')) {
       callback('Your passwords do not match!')
@@ -103,7 +102,10 @@ class RegisterForm extends React.Component<FormComponentProps, {}> {
             })(<Input.Password />)}
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit">Register</Button>
+            <Button.Group>
+              <Button type="primary" htmlType="submit">Register</Button>
+              <Button type="danger" onClick={() => this.props.toggleRegister()}>Cancel</Button>
+            </Button.Group>
           </Form.Item>
         </Form>
       </div>
