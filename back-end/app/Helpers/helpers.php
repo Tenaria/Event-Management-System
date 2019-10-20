@@ -26,14 +26,14 @@ if (!function_exists('proper_empty_check')) {
 if (!function_exists('get_event_attributes_pk')) {
     function get_event_attributes_pk() {
         $attributes_array = [];
-        $attributes = DB::table('event_attributes')   
+        $attributes = DB::table('events_attributes')   
                         ->select('events_attributes_id', 'events_attributes_name')
                         ->get();
 
         foreach($attributes as $attribute) {
             $name = $attribute->events_attributes_name;
             $primary_key = $attribute->events_attributes_id;
-            
+
             $attributes_array[$name] = $primary_key;
         }
 
