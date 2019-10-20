@@ -226,12 +226,11 @@ class eventAjaxController extends Controller
 		$new_event_name = $request->input('event_name');
 		$new_event_desc = $request->input('event_desc');
 		$new_event_location = $request->input('event_location');
-		//$new_event_attendees = $request->input('event_attendees');
+		$new_event_attendees = $request->input('event_attendees');
 		$new_event_public = $request->input('event_public');
 
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
-			
 			
 			if($token_data == true) {
 				$event_data = DB::table('events')
@@ -295,6 +294,55 @@ class eventAjaxController extends Controller
 								])
 								->update(['attributes_values_value' => $new_event_location]);
 						}
+
+						//UPDATE THE ATTENDEES
+						//$new_event_attendees
+						$attendees = DB::table('events_access')
+										->where([
+											//['access_active', 1],
+											['access_events_id', $event_id]
+										])
+										->get();
+
+						$current_attendees = [];
+						$inactive_attendees = [];
+						if(!is_null($attendees)) {
+							foreach($attendees as $attendee) {
+								if($attendee->events_active == 1) {
+									$current_attendees[] = $attendee;
+								} else {
+									$inactive_attendees[] = $attendee;
+								}
+							}
+						}
+
+						$new_attendees = array_diff($new_event_attendees, $current_attendees);
+						$old_attendees = array_diff($current_attendees, $new_event_attendees);
+
+						//REMOVE OLD ATTENDEES
+						$attendees = DB::table('events_access')
+										->where([
+											['access_active', 1],
+											['access_events_id', $event_id]
+										])
+										->whereIn('access_user_id', $old_attendees)
+										->update(['access_active' => 0]);
+
+						//ADD IN NEW ATTENDEES
+						$insert = [];
+						if(!empty($new_attendees)) {
+							foreach($new_attendees as $new_attendee) {
+								$insert[] = [
+									'access_user_id' => $new_attendee,
+									'access_active' => 1,
+									'access_events_id' => $event_id
+								];
+							}
+
+							DB::table('events_access')
+								->insert($new_attendees);
+						}
+						
 
 						return Response::json([], 200);
 					}	
