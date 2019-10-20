@@ -195,8 +195,8 @@ class eventAjaxController extends Controller
 						->insert([
 							'attributes_values_attributes_id' => $attributes_name_to_id['location'],
 							'attributes_values_value' => $event_location,
-							'attribute_values_active' => 1,
-							'attribute_values_events_id' => $new_event_id
+							'attributes_values_active' => 1,
+							'attributes_values_events_id' => $new_event_id
 						]);
 
 					//INESRT EVENT ATTENDEES IF GIVEN
@@ -261,7 +261,7 @@ class eventAjaxController extends Controller
 
 						$event_attributes = DB::table('events_attributes_values')
 												->where([
-													['attribute_values_events_id', $event_id],
+													['attributes_values_events_id', $event_id],
 													['attributes_values_active', 1]
 												])
 												->get();
@@ -282,8 +282,8 @@ class eventAjaxController extends Controller
 								->insert([
 									'attributes_values_attributes_id' => $location_id,
 									'attributes_values_value' => $new_event_location,
-									'attribute_values_active' => 1,
-									'attribute_values_events_id' => $event_id
+									'attributes_values_active' => 1,
+									'attributes_values_events_id' => $event_id
 								]);
 						// OTHERWISE UPDATE LOCATION IF CHANGE HAS OCCURRED
 						} else if($location !== $current_attributes_array[$location_id]) {
@@ -291,7 +291,7 @@ class eventAjaxController extends Controller
 								->where([
 									['attributes_values_attributes_id', $location_id],
 									['attributes_values_active', 1],
-									['attribute_values_events_id', $event_id]
+									['attributes_values_events_id', $event_id]
 								])
 								->update(['attributes_values_value' => $new_event_location]);
 						}
@@ -380,7 +380,7 @@ class eventAjaxController extends Controller
 
 					$event_attributes = DB::table('events_attributes_values')
 												->where([
-													['attribute_values_events_id', $event_id],
+													['attributes_values_events_id', $event_id],
 													['attributes_values_active', 1]
 												])
 												->get();
