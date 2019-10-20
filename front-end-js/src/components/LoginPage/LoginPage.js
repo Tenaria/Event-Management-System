@@ -4,7 +4,6 @@ import React from 'react';
 const { Title } = Typography;
 
 class LoginPage extends React.Component {
-
   handleSubmit = e => {
     e.preventDefault();
     this.props.form.validateFieldsAndScroll(async (err, values) => {
@@ -61,9 +60,9 @@ class LoginPage extends React.Component {
             <Button type="primary" htmlType="submit" className="login-form-button">
               Log in
             </Button>
-            <a className="login-form-forgot" href="">
+            <a className="login-form-forgot">
               Forgot password
-            </a> Or <a href="">register now!</a>
+            </a> Or <a onClick={() => this.props.toggleRegister()}>register now!</a>
           </Form.Item>
         </Form>
       </div>

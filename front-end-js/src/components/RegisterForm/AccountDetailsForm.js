@@ -102,7 +102,10 @@ class RegisterForm extends React.Component {
             })(<Input.Password />)}
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit">Register</Button>
+            <Button.Group>
+              <Button type="primary" htmlType="submit">Register</Button>
+              <Button type="danger" onClick={() => this.props.toggleRegister()}>Cancel</Button>
+            </Button.Group>
           </Form.Item>
         </Form>
       </div>

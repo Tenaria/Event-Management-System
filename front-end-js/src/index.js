@@ -7,14 +7,41 @@ import './index.scss';
 // Import your custom components
 import AccountDetailsForm from './components/RegisterForm';
 import LoginForm from './components/LoginPage';
+import RouterComponent from './components/Router';
 
 class Index extends React.Component {
+  state = {
+    token: null,
+    register: false
+  }
+
+  componentDidMount = () => {
+    const token = sessionStorage.getItem('token');
+
+    // TODO: Validate token is still valid.
+
+    // Change this to get the token from the session storage
+    this.setState({ token: true });
+  }
+
+  toggleRegister = () => {
+    this.setState({ register: !this.state.register });
+  }
+
   render() {
+    const { token, register } = this.state;
+    let displayElm = <LoginForm toggleRegister={this.toggleRegister} />;
+
+    if (register) {
+      displayElm = <AccountDetailsForm toggleRegister={this.toggleRegister} />;
+    } else if (token) {
+      displayElm = <RouterComponent />;
+    }
+
     return (
-      <div id='hello'>
-        <LoginForm />
-        <AccountDetailsForm />
-      </div>
+      <React.Fragment>
+        {displayElm}
+      </React.Fragment>
     )
   }
 };
