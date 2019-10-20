@@ -167,25 +167,48 @@ class eventAjaxController extends Controller
 	// S P R I N T 2 S T A R T //
 	public function create_event(Request $request) {
 		$token = $request->input('token');
-		$event_name = $request->input('event');
-		$event_desc = $request->input('desc');
-		$event_location = $request->input('event_location');
+		$event_name = $request->input('event'); //STRING
+		$event_desc = $request->input('desc'); //STRING
+		$event_location = $request->input('event_location'); //STRING
+		$event_attendees = $request->input('event_attendees'); //ASSUME IS PASSED THROUGH AS AN ARRAY OF USER IDS
 		
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
 				if(isset($event_name) && !empty($event_name)) {
-					//TODO: INSERT EVENT NAME AND DESCRIPTION INTO DATABASE
+					//INSERT EVENT NAME AND DESCRIPTION INTO DATABASE
 					$currentTimeInSeconds = time();
-					DB::table('events')
-							->insert([
-								'events_active' => 1,
-								'events_name' => $event_name,
-								'events_desc' => $event_desc,
-								'events_createdat' => $currentTimeInSeconds,
-								'events_createdby' => $token_data['users_id']
-								
-							]);
+					$new_event_id = DB::table('events')
+										->insertGetId([
+											'events_active' => 1,
+											'events_name' => $event_name,
+											'events_desc' => $event_desc,
+											'events_createdat' => $currentTimeInSeconds,
+											'events_createdby' => $token_data['users_id']
+											
+										]);
+
+					//INSERT EVENT LOCATION INTO DATABASE
+					$attributes_name_to_id = get_event_attributes_pk();
+					DB::table('events_attributes_values')
+						->insert([
+							'attributes_values_attributes_id' => $attributes_name_to_id['location'],
+							'attributes_values_value' => $event_location,
+							'attribute_values_active' => 1,
+							'attribute_values_events_id' => $new_event_id
+						]);
+
+					//INESRT EVENT ATTENDEES IF GIVEN
+					if(isset($event_attendees) && !empty($event_attendees)) {
+						foreach($event_attendees as $attendee) {
+							DB::table('events_access')
+								->insert([
+									'acces_user_id' => $attendee,
+									'access_active' => 1,
+									'access_events_id' => $new_event_id
+								]);
+						}
+					}
 
 					return Response::json([], 200);
 				}
@@ -202,7 +225,10 @@ class eventAjaxController extends Controller
 		$event_id = $request->input('event_id');
 		$new_event_name = $request->input('event_name');
 		$new_event_desc = $request->input('event_desc');
-		//$new_event_public = $request->input('event_public');
+		$new_event_location = $request->input('event_location');
+		//$new_event_attendees = $request->input('event_attendees');
+		$new_event_public = $request->input('event_public');
+
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			
@@ -215,19 +241,61 @@ class eventAjaxController extends Controller
 									['events_id', $event_id]
 								])
 								->first();
+
 				if(!is_null($event_data)) {
-					if(isset($new_event_name)) {
+					$attributes_name_to_id = get_event_attributes_pk();
+
+					if(isset($new_event_name) && !empty($new_event_name)) {
+						//update event name, description and whether it is public or private
 						DB::table('events')
-						->where([
-							['events_active', 1],
-							['events_createdby',$token_data['users_id']],
-							['events_id', $event_id]
-						])
-						->update([
-							'events_name' => $new_event_name,
-							//'events_public' => $new_event_public,
-							'events_desc' => $new_event_desc,
-						]);
+							->where([
+								['events_active', 1],
+								['events_createdby',$token_data['users_id']],
+								['events_id', $event_id]
+							])
+							->update([
+								'events_name' => $new_event_name,
+								'events_public' => $new_event_public,
+								'events_desc' => $new_event_desc
+							]);
+
+						$event_attributes = DB::table('events_attributes_values')
+												->where([
+													['attribute_values_events_id', $event_id],
+													['attributes_values_active', 1]
+												])
+												->get();
+
+						$current_attributes_array = [];
+						if(!is_null($event_attributes)) {
+							foreach($event_attributes as $attribute) {
+								$attribute_id = $attribute->attributes_values_attributes_id;
+								$attribute_value = $attribute->attributes_values_value;
+								$current_attributes_array[$attribute_id] = $attribute_value;
+							}
+						}
+
+						// INSERT LOCATION IF NOT EXIST
+						$location_id = $attributes_name_to_id['location'];
+						if(!isset($current_attributes_array[$location_id])) {
+							DB::table('events_attributes_values')
+								->insert([
+									'attributes_values_attributes_id' => $location_id,
+									'attributes_values_value' => $new_event_location,
+									'attribute_values_active' => 1,
+									'attribute_values_events_id' => $event_id
+								]);
+						// OTHERWISE UPDATE LOCATION IF CHANGE HAS OCCURRED
+						} else if($location !== $current_attributes_array[$location_id]) {
+							DB::table('events_attributes_values')
+								->where([
+									['attributes_values_attributes_id', $location_id],
+									['attributes_values_active', 1],
+									['attribute_values_events_id', $event_id]
+								])
+								->update(['attributes_values_value' => $new_event_location]);
+						}
+
 						return Response::json([], 200);
 					}	
 				}
@@ -255,13 +323,45 @@ class eventAjaxController extends Controller
 									
 								])
 								->first();
+
 				if(!is_null($event_data)) {
+					$attributes_name_to_id = get_event_attributes_pk();
+
+					$event_attributes = DB::table('events_attributes_values')
+												->where([
+													['attribute_values_events_id', $event_id],
+													['attributes_values_active', 1]
+												])
+												->get();
+
+					$current_attributes_array = [];
+					$id_to_name_array = [];
+					if(!empty($attributes_name_to_id)) {
+						foreach($attributes_name_to_id as $name => $id) {
+							$current_attributes_array[$name] = null;
+							$id_to_name_array[$id] = $name;
+						}
+					}
+
+					if(!is_null($event_attributes)) {
+						foreach($event_attributes as $attribute) {
+							$attribute_id = $attribute->attributes_values_attributes_id;
+							$attribute_value = $attribute->attributes_values_value;
+
+							$attribute_name = $id_to_name_array[$attribute_id];
+
+							$current_attributes_array[$attribute_name] = $attribute_value;
+						}
+					}
+
 					return Response::json([
 		        		'events_name' => $event_data->events_name,
 		        		'events_public' => $event_data->events_public,
 		        		//'events_createdby' => $event_data->events_createdby,
 						'events_createdat' => $event_data->events_createdat,
-						'events_desc' => $event_data->events_desc
+						'events_desc' => $event_data->events_desc,
+						'attributes' => $current_attributes_array
+						//attributes['location'] WILL GIVE YOU THE LOCATION
 		        	], 200);
 				}
 				return Response::json([], 400);
