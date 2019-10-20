@@ -10,3 +10,16 @@
 }
 
 .login-form-button { width: 100%; }
+
+// Add event property
+.add-event-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  &:hover {
+    background: #2D3748;
+    color: #EDF2F7;
+  }
+}

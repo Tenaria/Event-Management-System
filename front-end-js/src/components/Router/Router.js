@@ -9,6 +9,7 @@ import {
 
 // Import our components to show via the routing
 import AccountDetail from '../AccountDetail';
+import EventManager from '../EventManager';
 import Dashboard from '../Dashboard';
 
 const {  Content, Sider } = Layout;
@@ -18,7 +19,7 @@ class RouterComponent extends React.PureComponent {
     return (
       <Router>
         <Layout>
-          <Sider breakpoint="lg" collapsedWidth="0" >
+          <Sider breakpoint="lg" collapsedWidth="0" style={{minHeight: '100vh'}}>
             <div className="logo" />
             <Menu theme="dark" mode="inline">
               <Menu.Item key="1">
@@ -28,6 +29,12 @@ class RouterComponent extends React.PureComponent {
                 </Link>
               </Menu.Item>
               <Menu.Item key="2">
+                <Link to="/events_manager">
+                  <Icon type="file-add" />
+                  <span className="nav-text">Manage Events</span>
+                </Link>
+              </Menu.Item>
+              <Menu.Item key="3">
                 <Link to="/account">
                   <Icon type="user" />
                   <span className="nav-text">Account Detail</span>
@@ -41,6 +48,9 @@ class RouterComponent extends React.PureComponent {
                 <Switch>
                   <Route path='/account'>
                     <AccountDetail />
+                  </Route>
+                  <Route path='/events_manager'>
+                    <EventManager />
                   </Route>
                   <Route path='/'>
                     <Dashboard />

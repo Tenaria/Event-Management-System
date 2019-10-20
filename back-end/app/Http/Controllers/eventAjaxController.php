@@ -185,7 +185,7 @@ class eventAjaxController extends Controller
 											'events_name' => $event_name,
 											'events_desc' => $event_desc,
 											'events_createdat' => $currentTimeInSeconds,
-											'events_createdby' => $token_data['users_id'],
+											'events_createdby' => $token_data['user_id'],
 											'events_public' => $event_public
 										]);
 
