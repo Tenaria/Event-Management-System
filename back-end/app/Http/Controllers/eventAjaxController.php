@@ -171,6 +171,7 @@ class eventAjaxController extends Controller
 		$event_desc = $request->input('desc'); //STRING
 		$event_location = $request->input('event_location'); //STRING
 		$event_attendees = $request->input('event_attendees'); //ASSUME IS PASSED THROUGH AS AN ARRAY OF USER IDS
+		$event_public = $request->input('event_public');
 		
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
@@ -184,8 +185,8 @@ class eventAjaxController extends Controller
 											'events_name' => $event_name,
 											'events_desc' => $event_desc,
 											'events_createdat' => $currentTimeInSeconds,
-											'events_createdby' => $token_data['users_id']
-											
+											'events_createdby' => $token_data['users_id'],
+											'events_public' => $event_public
 										]);
 
 					//INSERT EVENT LOCATION INTO DATABASE
