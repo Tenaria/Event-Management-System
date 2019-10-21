@@ -594,6 +594,61 @@ class eventAjaxController extends Controller
 		return Response::json([],400);
 	}
 
+	public function get_upcoming_public_events() {
+		$token = $request->input('token');
+		if(isset($token) && !empty($token)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true){
+				$events_array = [];
+				$event_data = DB::table('events AS e')
+								->select('e.*', 'a.access_id', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"))
+								->leftJoin('events_access AS a', function($join) use ($token_data) {
+									$join->on('a.access_events_id', '=', 'e.events_id')
+										->where([
+											["a.access_user_id", $token_data['user_id']],
+											["a.access_active", 1]
+										]);
+								})
+								->where ([
+									['e.events_active', 1],
+									['e.events_createdby',$token_data['user_id']],
+									['e.events_status', 0],
+									['e.events_public', 1]
+								])
+								->havingRaw('a.access_id IS NULL')
+								->havingRaw('dates_latest=0 OR dates_latest > '.time())
+								->get();
+
+				if(!is_null($event_data)){
+					foreach($event_data as $event) {
+						//this means that the user is already attending the event
+						//so skip
+						// if(isset($event->access_id) && !empty($event->access_id)) {
+						// 	continue;
+						// }
+
+						$event_status = "ONGOING";
+						$public = "PUBLIC";
+
+						$events_array[] = [
+							'events_id' => $events->events_id,
+							'events_name' => htmlspecialchars($event->events_name),
+							'events_desc' => htmlspecialchars($event->events_status),
+							'events_status' => $event_status,
+							'events_public' => $public
+						];
+					}
+				}
+
+				return Response::json(['events'=>$events_array],200);
+			}
+
+			return Response::json([],400);
+		}
+
+		return Response::json([],400);
+	}
+
 	// public function get_events_managed_by_user(Request $request) {
 	// 	$token = $request->input('token');
 		
