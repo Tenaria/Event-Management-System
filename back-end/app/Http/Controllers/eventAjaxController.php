@@ -475,7 +475,7 @@ class eventAjaxController extends Controller
 								])
 								->havingRaw('dates_latest=0 OR dates_latest > '.time())
 								->get();
-				//$event_data = null;
+				$event_data =
 				if(!is_null($event_data)) {
 					foreach($event_data as $event) {
 						$event_status = "ONGOING";
@@ -489,6 +489,7 @@ class eventAjaxController extends Controller
 						}
 
 						$events_array[] = [
+							'events_id' => $events->events_id,
 							'events_name' => htmlspecialchars($event->events_name),
 							'events_desc' => htmlspecialchars($event->events_status),
 							'events_status' => $event_status,
@@ -503,22 +504,41 @@ class eventAjaxController extends Controller
 		
 		return Response::json([], 400);
 	}
-	public function get_invited_events(Request $request){
+	public function get_invited_events_upcoming(Request $request){
 		$token = $request->input('token');
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true){
 				$events_array = [];
-				$event_data = DB::table('events_access')
-					->join('events', 'events_access.access_events_id', '=', 'events.events_id')
-					->select('events.events_id', 'events.events_name')
-					->where([["a.access_user_id", $token_data['user_id']],["a.access_active", 1], ["a.access_accepted", 0]])
-					->get();
+				$event_data = DB::table('events_access AS a')
+								->select('e.events_id', 'e.events_name', 'e.events_public', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"))
+								->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
+								->where([
+									["a.access_user_id", $token_data['user_id']],
+									["a.access_active", 1], 
+									["a.access_accepted", 0]
+								])
+								->havingRaw('dates_latest=0 OR dates_latest > '.time())
+								->get();
+
 				if(!is_null($event_data)){
 					foreach($event_data as $event){
+						$event_status = "ONGOING";
+						// if($event_status == 1) {
+						// 	$event_status = "CANCELLED";
+						// }
+
+						$public = "PRIVATE";
+						if($event->events_public == 1) {
+							$public = "PUBLIC";
+						}
+
 						$events_array[] = [
 							'events_id' => $events->events_id,
-							'events_name' => htmlspecialchars($event->events_name)
+							'events_name' => htmlspecialchars($event->events_name),
+							'events_desc' => htmlspecialchars($event->events_status),
+							'events_status' => $event_status,
+							'events_public' => $public
 						];
 					}
 				}
@@ -529,29 +549,29 @@ class eventAjaxController extends Controller
 		return Response::json([],400);
 	}
 
-	public function get_events_managed_by_user(Request $request) {
+	public function get_invited_events_past(Request $request){
 		$token = $request->input('token');
-		
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
-			if($token_data == true) {
+			if($token_data == true){
 				$events_array = [];
-				$event_data = DB::table('events AS e')
-								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"))
-								->where ([
-									['e.events_active', 1],
-									['e.events_createdby',$token_data['user_id']]
-									
+				$event_data = DB::table('events_access AS a')
+								->select('e.events_id', 'e.events_name', 'e.events_public', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'dates_earliest'"))
+								->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
+								->where([
+									["a.access_user_id", $token_data['user_id']],
+									["a.access_active", 1], 
+									["a.access_accepted", 0]
 								])
-								->havingRaw('dates_latest > '.time())
+								->havingRaw('dates_earliest > '.time())
 								->get();
 
-				if(!is_null($event_data)) {
-					foreach($event_data as $event) {
-						$event_status = "ONGOING";
-						if($event_status == 1) {
-							$event_status = "CANCELLED";
-						}
+				if(!is_null($event_data)){
+					foreach($event_data as $event){
+						$event_status = "PAST";
+						// if($event_status == 1) {
+						// 	$event_status = "CANCELLED";
+						// }
 
 						$public = "PRIVATE";
 						if($events_public == 1) {
@@ -559,6 +579,7 @@ class eventAjaxController extends Controller
 						}
 
 						$events_array[] = [
+							'events_id' => $events->events_id,
 							'events_name' => htmlspecialchars($event->events_name),
 							'events_desc' => htmlspecialchars($event->events_status),
 							'events_status' => $event_status,
@@ -566,10 +587,54 @@ class eventAjaxController extends Controller
 						];
 					}
 				}
-
-				return Response::json(['events' => $events_array], 200);
+				return Response::json(['events'=>$events_array],200);
 			}
+			return Response::json([],400);
 		}
+		return Response::json([],400);
+	}
+
+	// public function get_events_managed_by_user(Request $request) {
+	// 	$token = $request->input('token');
+		
+	// 	if(isset($token) && !empty($token)) {
+	// 		$token_data = validate_jwt($token);
+	// 		if($token_data == true) {
+	// 			$events_array = [];
+	// 			$event_data = DB::table('events AS e')
+	// 							->select('e.*', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"))
+	// 							->where ([
+	// 								['e.events_active', 1],
+	// 								['e.events_createdby',$token_data['user_id']]
+									
+	// 							])
+	// 							->havingRaw('dates_latest > '.time())
+	// 							->get();
+
+	// 			if(!is_null($event_data)) {
+	// 				foreach($event_data as $event) {
+	// 					$event_status = "ONGOING";
+	// 					if($event_status == 1) {
+	// 						$event_status = "CANCELLED";
+	// 					}
+
+	// 					$public = "PRIVATE";
+	// 					if($events_public == 1) {
+	// 						$public = "PUBLIC";
+	// 					}
+
+	// 					$events_array[] = [
+	// 						'events_name' => htmlspecialchars($event->events_name),
+	// 						'events_desc' => htmlspecialchars($event->events_status),
+	// 						'events_status' => $event_status,
+	// 						'events_public' => $public
+	// 					];
+	// 				}
+	// 			}
+
+	// 			return Response::json(['events' => $events_array], 200);
+	// 		}
+	// 	}
 		
 		return Response::json([], 400);
 	}
@@ -608,6 +673,7 @@ class eventAjaxController extends Controller
 						}
 
 						$events_array[] = [
+							'events_id' => $events->events_id,
 							'events_name' => htmlspecialchars($event->events_name),
 							'events_desc' => htmlspecialchars($event->events_status),
 							'events_status' => $event_status,
