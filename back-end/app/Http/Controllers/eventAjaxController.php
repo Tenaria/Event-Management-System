@@ -473,9 +473,9 @@ class eventAjaxController extends Controller
 									['e.events_status', 0]
 									
 								])
-								->havingRaw('dates_latest > '.time())
+								->havingRaw('dates_latest=0 OR dates_latest > '.time())
 								->get();
-
+				//$event_data = null;
 				if(!is_null($event_data)) {
 					foreach($event_data as $event) {
 						$event_status = "ONGOING";
@@ -484,7 +484,7 @@ class eventAjaxController extends Controller
 						// }
 
 						$public = "PRIVATE";
-						if($events_public == 1) {
+						if($event->events_public == 1) {
 							$public = "PUBLIC";
 						}
 
