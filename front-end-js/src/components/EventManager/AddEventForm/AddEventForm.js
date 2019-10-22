@@ -88,7 +88,7 @@ class AddEventForm extends React.Component {
               {getFieldDecorator('desc', {
                 initialValue: '',
                 rules: [{ required: false }],
-              })(<TextArea placeholder="Event Name" rows={7} />)}
+              })(<TextArea placeholder="Event Description" rows={7} />)}
             </Form.Item>
           </Row>
         </Form>
