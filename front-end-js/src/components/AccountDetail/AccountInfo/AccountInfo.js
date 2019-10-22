@@ -25,9 +25,6 @@ class AccountDetail extends React.Component {
           <Button type="primary" onClick={() => this.props.toggleEdit()} style={{width: '100%'}}>
             Edit
           </Button>
-          <Button type="danger" htmlType="submit" style={{marginTop: '1em', width: '100%'}}>
-            Delete
-          </Button>
         </Row>
       </div>
     );

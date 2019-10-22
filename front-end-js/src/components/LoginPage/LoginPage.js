@@ -19,7 +19,8 @@ class LoginPage extends React.Component {
           body: JSON.stringify(values)
         })
 
-        console.log(res);
+        const data = await res.json();
+        this.props.onLogin(data.token);
       }
     })
   }

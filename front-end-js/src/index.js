@@ -28,7 +28,10 @@ class Index extends React.Component {
   }
 
   toggleRegister = () => this.setState({ register: !this.state.register });
-  onLogin = (token) => this.setState({ token });
+  onLogin = (token) => {
+    console.log(token);
+    this.setState({ token });
+  }
 
   render() {
     const { token, register } = this.state;
