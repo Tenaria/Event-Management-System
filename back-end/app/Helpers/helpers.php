@@ -1,6 +1,7 @@
 <?php
 
 use Firebase\JWT\JWT;
+use Postmark\PostmarkClient;
 
 if (!function_exists('validate_jwt')) {
     function validate_jwt($token=null) {
@@ -38,6 +39,24 @@ if (!function_exists('get_event_attributes_pk')) {
         }
 
         return $attributes_array;
+    }
+}
+
+if (!function_exists('send_generic_email')) {
+    function send_generic_email($email, $email_subject, $to_name, $text_block, $button_url, $button_name) {
+        $client = new PostmarkClient(env('POSTMARKCLIENT_KEY', ''));
+        $sendResult = $client->sendEmailWithTemplate(
+            "admin@go-meet.org",
+            $email,
+            14480530,
+            [
+                "to_name" => $to_name,
+                "text_block" => $text_block,
+                "button_url" => env('APP_URL', 'http://localhost:3000').$button_url,
+                "button_name" => $button_name,
+                "email_subject" => $email_subject
+            ]
+        );
     }
 }
 
