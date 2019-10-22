@@ -13,7 +13,8 @@
         "fideloper/proxy": "^4.0",
         "firebase/php-jwt": "^5.0",
         "laravel/framework": "^6.0",
-        "laravel/tinker": "^1.0"
+        "laravel/tinker": "^1.0",
+        "wildbit/postmark-php": "^2.8"
     },
     "require-dev": {
         "facade/ignition": "^1.4",
