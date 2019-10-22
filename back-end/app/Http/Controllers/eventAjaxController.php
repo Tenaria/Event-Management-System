@@ -475,7 +475,7 @@ class eventAjaxController extends Controller
 								])
 								->havingRaw('dates_latest=0 OR dates_latest > '.time())
 								->get();
-				$event_data =
+				
 				if(!is_null($event_data)) {
 					foreach($event_data as $event) {
 						$event_status = "ONGOING";
