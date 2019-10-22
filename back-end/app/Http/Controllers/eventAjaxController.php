@@ -489,7 +489,7 @@ class eventAjaxController extends Controller
 						}
 
 						$events_array[] = [
-							'events_id' => $events->events_id,
+							'events_id' => $event->events_id,
 							'events_name' => htmlspecialchars($event->events_name),
 							'events_desc' => htmlspecialchars($event->events_status),
 							'events_status' => $event_status,
@@ -534,7 +534,7 @@ class eventAjaxController extends Controller
 						}
 
 						$events_array[] = [
-							'events_id' => $events->events_id,
+							'events_id' => $event->events_id,
 							'events_name' => htmlspecialchars($event->events_name),
 							'events_desc' => htmlspecialchars($event->events_status),
 							'events_status' => $event_status,
@@ -579,7 +579,7 @@ class eventAjaxController extends Controller
 						}
 
 						$events_array[] = [
-							'events_id' => $events->events_id,
+							'events_id' => $event->events_id,
 							'events_name' => htmlspecialchars($event->events_name),
 							'events_desc' => htmlspecialchars($event->events_status),
 							'events_status' => $event_status,
@@ -631,7 +631,7 @@ class eventAjaxController extends Controller
 						$public = "PUBLIC";
 
 						$events_array[] = [
-							'events_id' => $events->events_id,
+							'events_id' => $event->events_id,
 							'events_name' => htmlspecialchars($event->events_name),
 							'events_desc' => htmlspecialchars($event->events_status),
 							'events_status' => $event_status,
@@ -728,7 +728,7 @@ class eventAjaxController extends Controller
 						}
 
 						$events_array[] = [
-							'events_id' => $events->events_id,
+							'events_id' => $event->events_id,
 							'events_name' => htmlspecialchars($event->events_name),
 							'events_desc' => htmlspecialchars($event->events_status),
 							'events_status' => $event_status,
