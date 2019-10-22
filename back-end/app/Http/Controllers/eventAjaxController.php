@@ -483,9 +483,9 @@ class eventAjaxController extends Controller
 						// 	$event_status = "CANCELLED";
 						// }
 
-						$public = "PRIVATE";
+						$public = false;
 						if($event->events_public == 1) {
-							$public = "PUBLIC";
+							$public = true;
 						}
 
 						$events_array[] = [
@@ -529,9 +529,9 @@ class eventAjaxController extends Controller
 						// 	$event_status = "CANCELLED";
 						// }
 
-						$public = "PRIVATE";
+						$public = false;
 						if($event->events_public == 1) {
-							$public = "PUBLIC";
+							$public = true;
 						}
 
 						$events_array[] = [
@@ -575,9 +575,9 @@ class eventAjaxController extends Controller
 						// 	$event_status = "CANCELLED";
 						// }
 
-						$public = "PRIVATE";
+						$public = false;
 						if($events_public == 1) {
-							$public = "PUBLIC";
+							$public = true;
 						}
 
 						$events_array[] = [
@@ -724,9 +724,9 @@ class eventAjaxController extends Controller
 						// 	$event_status = "CANCELLED";
 						// }
 
-						$public = "PRIVATE";
+						$public = false;
 						if($events_public == 1) {
-							$public = "PUBLIC";
+							$public = true;
 						}
 
 						$events_array[] = [
