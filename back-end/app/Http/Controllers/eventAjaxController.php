@@ -853,7 +853,7 @@ class eventAjaxController extends Controller
 					if(isset(event) && !is_null(event)){
 						if($event['events_createdby'] == $token_data['user_id']){
 							if($event['events_status'] == 0){
-								$session_exists = DB::table('events_sessions')->select('sessions_active')
+								$session_exists = DB::table('events_sessions')
 									->where([
 											['sessions_events_id', $token_data['events_id']],
 											['sessions_id', $token_data['sessions_id']]
