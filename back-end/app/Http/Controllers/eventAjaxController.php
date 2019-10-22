@@ -596,7 +596,7 @@ class eventAjaxController extends Controller
 		return Response::json([],400);
 	}
 
-	public function get_upcoming_public_events() {
+	public function get_upcoming_public_events(Request $request) {
 		$token = $request->input('token');
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
