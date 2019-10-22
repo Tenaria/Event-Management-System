@@ -839,6 +839,50 @@ class eventAjaxController extends Controller
 		
 		return Response::json([], 400);
 	}
+
+	public function cancel_event_sessions(Request $request){
+		$token = $request->input('token');
+			
+			if(isset($token) && !empty($token)) {
+				$token_data = validate_jwt($token);
+				if($token_data == true) {
+					$event = DB::table('events')->select('events_createdby', 'events_status')
+						->where(['events_id',$token_data['events_id']])->get();
+
+
+					if(isset(event) && !is_null(event)){
+						if($event['events_createdby'] == $token_data['user_id']){
+							if($event['events_status'] == 0){
+								$session_exists = DB::table('events_sessions')->select('sessions_active')
+									->where([
+											['sessions_events_id', $token_data['events_id']],
+											['sessions_id', $token_data['sessions_id']]
+											])
+									->exists();
+								if($session_exists){
+									DB::table('events_sessions')->where(['sessions_id', $token_data['sessions_id']])
+									->update(['sessions_id' => 1]);
+									return Response::json([],200);
+								}else{
+									return Response::json(['status' => "no such session"], 400)
+								}
+							}else{
+								return Response::json(['status' => "event not active"], 400);
+							}
+						}else{
+							return Response::json(['status' => "invalid user"],400);
+						}
+					}else{
+						return Response::json(['status' => "no such event"],400);
+					}
+
+					return Response::json([], 400);
+				}
+			}
+			
+		return Response::json([], 400);
+	}
+	}
 	// S P R I N T 3 E N D //
 
 
