@@ -690,9 +690,9 @@ class eventAjaxController extends Controller
 	// 			return Response::json(['events' => $events_array], 200);
 	// 		}
 	// 	}
-		
-		return Response::json([], 400);
-	}
+	// 
+	// 	return Response::json([], 400);
+	// }
 	// S P R I N T 2 E N D //
 
 	// S P R I N T 3 S T A R T //
