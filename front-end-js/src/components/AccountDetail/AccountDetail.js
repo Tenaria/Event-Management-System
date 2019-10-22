@@ -12,7 +12,7 @@ class AccountDetail extends React.Component {
     lName: 'Smith',
     email: 'johnsmith@temp.com',
     editing: false,
-    loading: false,
+    loaded: false,
   }
 
   componentDidMount = () => {
@@ -38,7 +38,7 @@ class AccountDetail extends React.Component {
       fName: data.users_fname,
       lName: data.users_lname,
       email: data.users_email,
-      loading: true
+      loaded: true
     });
   }
 
@@ -48,10 +48,10 @@ class AccountDetail extends React.Component {
   }
 
   render() {
-    const { fName, lName, email, editing, loading } = this.state;
+    const { fName, lName, email, editing, loaded } = this.state;
     let displayElm = <Skeleton avatar active paragraph={{ rows: 14 }} />;
     
-    if (loading) {
+    if (loaded) {
       if (editing) {
         displayElm = <AccountEdit fName={fName} lName={lName} toggleEdit={this.toggleEdit} />;
       } else {
