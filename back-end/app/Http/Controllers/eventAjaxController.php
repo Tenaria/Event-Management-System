@@ -516,7 +516,8 @@ class eventAjaxController extends Controller
 								->where([
 									["a.access_user_id", $token_data['user_id']],
 									["a.access_active", 1], 
-									["a.access_accepted", 0]
+									["a.access_accepted", 0],
+									["e.events_createdby", '!=', $token_data['user_id']]
 								])
 								->havingRaw('dates_latest=0 OR dates_latest > '.time())
 								->get();
@@ -561,7 +562,8 @@ class eventAjaxController extends Controller
 								->where([
 									["a.access_user_id", $token_data['user_id']],
 									["a.access_active", 1], 
-									["a.access_accepted", 0]
+									["a.access_accepted", 0],
+									["e.events_createdby", '!=', $token_data['user_id']]
 								])
 								->havingRaw('dates_earliest > '.time())
 								->get();
@@ -611,7 +613,7 @@ class eventAjaxController extends Controller
 								})
 								->where ([
 									['e.events_active', 1],
-									['e.events_createdby',$token_data['user_id']],
+									['e.events_createdby','!=',$token_data['user_id']],
 									['e.events_status', 0],
 									['e.events_public', 1]
 								])
@@ -708,7 +710,7 @@ class eventAjaxController extends Controller
 								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'dates_earliest'"))
 								->where ([
 									['e.events_active', 1],
-									['e.events_createdby',$token_data['user_id']],
+									['e.events_createdby', $token_data['user_id']],
 									['e.events_status', 0]
 									
 								])
@@ -738,6 +740,40 @@ class eventAjaxController extends Controller
 				}
 
 				return Response::json(['events' => $events_array], 200);
+			}
+		}
+		
+		return Response::json([], 400);
+	}
+
+	//ASSUMES THAT USER PUTS IN ATLEAST ONE
+	public function get_emails_exclude_user(Request $request) {
+		$token = $request->input('token');
+		$search_term = $request->input('search_term');
+		
+		if(isset($token) && !empty($token) && isset($search_term) && !is_null($search_term)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				$results = [];
+
+				$user_data = DB::table('users')
+								->where([
+									['users_active', 1],
+									['users_id', '!=', $token_data['user_id']],
+									['users_email', 'like', '%'.$search_term.'%']
+								])
+								->get();
+
+				if(!is_null($user_data)) {
+					foreach($user_data as $data) {
+						$results[] = [
+							'id' => $data->users_id,
+							'email' => $data->users_email
+						];
+					}
+				}
+
+				return Response::json(['results' => $emails], 200);
 			}
 		}
 		
