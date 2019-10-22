@@ -491,7 +491,7 @@ class eventAjaxController extends Controller
 						$events_array[] = [
 							'events_id' => $event->events_id,
 							'events_name' => htmlspecialchars($event->events_name),
-							'events_desc' => htmlspecialchars($event->events_status),
+							'events_desc' => htmlspecialchars($event->events_desc),
 							'events_status' => $event_status,
 							'events_public' => $public
 						];
@@ -537,7 +537,7 @@ class eventAjaxController extends Controller
 						$events_array[] = [
 							'events_id' => $event->events_id,
 							'events_name' => htmlspecialchars($event->events_name),
-							'events_desc' => htmlspecialchars($event->events_status),
+							'events_desc' => htmlspecialchars($event->events_desc),
 							'events_status' => $event_status,
 							'events_public' => $public
 						];
@@ -583,7 +583,7 @@ class eventAjaxController extends Controller
 						$events_array[] = [
 							'events_id' => $event->events_id,
 							'events_name' => htmlspecialchars($event->events_name),
-							'events_desc' => htmlspecialchars($event->events_status),
+							'events_desc' => htmlspecialchars($event->events_desc),
 							'events_status' => $event_status,
 							'events_public' => $public
 						];
@@ -635,7 +635,7 @@ class eventAjaxController extends Controller
 						$events_array[] = [
 							'events_id' => $event->events_id,
 							'events_name' => htmlspecialchars($event->events_name),
-							'events_desc' => htmlspecialchars($event->events_status),
+							'events_desc' => htmlspecialchars($event->events_desc),
 							'events_status' => $event_status,
 							'events_public' => $public
 						];
@@ -732,7 +732,7 @@ class eventAjaxController extends Controller
 						$events_array[] = [
 							'events_id' => $event->events_id,
 							'events_name' => htmlspecialchars($event->events_name),
-							'events_desc' => htmlspecialchars($event->events_status),
+							'events_desc' => htmlspecialchars($event->events_desc),
 							'events_status' => $event_status,
 							'events_public' => $public
 						];
