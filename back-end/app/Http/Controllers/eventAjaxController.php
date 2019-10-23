@@ -482,7 +482,7 @@ class eventAjaxController extends Controller
 						// 	$event_status = "CANCELLED";
 						// }
 						$cancelled = false;
-						if($event_data->events_status) {
+						if($event->events_status) {
 							$cancelled = true;
 						}
 
@@ -534,7 +534,7 @@ class eventAjaxController extends Controller
 						// }
 
 						$cancelled = false;
-						if($event_data->events_status) {
+						if($event->events_status) {
 							$cancelled = true;
 						}
 
@@ -586,7 +586,7 @@ class eventAjaxController extends Controller
 						// }
 
 						$cancelled = false;
-						if($event_data->events_status) {
+						if($event->events_status) {
 							$cancelled = true;
 						}
 
@@ -645,7 +645,7 @@ class eventAjaxController extends Controller
 						// }
 
 						$cancelled = false;
-						if($event_data->events_status) {
+						if($event->events_status) {
 							$cancelled = true;
 						}
 
@@ -745,7 +745,7 @@ class eventAjaxController extends Controller
 						// 	$event_status = "CANCELLED";
 						// }
 						$cancelled = false;
-						if($event_data->events_status) {
+						if($event->events_status) {
 							$cancelled = true;
 						}
 
