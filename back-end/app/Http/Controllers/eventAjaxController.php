@@ -876,7 +876,7 @@ class eventAjaxController extends Controller
 						->where(['events_id',$token_data['events_id']])->get();
 
 
-					if(isset(event) && !is_null(event)){
+					if(isset($event) && !is_null($event)){
 						if($event['events_createdby'] == $token_data['user_id']){
 							if($event['events_status'] == 0){
 								$session_exists = DB::table('events_sessions')
@@ -890,7 +890,7 @@ class eventAjaxController extends Controller
 									->update(['sessions_id' => 1]);
 									return Response::json([],200);
 								}else{
-									return Response::json(['status' => "no such session"], 400)
+									return Response::json(['status' => "no such session"], 400);
 								}
 							}else{
 								return Response::json(['status' => "event not active"], 400);
@@ -907,7 +907,6 @@ class eventAjaxController extends Controller
 			}
 			
 		return Response::json([], 400);
-	}
 	}
 	// S P R I N T 3 E N D //
 
