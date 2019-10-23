@@ -466,7 +466,7 @@ class eventAjaxController extends Controller
 				//TODO: CLAIRE: TEST
 				$events_array = [];
 				$event_data = DB::table('events AS e')
-								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"))
+								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"), DB::raw("(SELECT count(a.access_user_id) FROM events_access AS a WHERE a.access_events_id=e.events_id) as 'num_attendees'"))
 								->where ([
 									['e.events_active', 1],
 									['e.events_createdby',$token_data['user_id']]
@@ -474,6 +474,18 @@ class eventAjaxController extends Controller
 								])
 								->havingRaw('dates_latest=0 OR dates_latest > '.time())
 								->get();
+
+				/*
+					->select('e.events_id', 'e.events_name', 'e.events_public', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"))
+								->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
+								->where([
+									["a.access_user_id", $token_data['user_id']],
+									["a.access_active", 1], 
+									["a.access_accepted", 0],
+									["e.events_createdby", '!=', $token_data['user_id']],
+									["a.access_archived", 0]
+								])
+				*/
 
 				if(!is_null($event_data)) {
 					foreach($event_data as $event) {
@@ -491,13 +503,19 @@ class eventAjaxController extends Controller
 							$public = true;
 						}
 
+						$num_attendees = 0;
+						if(isset($event->num_attendees) && !empty($event->num_attendees)) {
+							$num_attendees = $event->num_attendees;
+						}
+
 						$events_array[] = [
 							'events_id' => $event->events_id,
 							'events_name' => htmlspecialchars($event->events_name),
 							'events_desc' => htmlspecialchars($event->events_desc),
 							'events_status' => $event_status,
 							'events_public' => $public,
-							'events_cancelled' => $cancelled
+							'events_cancelled' => $cancelled,
+							'events_attendees_count' => $num_attendees
 						];
 					}
 				}
