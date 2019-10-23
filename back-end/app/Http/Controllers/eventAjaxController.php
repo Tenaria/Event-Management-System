@@ -469,8 +469,7 @@ class eventAjaxController extends Controller
 								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"))
 								->where ([
 									['e.events_active', 1],
-									['e.events_createdby',$token_data['user_id']],
-									['e.events_status', 0]
+									['e.events_createdby',$token_data['user_id']]
 									
 								])
 								->havingRaw('dates_latest=0 OR dates_latest > '.time())
@@ -482,6 +481,10 @@ class eventAjaxController extends Controller
 						// if($event_status == 1) {
 						// 	$event_status = "CANCELLED";
 						// }
+						$cancelled = false;
+						if($event_data->events_status) {
+							$cancelled = true;
+						}
 
 						$public = false;
 						if($event->events_public == 1) {
@@ -493,7 +496,8 @@ class eventAjaxController extends Controller
 							'events_name' => htmlspecialchars($event->events_name),
 							'events_desc' => htmlspecialchars($event->events_desc),
 							'events_status' => $event_status,
-							'events_public' => $public
+							'events_public' => $public,
+							'events_cancelled' => $cancelled
 						];
 					}
 				}
@@ -529,6 +533,11 @@ class eventAjaxController extends Controller
 						// 	$event_status = "CANCELLED";
 						// }
 
+						$cancelled = false;
+						if($event_data->events_status) {
+							$cancelled = true;
+						}
+
 						$public = false;
 						if($event->events_public == 1) {
 							$public = true;
@@ -539,7 +548,8 @@ class eventAjaxController extends Controller
 							'events_name' => htmlspecialchars($event->events_name),
 							'events_desc' => htmlspecialchars($event->events_desc),
 							'events_status' => $event_status,
-							'events_public' => $public
+							'events_public' => $public,
+							'events_cancelled' => $cancelled
 						];
 					}
 				}
@@ -575,6 +585,11 @@ class eventAjaxController extends Controller
 						// 	$event_status = "CANCELLED";
 						// }
 
+						$cancelled = false;
+						if($event_data->events_status) {
+							$cancelled = true;
+						}
+
 						$public = false;
 						if($events_public == 1) {
 							$public = true;
@@ -585,7 +600,8 @@ class eventAjaxController extends Controller
 							'events_name' => htmlspecialchars($event->events_name),
 							'events_desc' => htmlspecialchars($event->events_desc),
 							'events_status' => $event_status,
-							'events_public' => $public
+							'events_public' => $public,
+							'events_cancelled' => $cancelled
 						];
 					}
 				}
@@ -614,7 +630,6 @@ class eventAjaxController extends Controller
 								->where ([
 									['e.events_active', 1],
 									['e.events_createdby','!=',$token_data['user_id']],
-									['e.events_status', 0],
 									['e.events_public', 1]
 								])
 								->havingRaw('a.access_id IS NULL')
@@ -629,6 +644,11 @@ class eventAjaxController extends Controller
 						// 	continue;
 						// }
 
+						$cancelled = false;
+						if($event_data->events_status) {
+							$cancelled = true;
+						}
+
 						$event_status = "ONGOING";
 						$public = "PUBLIC";
 
@@ -637,7 +657,8 @@ class eventAjaxController extends Controller
 							'events_name' => htmlspecialchars($event->events_name),
 							'events_desc' => htmlspecialchars($event->events_desc),
 							'events_status' => $event_status,
-							'events_public' => $public
+							'events_public' => $public,
+							'events_cancelled' => $cancelled
 						];
 					}
 				}
@@ -710,8 +731,8 @@ class eventAjaxController extends Controller
 								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'dates_earliest'"))
 								->where ([
 									['e.events_active', 1],
-									['e.events_createdby', $token_data['user_id']],
-									['e.events_status', 0]
+									['e.events_createdby', $token_data['user_id']]
+									//['e.events_status', 0]
 									
 								])
 								->havingRaw('dates_earliest > '.time())
@@ -723,6 +744,10 @@ class eventAjaxController extends Controller
 						// if($event_status == 1) {
 						// 	$event_status = "CANCELLED";
 						// }
+						$cancelled = false;
+						if($event_data->events_status) {
+							$cancelled = true;
+						}
 
 						$public = false;
 						if($events_public == 1) {
@@ -734,7 +759,8 @@ class eventAjaxController extends Controller
 							'events_name' => htmlspecialchars($event->events_name),
 							'events_desc' => htmlspecialchars($event->events_desc),
 							'events_status' => $event_status,
-							'events_public' => $public
+							'events_public' => $public,
+							'events_cancelled' => $cancelled
 						];
 					}
 				}
