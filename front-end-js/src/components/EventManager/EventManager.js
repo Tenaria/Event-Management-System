@@ -1,4 +1,4 @@
-import { Card, Divider, Icon, Row, Spin, Typography } from 'antd';
+import { Button, Card, Divider, Icon, Row, Spin, Tooltip, Typography } from 'antd';
 import React from 'react';
 
 import AddEventForm from './AddEventForm';
@@ -57,9 +57,40 @@ class EventManager extends React.Component {
       for (let i = 0; i < upcomingEvents.length; ++i) {
         const upcomingEvent = upcomingEvents[i];
         eventElms.push(
-          <Card key={i} style={cardStyle}>
-            <p>{upcomingEvent.events_name}</p>
-            <p>{upcomingEvent.events_desc}</p>
+          <Card
+            className="my-event-card"
+            key={i}
+            style={cardStyle}
+            size="small"
+            title={[
+              <Tooltip title={
+                upcomingEvent.events_public ?
+                  "Your event is publicly visible!" :
+                  "Your event is not publicly visible"
+                }
+              >
+                {
+                  upcomingEvent.events_public ?
+                    <Icon type="eye" style={{color: "#68D391", marginRight: '0.5em'}} /> :
+                    <Icon type="eye-invisible" style={{color: "#E53E3E", marginRight: '0.5em'}} />
+                }
+              </Tooltip>,
+              upcomingEvent.events_name
+            ]}
+          >
+            <p>{upcomingEvent.events_desc ? upcomingEvent.events_desc : 'No description'}</p>
+            <Row style={{textAlign: 'right'}}>
+              <Button
+                icon="edit"
+                style={{
+                  background: '#38B2AC',
+                  border: 'none',
+                  color: 'white',
+                  marginRight: '0.5em'
+                }}
+              />
+              <Button type="danger" icon="delete"/>
+            </Row>
           </Card>
         );
       }
