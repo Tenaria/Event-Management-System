@@ -469,8 +469,7 @@ class eventAjaxController extends Controller
 								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"))
 								->where ([
 									['e.events_active', 1],
-									['e.events_createdby',$token_data['user_id']],
-									['e.events_status', 0]
+									['e.events_createdby',$token_data['user_id']]
 									
 								])
 								->havingRaw('dates_latest=0 OR dates_latest > '.time())
@@ -482,18 +481,23 @@ class eventAjaxController extends Controller
 						// if($event_status == 1) {
 						// 	$event_status = "CANCELLED";
 						// }
+						$cancelled = false;
+						if($event_data->events_status) {
+							$cancelled = true;
+						}
 
-						$public = "PRIVATE";
+						$public = false;
 						if($event->events_public == 1) {
-							$public = "PUBLIC";
+							$public = true;
 						}
 
 						$events_array[] = [
 							'events_id' => $event->events_id,
 							'events_name' => htmlspecialchars($event->events_name),
-							'events_desc' => htmlspecialchars($event->events_status),
+							'events_desc' => htmlspecialchars($event->events_desc),
 							'events_status' => $event_status,
-							'events_public' => $public
+							'events_public' => $public,
+							'events_cancelled' => $cancelled
 						];
 					}
 				}
@@ -529,17 +533,23 @@ class eventAjaxController extends Controller
 						// 	$event_status = "CANCELLED";
 						// }
 
-						$public = "PRIVATE";
+						$cancelled = false;
+						if($event_data->events_status) {
+							$cancelled = true;
+						}
+
+						$public = false;
 						if($event->events_public == 1) {
-							$public = "PUBLIC";
+							$public = true;
 						}
 
 						$events_array[] = [
 							'events_id' => $event->events_id,
 							'events_name' => htmlspecialchars($event->events_name),
-							'events_desc' => htmlspecialchars($event->events_status),
+							'events_desc' => htmlspecialchars($event->events_desc),
 							'events_status' => $event_status,
-							'events_public' => $public
+							'events_public' => $public,
+							'events_cancelled' => $cancelled
 						];
 					}
 				}
@@ -575,17 +585,23 @@ class eventAjaxController extends Controller
 						// 	$event_status = "CANCELLED";
 						// }
 
-						$public = "PRIVATE";
+						$cancelled = false;
+						if($event_data->events_status) {
+							$cancelled = true;
+						}
+
+						$public = false;
 						if($events_public == 1) {
-							$public = "PUBLIC";
+							$public = true;
 						}
 
 						$events_array[] = [
 							'events_id' => $event->events_id,
 							'events_name' => htmlspecialchars($event->events_name),
-							'events_desc' => htmlspecialchars($event->events_status),
+							'events_desc' => htmlspecialchars($event->events_desc),
 							'events_status' => $event_status,
-							'events_public' => $public
+							'events_public' => $public,
+							'events_cancelled' => $cancelled
 						];
 					}
 				}
@@ -614,7 +630,6 @@ class eventAjaxController extends Controller
 								->where ([
 									['e.events_active', 1],
 									['e.events_createdby','!=',$token_data['user_id']],
-									['e.events_status', 0],
 									['e.events_public', 1]
 								])
 								->havingRaw('a.access_id IS NULL')
@@ -629,15 +644,21 @@ class eventAjaxController extends Controller
 						// 	continue;
 						// }
 
+						$cancelled = false;
+						if($event_data->events_status) {
+							$cancelled = true;
+						}
+
 						$event_status = "ONGOING";
 						$public = "PUBLIC";
 
 						$events_array[] = [
 							'events_id' => $event->events_id,
 							'events_name' => htmlspecialchars($event->events_name),
-							'events_desc' => htmlspecialchars($event->events_status),
+							'events_desc' => htmlspecialchars($event->events_desc),
 							'events_status' => $event_status,
-							'events_public' => $public
+							'events_public' => $public,
+							'events_cancelled' => $cancelled
 						];
 					}
 				}
@@ -710,8 +731,8 @@ class eventAjaxController extends Controller
 								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'dates_earliest'"))
 								->where ([
 									['e.events_active', 1],
-									['e.events_createdby', $token_data['user_id']],
-									['e.events_status', 0]
+									['e.events_createdby', $token_data['user_id']]
+									//['e.events_status', 0]
 									
 								])
 								->havingRaw('dates_earliest > '.time())
@@ -723,18 +744,23 @@ class eventAjaxController extends Controller
 						// if($event_status == 1) {
 						// 	$event_status = "CANCELLED";
 						// }
+						$cancelled = false;
+						if($event_data->events_status) {
+							$cancelled = true;
+						}
 
-						$public = "PRIVATE";
+						$public = false;
 						if($events_public == 1) {
-							$public = "PUBLIC";
+							$public = true;
 						}
 
 						$events_array[] = [
 							'events_id' => $event->events_id,
 							'events_name' => htmlspecialchars($event->events_name),
-							'events_desc' => htmlspecialchars($event->events_status),
+							'events_desc' => htmlspecialchars($event->events_desc),
 							'events_status' => $event_status,
-							'events_public' => $public
+							'events_public' => $public,
+							'events_cancelled' => $cancelled
 						];
 					}
 				}
@@ -838,6 +864,50 @@ class eventAjaxController extends Controller
 		}
 		
 		return Response::json([], 400);
+	}
+
+	public function cancel_event_sessions(Request $request){
+		$token = $request->input('token');
+			
+			if(isset($token) && !empty($token)) {
+				$token_data = validate_jwt($token);
+				if($token_data == true) {
+					$event = DB::table('events')->select('events_createdby', 'events_status')
+						->where(['events_id',$token_data['events_id']])->get();
+
+
+					if(isset(event) && !is_null(event)){
+						if($event['events_createdby'] == $token_data['user_id']){
+							if($event['events_status'] == 0){
+								$session_exists = DB::table('events_sessions')
+									->where([
+											['sessions_events_id', $token_data['events_id']],
+											['sessions_id', $token_data['sessions_id']]
+											])
+									->exists();
+								if($session_exists){
+									DB::table('events_sessions')->where(['sessions_id', $token_data['sessions_id']])
+									->update(['sessions_id' => 1]);
+									return Response::json([],200);
+								}else{
+									return Response::json(['status' => "no such session"], 400)
+								}
+							}else{
+								return Response::json(['status' => "event not active"], 400);
+							}
+						}else{
+							return Response::json(['status' => "invalid user"],400);
+						}
+					}else{
+						return Response::json(['status' => "no such event"],400);
+					}
+
+					return Response::json([], 400);
+				}
+			}
+			
+		return Response::json([], 400);
+	}
 	}
 	// S P R I N T 3 E N D //
 
