@@ -11,6 +11,7 @@ import {
 import AccountDetail from '../AccountDetail';
 import EventManager from '../EventManager';
 import Dashboard from '../Dashboard';
+import Event from '../Event';
 import Test from '../Test';
 
 const {  Content, Sider } = Layout;
@@ -49,6 +50,9 @@ class RouterComponent extends React.PureComponent {
                 <Switch>
                   <Route path='/test'>
                     <Test />
+                  </Route>
+                  <Route path='/event'>
+                    <Event />
                   </Route>
                   <Route path='/account'>
                     <AccountDetail />

@@ -406,9 +406,10 @@ class eventAjaxController extends Controller
 					}
 
 					return Response::json([
-		        		'events_name' => $event_data->events_name,
-		        		'events_public' => $event_data->events_public,
-		        		//'events_createdby' => $event_data->events_createdby,
+						'events_id' => $event_data->events_id,
+						'events_name' => $event_data->events_name,
+						'events_public' => $event_data->events_public,
+						//'events_createdby' => $event_data->events_createdby,
 						'events_createdat' => $event_data->events_createdat,
 						'events_desc' => $event_data->events_desc,
 						'attributes' => $current_attributes_array

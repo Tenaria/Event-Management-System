@@ -15,6 +15,8 @@ class EventManager extends React.Component {
     loaded: false
   }
 
+  selectEvent = id => {}
+
   componentDidMount = async () => {
     const token = this.context;
 
