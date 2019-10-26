@@ -23,12 +23,13 @@ Route::post('/get_account_details', 'eventAjaxController@get_account_details');
 // SPRINT 2 (EVENT ROUTES)
 Route::post('/create_event', 'eventAjaxController@create_event');
 Route::post('/edit_event', 'eventAjaxController@edit_event');
-Route::get('/', 'eventAjaxController@get_event_details');
+Route::post('/get_event_details', 'eventAjaxController@get_event_details');
 Route::post('/cancel_event', 'eventAjaxController@cancel_event');
 Route::post('/get_upcoming_events', 'eventAjaxController@get_upcoming_events');
 Route::post('/get_invited_events_past', 'eventAjaxController@get_invited_events_past');
 Route::post('/get_invited_events_upcoming', 'eventAjaxController@get_invited_events_upcoming');
 Route::post('/get_emails_exclude_user', 'eventAjaxController@get_emails_exclude_user');
+Route::get('/','eventAjaxController@mark_as_going');
 
 // SPRINT 3 (ROUTES)
 Route::post('/get_past_events', 'eventAjaxController@get_past_events');

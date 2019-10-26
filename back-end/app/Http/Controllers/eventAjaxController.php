@@ -359,6 +359,80 @@ class eventAjaxController extends Controller
 		return Response::json([], 400);
 		}	
 	}
+	
+	public function mark_as_going(Request $request) {
+		$token = $request->input('token');
+		$event_id = $request->input('event_id');
+		$session_id = $request->input('session_id');
+		if(isset($token) && !empty($token) && isset($event_id) && !empty($event_id) && isset($session_id) && !empty($session_id)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				$event_data = DB::table('events')
+								->where ([
+									['events_active', 1],
+									['events_id',$token_data['users_id']],
+									['events_id', $event_id],
+									['events_status',0]
+									
+								])
+								->first();
+				if(!is_null($event_data)) {
+					// check if event is public
+					if($event_data['events_public'] == 1) {
+						$session_data = DB::table('event_sessions')
+											->where([
+												['sessions_active', 1],
+												['sessions_events_id', $event_data['events_id']],
+												['sessions_id', $session_id],
+												
+											])
+											->first();
+						if(!is_null($session_data)){
+							DB::table('events_sessions_attendance')
+								->updateOrInsert([
+									'sessions_attendance_id' => $events_id,
+									'sessions_attendance_sessions_id' => $session_id,
+									'sessions_attendance_access_id' => $session_id
+									],
+									['sessions_attendance_active' => 1,
+									 'sessions_attendance_going' => 1
+									]
+								);
+							
+							return Response::json([], 200);
+						}
+										
+					}
+					//event is not public
+					if($event_data['events_public'] == 0) {
+						$session_data = DB::table('event_sessions')
+											->where([
+												['sessions_active', 1],
+												['sessions_events_id', $event_data['events_id']],
+												['sessions_id', $session_id],
+												
+											])
+											->first();
+						if(!is_null($session_data)){
+							DB::table('events_sessions_attendance')
+								->updateOrInsert([
+									'sessions_attendance_id' => $events_id,
+									'sessions_attendance_sessions_id' => $session_id,
+									'sessions_attendance_access_id' => $session_id
+									],
+									['sessions_attendance_active' => 1,
+									 'sessions_attendance_going' => 1
+									]
+								);
+							
+							return Response::json([], 200);
+						}
+					}
+				}				
+			}					
+		}						
+		return Response::json([], 400);
+	}
 
 	public function get_event_details(Request $request) {
 		$token = $request->input('token');
