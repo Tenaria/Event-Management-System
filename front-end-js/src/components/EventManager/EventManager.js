@@ -11,11 +11,13 @@ const spinIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
 class EventManager extends React.Component {
   state = {
     addEvent: false,
+    loaded: false,
     upcomingEvents: null,
-    loaded: false
   }
 
-  selectEvent = id => {}
+  selectEvent = id => {
+    sessionStorage.setItem('event_id', id);
+  }
 
   componentDidMount = async () => {
     const token = this.context;
@@ -88,6 +90,7 @@ class EventManager extends React.Component {
                   color: 'white',
                   marginRight: '0.5em'
                 }}
+                onClick={() => this.selectEvent(upcomingEvent.events_id)}
               />
               <Button type="danger" icon="delete"/>
             </Row>
