@@ -40,7 +40,7 @@ class AccountEdit extends React.Component {
 
         console.log(res);
         if (res.status === 200) {
-          message.success('You have successfully editted your account!');
+          message.success('You have successfully edited your account!');
           this.props.toggleEdit()
         } else {
           message.error('The system has encountered an error. Contact your admin!');
