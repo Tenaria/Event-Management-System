@@ -69,11 +69,11 @@ class eventAjaxController extends Controller
 	        if (!is_null($user) && !is_null($password) && Hash::check($password, $user->users_password)) {
 	        	$key = env('JWT_KEY');
 
-	        	$timestamp = strtotime('+3 days', time());
+	        	$timestamp = strtotime('+30 days', time());
 
 	        	$token = [
 	        		'user_id' => $user->users_id,
-	        		'expiration' => $timestamp,
+	        		'exp' => $timestamp,
 	        		'email' => $user->users_email,
 	        		'name' => $user->users_fname." ".$user->users_lname
 	        	];

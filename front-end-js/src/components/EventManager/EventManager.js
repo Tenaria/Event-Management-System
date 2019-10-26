@@ -1,5 +1,6 @@
 import { Button, Card, Divider, Icon, Row, Spin, Tooltip, Typography } from 'antd';
 import React from 'react';
+import { Redirect } from "react-router-dom";
 
 import AddEventForm from './AddEventForm';
 
@@ -13,10 +14,12 @@ class EventManager extends React.Component {
     addEvent: false,
     loaded: false,
     upcomingEvents: null,
+    editingEvent: false,
   }
 
   selectEvent = id => {
     sessionStorage.setItem('event_id', id);
+    this.setState({ editingEvent: true });
   }
 
   componentDidMount = async () => {
@@ -40,7 +43,7 @@ class EventManager extends React.Component {
   closeAddForm = () => this.setState({addEvent: false})
 
   render() {
-    const { addEvent, loaded, upcomingEvents } = this.state;
+    const { addEvent, loaded, upcomingEvents, editingEvent } = this.state;
     const cardStyle = {
       margin: '1em',
       width: '30%'
@@ -52,7 +55,7 @@ class EventManager extends React.Component {
     };
     let eventElms = <div style={spinStyle}><Spin indicator={spinIcon}/></div>;
 
-    if (upcomingEvents && loaded) {
+    if (upcomingEvents && loaded && !editingEvent) {
       eventElms = [
         <Card className="add-event-card" style={cardStyle} onClick={this.toggleAddForm}>
           <Icon type="plus" style={{fontSize: 48}} />
@@ -97,6 +100,8 @@ class EventManager extends React.Component {
           </Card>
         );
       }
+    } else if (editingEvent) {
+      eventElms = <Redirect to="/event" />
     }
 
     return (

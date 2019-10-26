@@ -16,7 +16,9 @@ class Event extends React.Component {
     const { eventID } = this.state;
     let eventElm = <Empty description={<span>No event found with the ID</span>}/>;
 
-    if (eventID) {}
+    if (eventID) {
+      eventElm = <div>{ eventID }</div>;
+    }
 
     return (
       <React.Fragment>
