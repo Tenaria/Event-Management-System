@@ -73,7 +73,7 @@ class eventAjaxController extends Controller
 
 	        	$token = [
 	        		'user_id' => $user->users_id,
-	        		'exp' => $timestamp,
+	        		'expiration' => $timestamp,
 	        		'email' => $user->users_email,
 	        		'name' => $user->users_fname." ".$user->users_lname
 	        	];
