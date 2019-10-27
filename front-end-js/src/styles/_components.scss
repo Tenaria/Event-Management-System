@@ -29,7 +29,20 @@
   color: white;
 }
 
-.my-event-cancelled .ant-card-head {
-  background-color: #E53E3E;
-  color: white;
+.my-event-cancelled {
+  opacity: 0.75;
+  .ant-card-head {
+    background-color: #E53E3E;
+    color: white;
+  }
+  &:hover{
+    opacity: 1;
+  }
+}
+
+.my-event-cancelled, .my-event-card {
+  position: relative;
+  .ant-card-body {
+    padding-bottom: 2.5em;
+  }
 }

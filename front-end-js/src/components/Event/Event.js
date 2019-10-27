@@ -2,6 +2,7 @@ import { Collapse, Divider, Empty, Icon, Spin, Typography } from 'antd';
 import React from 'react';
 
 import EditEventForm from './EditEventForm';
+import EditAttendee from './EditAttendees';
 
 import TokenContext from '../../context/TokenContext';
 
@@ -71,7 +72,7 @@ class Event extends React.Component {
     if (loaded) {
       if (valid) {
         eventElm =  (
-          <Collapse defaultActiveKey={['1']}>
+          <Collapse defaultActiveKey={['1', '2']}>
             <Panel header="General Information" key="1">
               <EditEventForm
                 id={id}
@@ -82,7 +83,7 @@ class Event extends React.Component {
               />
             </Panel>
             <Panel header="Attendees" key="2">
-              <p>{'loll'}</p>
+              <EditAttendee />
             </Panel>
           </Collapse>
         );
