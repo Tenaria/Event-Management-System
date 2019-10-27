@@ -972,7 +972,38 @@ class eventAjaxController extends Controller
 		
 		return Response::json([], 400);
 	}
+	public function search_event(Request $request){
+		$token = $request->input('token');
+		$search_term = $request->input('search_term');
+		if(isset($token) && !empty($token) && isset($search_term) && !is_null($search_term)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				$results = [];
 
+				$event_data = DB::table('events')
+								->where([
+									['events_status', 0],
+									['events_name', 'like', '%'.$search_term.'%']
+								])
+								->get();
+
+				if(!is_null($event_data)) {
+					foreach($event_data as $data) {
+						$results[] = [
+							'id' => $data->events_id,
+							'events_name' => $data->events_name,
+							'events_desc' => $data->events_desc
+						];
+					}
+				}
+
+				return Response::json(['results' => $results], 200);
+			}
+		}
+		
+		return Response::json([], 400);
+
+	}
 	public function get_timetable_details(Request $request) {
 		$token = $request->input('token');
 		
