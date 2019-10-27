@@ -83,7 +83,13 @@ class Event extends React.Component {
               />
             </Panel>
             <Panel header="Attendees" key="2">
-              <EditAttendee />
+              <EditAttendee
+                id={id}
+                name={name}
+                desc={desc}
+                event_public={event_public}
+                location={location}
+              />
             </Panel>
           </Collapse>
         );

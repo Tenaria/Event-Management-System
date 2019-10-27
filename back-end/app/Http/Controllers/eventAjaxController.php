@@ -861,7 +861,7 @@ class eventAjaxController extends Controller
 			if($token_data == true && isset($event_id) && !empty($event_id)) {
 				$return = [];
 				$attendees = DB::table('events_access AS a')
-								->select('u.users_fname', 'u.users_lname', 'u.users_id')
+								->select('u.users_email', 'u.users_id')
 								->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
 								->join('users AS u', 'a.access_user_id', '=', 'u.users_id')
 								->where([
@@ -873,8 +873,7 @@ class eventAjaxController extends Controller
 				if(!is_null($attendees)) {
 					foreach($attendees AS $attendee) {
 						$return[] = [
-							'fname' => $attendee->users_fname,
-							'lname' => $attendee->users_lname,
+							'email' => $attendee->users_email,
 							'id' => $attendee->users_id
 						];
 					}

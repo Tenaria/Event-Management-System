@@ -37,7 +37,7 @@ class EditEventForm extends React.Component {
         });
 
         if (res.status === 200) {
-          message.success('You have successfully added an event!');
+          message.success('You have successfully edited an event!');
         } else {
           message.error('The system has encountered an error. Contact your admin!');
         }
