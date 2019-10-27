@@ -866,7 +866,7 @@ class eventAjaxController extends Controller
 								->join('users AS u', 'a.access_user_id', '=', 'u.users_id')
 								->where([
 									['a.access_events_id', $event_id],
-									['e.events_access', 1]
+									['e.events_active', 1]
 								])
 								->get();
 
