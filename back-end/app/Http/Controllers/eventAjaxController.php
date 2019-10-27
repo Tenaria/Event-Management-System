@@ -924,7 +924,7 @@ class eventAjaxController extends Controller
 					}
 				}
 
-				return Response::json(['results' => $emails], 200);
+				return Response::json(['results' => $results], 200);
 			}
 		}
 		
