@@ -271,10 +271,14 @@ class eventAjaxController extends Controller
 							foreach($event_attributes as $attribute) {
 								$attribute_id = $attribute->attributes_values_attributes_id;
 								$attribute_value = $attribute->attributes_values_value;
-								$current_attributes_array[$attribute_id] = $attribute_value;
+								if($attribute_value != NULL) {
+									$current_attributes_array[$attribute_id] = $attribute_value;
+								} else {
+									$current_attributes_array[$attribute_id] = "";
+								}
 							}
 						}
-
+				
 						// INSERT LOCATION IF NOT EXIST
 						$location_id = $attributes_name_to_id['location'];
 						if(!isset($current_attributes_array[$location_id])) {
