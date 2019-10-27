@@ -199,6 +199,14 @@ class eventAjaxController extends Controller
 							'attributes_values_events_id' => $new_event_id
 						]);
 
+					//INESRT OWNER
+					DB::table('events_access')
+								->insert([
+									'access_user_id' => $token_data['user_id'],
+									'access_active' => 1,
+									'access_events_id' => $new_event_id
+								]);
+
 					//INESRT EVENT ATTENDEES IF GIVEN
 					if(isset($event_attendees) && !empty($event_attendees)) {
 						foreach($event_attendees as $attendee) {
