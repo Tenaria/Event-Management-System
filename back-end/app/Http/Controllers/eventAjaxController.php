@@ -844,7 +844,6 @@ class eventAjaxController extends Controller
 	// S P R I N T 2 E N D //
 
 	// S P R I N T 3 S T A R T //
-	//TODO: CLAIRE
 	public function get_attendees_of_event(Request $request) {
 		$token = $request->input('token');
 		$event_id = $request->input('event_id');
