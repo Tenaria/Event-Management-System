@@ -503,6 +503,11 @@ class eventAjaxController extends Controller
 						}
 					}
 
+					$cancelled = false;
+					if($event_data->events_status == 1) {
+						$cancelled = true;
+					}
+
 					return Response::json([
 						'events_id' => $event_data->events_id,
 						'events_name' => $event_data->events_name,
@@ -510,7 +515,8 @@ class eventAjaxController extends Controller
 						//'events_createdby' => $event_data->events_createdby,
 						'events_createdat' => $event_data->events_createdat,
 						'events_desc' => $event_data->events_desc,
-						'attributes' => $current_attributes_array
+						'attributes' => $current_attributes_array,
+						'events_cancelled' => $cancelled
 						//attributes['location'] WILL GIVE YOU THE LOCATION
 		        	], 200);
 				}
