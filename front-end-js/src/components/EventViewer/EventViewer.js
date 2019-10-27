@@ -1,7 +1,7 @@
 /*
   This allows you to view the events that are available for the user
  */
-import { Divider, Empty, Icon, Input, Spin, Typography } from 'antd';
+import { Card, Divider, Empty, Icon, Input, Row, Spin, Tooltip, Typography } from 'antd';
 import React from 'react';
 
 import TokenContext from '../../context/TokenContext';
@@ -12,7 +12,7 @@ const spinIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
 
 class EventViewer extends React.Component {
   state = {
-    upcomingEvent: null,
+    upcomingEvents: null,
     loaded: false
   };
 
@@ -30,11 +30,11 @@ class EventViewer extends React.Component {
     });
 
     const data = await res.json();
-    this.setState({upcomingEvent: data.events, loaded: true});
+    this.setState({upcomingEvents: data.events, loaded: true});
   }
 
   render() {
-    const { upcomingEvent, loaded } = this.state;
+    const { upcomingEvents, loaded } = this.state;
     const cardStyle = {
       margin: '1%',
       width: '30%'
@@ -44,9 +44,9 @@ class EventViewer extends React.Component {
       textAlign: 'center',
       width: '100%'
     };
-    let eventElm = <div style={spinStyle}><Spin indicator={spinIcon}/></div>;
+    let eventElms = <div style={spinStyle}><Spin indicator={spinIcon}/></div>;
 
-    if (loaded) {
+    if (loaded && upcomingEvents) {
       eventElms = [];
       for (let i = 0; i < upcomingEvents.length; ++i) {
         const upcomingEvent = upcomingEvents[i];
