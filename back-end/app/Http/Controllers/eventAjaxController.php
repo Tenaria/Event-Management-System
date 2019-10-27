@@ -400,8 +400,8 @@ class eventAjaxController extends Controller
 								['access_events_id', $event_id]
 							]);
 
-						$curr_event_access ->update(['access_active' => 1])
-						$curr_event_access ->get();
+						$curr_event_access->update(['access_active' => 1]);
+						$curr_event_access->get();
 
 						if(!is_null($session_data)){
 							DB::table('events_sessions_attendance')
