@@ -312,8 +312,9 @@ class eventAjaxController extends Controller
 
 						//UPDATE THE ATTENDEES
 						if(!isset($new_event_attendees) || empty($new_event_attendees)) {
-							$new_event_attendees= [];
+							$new_event_attendees = [];
 						}
+
 						$attendees = DB::table('events_access')
 										->where([
 											//['access_active', 1],
@@ -326,13 +327,14 @@ class eventAjaxController extends Controller
 						if(!is_null($attendees)) {
 							foreach($attendees as $attendee) {
 								if($attendee->access_active == 1) {
-									$current_attendees[] = $attendee;
+									$current_attendees[] = $attendee->access_user_id;
 								} else {
-									$inactive_attendees[] = $attendee;
+									$inactive_attendees[] = $attendee->access_user_id;
 								}
 							}
 						}
-
+						//var_dump($current_attendees);
+//die(var_dump($new_event_attendees));
 						$new_attendees = array_diff($new_event_attendees, $current_attendees);
 						$old_attendees = array_diff($current_attendees, $new_event_attendees);
 
