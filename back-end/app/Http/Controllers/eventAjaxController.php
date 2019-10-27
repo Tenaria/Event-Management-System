@@ -291,13 +291,15 @@ class eventAjaxController extends Controller
 								]);
 						// OTHERWISE UPDATE LOCATION IF CHANGE HAS OCCURRED
 						} else if($new_event_location !== $current_attributes_array[$location_id]) {
-							DB::table('events_attributes_values')
+							if(!($current_attributes_array[$location_id] == "" && $new_event_location == NULL)) {
+								DB::table('events_attributes_values')
 								->where([
 									['attributes_values_attributes_id', $location_id],
 									['attributes_values_active', 1],
 									['attributes_values_events_id', $event_id]
 								])
 								->update(['attributes_values_value' => $new_event_location]);
+							}
 						}
 
 						//UPDATE THE ATTENDEES
