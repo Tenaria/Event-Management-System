@@ -23,8 +23,7 @@ class EditEventForm extends React.Component {
           ...values,
           token,
           event_id: id,
-          event_attendees: null,
-          event_location: null
+          event_attendees: null
         };
         console.log(sendData);
 
@@ -91,8 +90,8 @@ class EditEventForm extends React.Component {
         <Row>
           <Form.Item style={{margin: 0}}>
             {getFieldDecorator('event_public', {
+              initialValue: event_public,
               valuePropName: 'checked',
-              initialValue: false,
             })(<Checkbox>Public Event</Checkbox>)}
           </Form.Item>
         </Row>

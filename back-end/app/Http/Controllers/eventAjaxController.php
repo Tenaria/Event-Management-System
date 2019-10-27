@@ -397,15 +397,15 @@ class eventAjaxController extends Controller
 						$curr_event_access = DB::table('events_access')
 							->where([
 								['access_events_id', $event_id]
-							->update(['access_active'] => 1)
+							])
+							->update(['access_active' => 1])
 							->get();
-							])				
 						if(!is_null($session_data)){
 							
 							
 							DB::table('events_sessions_attendance')
 								->updateOrInsert([
-									'sessions_attendance_id' => $events_id,
+									'sessions_attendance_id' => $event_id,
 									'sessions_attendance_sessions_id' => $session_id,
 									'sessions_attendance_access_id' => $curr_event_access['access_id']
 									],
@@ -440,7 +440,7 @@ class eventAjaxController extends Controller
 						if(!is_null($session_data)){
 							DB::table('events_sessions_attendance')
 								->updateOrInsert([
-									'sessions_attendance_id' => $events_id,
+									'sessions_attendance_id' => $event_id,
 									'sessions_attendance_sessions_id' => $session_id,
 									'sessions_attendance_access_id' => $curr_event_access['access_id']
 									],
