@@ -32,6 +32,7 @@ Route::post('/get_emails_exclude_user', 'eventAjaxController@get_emails_exclude_
 Route::get('/','eventAjaxController@mark_as_going');
 
 // SPRINT 3 (ROUTES)
+Route::post('/get_attendees_of_event', 'eventAjaxController@get_attendees_of_event');
 Route::post('/get_past_events', 'eventAjaxController@get_past_events');
 Route::post('/get_timetable_details', 'eventAjaxController@get_timetable_details');
 Route::post('/save_timetable_details', 'eventAjaxController@save_timetable_details');

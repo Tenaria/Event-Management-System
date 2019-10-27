@@ -844,6 +844,42 @@ class eventAjaxController extends Controller
 	// S P R I N T 2 E N D //
 
 	// S P R I N T 3 S T A R T //
+	//TODO: CLAIRE
+	public function get_attendees_of_event(Request $request) {
+		$token = $request->input('token');
+		$event_id = $request->input('event_id');
+		
+		if(isset($token) && !empty($token)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true && isset($event_id) && !empty($event_id)) {
+				$return = [];
+				$attendees = DB::table('events_access AS a')
+								->select('u.users_fname', 'u.users_lname', 'u.users_id')
+								->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
+								->join('users AS u', 'a.access_user_id', '=', 'u.users_id')
+								->where([
+									['a.access_events_id', $event_id],
+									['e.events_access', 1]
+								])
+								->get();
+
+				if(!is_null($attendees)) {
+					foreach($attendees AS $attendee) {
+						$return[] = [
+							'fname' => $attendee->users_fname,
+							'lname' => $attendee->users_lname,
+							'id' => $attendee->users_id
+						];
+					}
+				}
+
+				return Response::json(['attendees' => $return], 200);
+			}
+		}
+		
+		return Response::json([], 400);
+	}
+
 	public function get_past_events(Request $request) {
 		$token = $request->input('token');
 		
