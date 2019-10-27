@@ -1,3 +1,7 @@
+/*
+  This is a component that is responsible for managing your event. So you are able to view a list
+  of events you host.
+ */
 import { Button, Card, Divider, Icon, Row, Spin, Tooltip, Typography } from 'antd';
 import React from 'react';
 import { Redirect } from "react-router-dom";
@@ -36,15 +40,19 @@ class EventManager extends React.Component {
     this.setState({upcomingEvents: data.events, loaded: true});
   }
 
+  // Collection of functions used to show/hide the add event form modal
   toggleAddForm = () => this.setState({addEvent: !this.state.addEvent})
   closeAddForm = () => this.setState({addEvent: false})
 
   selectEvent = id => {
+    // This function will remember the id of the event selected in the session memory then redirect
+    // the user to the event editor view where you can edit a single event.
     sessionStorage.setItem('event_id', id);
     this.setState({ editingEvent: true });
   }
   
   cancelEvent = async id => {
+    // Sets an event to be cancelled
     const token = this.context;
 
     const res = await fetch('http://localhost:8000/cancel_event', {

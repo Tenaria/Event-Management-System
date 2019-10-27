@@ -45,14 +45,6 @@ class EditEventForm extends React.Component {
     })
   }
 
-  handleSearch = value => {
-    console.log(value);
-  }
-
-  handleChange = value => {
-    console.log(value);
-  }
-
   render() {
     const { name, desc, event_public, location } = this.props;
     const { getFieldDecorator } = this.props.form;

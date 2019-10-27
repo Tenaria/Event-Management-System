@@ -1,3 +1,8 @@
+/*
+  This will show you a particular event that you can edit. This will act as the middle man to hold
+  the two actual forms that are able to edit an event. Essentially, all this component does is
+  load information and send it to the two separate forms.
+ */
 import { Collapse, Divider, Empty, Icon, Spin, Typography } from 'antd';
 import React from 'react';
 
@@ -23,6 +28,7 @@ class Event extends React.Component {
   };
 
   componentDidMount = async () => {
+    // The instant the element is added to the DOM, load the information
     const eventID = sessionStorage.getItem('event_id');
     const token = this.context;
 
