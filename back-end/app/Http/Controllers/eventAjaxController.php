@@ -359,7 +359,7 @@ class eventAjaxController extends Controller
 							}
 
 							DB::table('events_access')
-								->insert($new_attendees);
+								->insert($insert);
 						}
 						
 
