@@ -84,6 +84,8 @@ class EditAttendees extends React.Component {
     const { attendees } = this.state;
     const token = this.context;
 
+    const attendeeIDs = attendees.map(a => a.id);
+
     const res = await fetch('http://localhost:8000/edit_event', {
       method: 'POST',
       mode: 'cors',
@@ -96,7 +98,7 @@ class EditAttendees extends React.Component {
         event_name: name,
         event_desc: desc,
         event_location: location,
-        event_attendees: attendees,
+        event_attendees: attendeeIDs,
         event_public
       })
     });

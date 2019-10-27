@@ -42,7 +42,10 @@ class EventManager extends React.Component {
 
   // Collection of functions used to show/hide the add event form modal
   toggleAddForm = () => this.setState({addEvent: !this.state.addEvent})
-  closeAddForm = () => this.setState({addEvent: false})
+  closeAddForm = () => {
+    this.setState({addEvent: false});
+    this.loadData();
+  }
 
   selectEvent = id => {
     // This function will remember the id of the event selected in the session memory then redirect
