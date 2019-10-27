@@ -325,7 +325,7 @@ class eventAjaxController extends Controller
 						$inactive_attendees = [];
 						if(!is_null($attendees)) {
 							foreach($attendees as $attendee) {
-								if($attendee->events_active == 1) {
+								if($attendee->access_active == 1) {
 									$current_attendees[] = $attendee;
 								} else {
 									$inactive_attendees[] = $attendee;
