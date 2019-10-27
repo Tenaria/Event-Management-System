@@ -204,7 +204,7 @@ class eventAjaxController extends Controller
 						foreach($event_attendees as $attendee) {
 							DB::table('events_access')
 								->insert([
-									'acces_user_id' => $attendee,
+									'access_user_id' => $attendee,
 									'access_active' => 1,
 									'access_events_id' => $new_event_id
 								]);
@@ -271,10 +271,14 @@ class eventAjaxController extends Controller
 							foreach($event_attributes as $attribute) {
 								$attribute_id = $attribute->attributes_values_attributes_id;
 								$attribute_value = $attribute->attributes_values_value;
-								$current_attributes_array[$attribute_id] = $attribute_value;
+								if($attribute_value != NULL) {
+									$current_attributes_array[$attribute_id] = $attribute_value;
+								} else {
+									$current_attributes_array[$attribute_id] = "";
+								}
 							}
 						}
-
+				
 						// INSERT LOCATION IF NOT EXIST
 						$location_id = $attributes_name_to_id['location'];
 						if(!isset($current_attributes_array[$location_id])) {
@@ -286,14 +290,16 @@ class eventAjaxController extends Controller
 									'attributes_values_events_id' => $event_id
 								]);
 						// OTHERWISE UPDATE LOCATION IF CHANGE HAS OCCURRED
-						} else if($location_id !== $current_attributes_array[$location_id]) {
-							DB::table('events_attributes_values')
+						} else if($new_event_location !== $current_attributes_array[$location_id]) {
+							if(!($current_attributes_array[$location_id] == "" && $new_event_location == NULL)) {
+								DB::table('events_attributes_values')
 								->where([
 									['attributes_values_attributes_id', $location_id],
 									['attributes_values_active', 1],
 									['attributes_values_events_id', $event_id]
 								])
 								->update(['attributes_values_value' => $new_event_location]);
+							}
 						}
 
 						//UPDATE THE ATTENDEES
@@ -370,7 +376,6 @@ class eventAjaxController extends Controller
 				$event_data = DB::table('events')
 								->where ([
 									['events_active', 1],
-									['events_id',$token_data['user_id']],
 									['events_id', $event_id],
 									['events_status',0]
 									
@@ -379,20 +384,30 @@ class eventAjaxController extends Controller
 				if(!is_null($event_data)) {
 					// check if event is public
 					if($event_data['events_public'] == 1) {
-						$session_data = DB::table('event_sessions')
+						
+						
+						$session_data = DB::table('events_sessions')
 											->where([
 												['sessions_active', 1],
 												['sessions_events_id', $event_data['events_id']],
-												['sessions_id', $session_id],
+												['sessions_id', $session_id]
 												
 											])
 											->first();
+						$curr_event_access = DB::table('events_access')
+							->where([
+								['access_events_id', $event_id]
+							->update(['access_active'] => 1)
+							->get();
+							])				
 						if(!is_null($session_data)){
+							
+							
 							DB::table('events_sessions_attendance')
 								->updateOrInsert([
 									'sessions_attendance_id' => $events_id,
 									'sessions_attendance_sessions_id' => $session_id,
-									'sessions_attendance_access_id' => $session_id
+									'sessions_attendance_access_id' => $curr_event_access['access_id']
 									],
 									['sessions_attendance_active' => 1,
 									 'sessions_attendance_going' => 1
@@ -403,22 +418,31 @@ class eventAjaxController extends Controller
 						}
 										
 					}
-					//event is not public
+					//event is not public but the user can see it themselves
+					// and they want to go
 					if($event_data['events_public'] == 0) {
 						$session_data = DB::table('event_sessions')
 											->where([
 												['sessions_active', 1],
 												['sessions_events_id', $event_data['events_id']],
-												['sessions_id', $session_id],
+												['sessions_id', $session_id]
 												
 											])
 											->first();
+						$curr_event_access = DB::table('access_id')
+												->where([
+													['access_events_id', $event_id]
+												])
+												->update(['access_active' => 1])
+												->first();
+						
+								
 						if(!is_null($session_data)){
 							DB::table('events_sessions_attendance')
 								->updateOrInsert([
 									'sessions_attendance_id' => $events_id,
 									'sessions_attendance_sessions_id' => $session_id,
-									'sessions_attendance_access_id' => $session_id
+									'sessions_attendance_access_id' => $curr_event_access['access_id']
 									],
 									['sessions_attendance_active' => 1,
 									 'sessions_attendance_going' => 1
