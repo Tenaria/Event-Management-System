@@ -62,7 +62,7 @@ class EventManager extends React.Component {
   render() {
     const { addEvent, loaded, upcomingEvents, editingEvent } = this.state;
     const cardStyle = {
-      margin: '1em',
+      margin: '1%',
       width: '30%'
     };
     const spinStyle = {
@@ -108,7 +108,11 @@ class EventManager extends React.Component {
             ]}
           >
             <p>{upcomingEvent.events_desc ? upcomingEvent.events_desc : 'No description'}</p>
-            <Row style={{textAlign: 'right'}}>
+            <Row style={{
+              position: 'absolute',
+              right: '1em',
+              bottom: '1em'
+            }}>
               <Button
                 icon="edit"
                 style={{
