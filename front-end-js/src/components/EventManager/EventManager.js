@@ -17,12 +17,9 @@ class EventManager extends React.Component {
     editingEvent: false,
   }
 
-  selectEvent = id => {
-    sessionStorage.setItem('event_id', id);
-    this.setState({ editingEvent: true });
-  }
+  componentDidMount = () => { this.loadData(); }
 
-  componentDidMount = async () => {
+  loadData = async () => {
     const token = this.context;
 
     const res = await fetch('http://localhost:8000/get_upcoming_events', {
@@ -42,6 +39,26 @@ class EventManager extends React.Component {
   toggleAddForm = () => this.setState({addEvent: !this.state.addEvent})
   closeAddForm = () => this.setState({addEvent: false})
 
+  selectEvent = id => {
+    sessionStorage.setItem('event_id', id);
+    this.setState({ editingEvent: true });
+  }
+  
+  cancelEvent = async id => {
+    const token = this.context;
+
+    const res = await fetch('http://localhost:8000/cancel_event', {
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ token, event_id: id })
+    });
+    this.loadData();
+  }
+
   render() {
     const { addEvent, loaded, upcomingEvents, editingEvent } = this.state;
     const cardStyle = {
@@ -57,7 +74,7 @@ class EventManager extends React.Component {
 
     if (upcomingEvents && loaded && !editingEvent) {
       eventElms = [
-        <Card className="add-event-card" style={cardStyle} onClick={this.toggleAddForm}>
+        <Card key={-1} className="add-event-card" style={cardStyle} onClick={this.toggleAddForm}>
           <Icon type="plus" style={{fontSize: 48}} />
         </Card>
       ];
@@ -65,22 +82,29 @@ class EventManager extends React.Component {
         const upcomingEvent = upcomingEvents[i];
         eventElms.push(
           <Card
-            className="my-event-card"
+            className={upcomingEvent.events_cancelled ? "my-event-cancelled" : "my-event-card"}
             key={i}
             style={cardStyle}
             size="small"
             title={[
-              <Tooltip title={upcomingEvent.events_public ?
-                "Your event is publicly visible!" :
-                "Your event is not publicly visible"
-                }
-              >
-                {upcomingEvent.events_public ?
-                  <Icon type="eye" style={{color: "#68D391", marginRight: '0.5em'}} /> :
-                  <Icon type="eye-invisible" style={{color: "#E53E3E", marginRight: '0.5em'}} />
-                }
-              </Tooltip>,
-              upcomingEvent.events_name
+              (upcomingEvent.events_cancelled ? 
+                <Tooltip title="Your event is cancelled">
+                  <Icon type="stop" style={{color: "white", marginRight: '0.5em'}} />
+                </Tooltip> :
+                <Tooltip title={upcomingEvent.events_public ?
+                  "Your event is publicly visible!" :
+                  "Your event is not publicly visible"
+                  }
+                >
+                  {upcomingEvent.events_public ?
+                    <Icon type="eye" style={{color: "#68D391", marginRight: '0.5em'}} /> :
+                    <Icon type="eye-invisible" style={{color: "#E53E3E", marginRight: '0.5em'}} />
+                  }
+                </Tooltip>
+              )
+              ,
+              upcomingEvent.events_name,
+              (upcomingEvent.events_cancelled ? " (Cancelled)" : "")
             ]}
           >
             <p>{upcomingEvent.events_desc ? upcomingEvent.events_desc : 'No description'}</p>
@@ -91,11 +115,18 @@ class EventManager extends React.Component {
                   background: '#38B2AC',
                   border: 'none',
                   color: 'white',
-                  marginRight: '0.5em'
+                  marginRight: (upcomingEvent.events_cancelled ? '' : '0.5em')
                 }}
                 onClick={() => this.selectEvent(upcomingEvent.events_id)}
               />
-              <Button type="danger" icon="delete"/>
+              {upcomingEvent.events_cancelled ?
+                '' :
+                <Button
+                  type="danger"
+                  icon="stop"
+                  onClick={() => this.cancelEvent(upcomingEvent.events_id)}
+                />
+              }
             </Row>
           </Card>
         );
