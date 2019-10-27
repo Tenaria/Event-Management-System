@@ -394,12 +394,15 @@ class eventAjaxController extends Controller
 												
 											])
 											->first();
+
 						$curr_event_access = DB::table('events_access')
-							->where([
-								['access_events_id', $event_id]
-							->update(['access_active'] => 1)
-							->get();
-							])				
+												->where([
+													['access_events_id', $event_id]
+												])
+												->update([
+													'access_active' => 1
+												]);
+
 						if(!is_null($session_data)){
 							
 							
