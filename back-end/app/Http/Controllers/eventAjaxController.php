@@ -286,7 +286,7 @@ class eventAjaxController extends Controller
 									'attributes_values_events_id' => $event_id
 								]);
 						// OTHERWISE UPDATE LOCATION IF CHANGE HAS OCCURRED
-						} else if($location !== $current_attributes_array[$location_id]) {
+						} else if($location_id !== $current_attributes_array[$location_id]) {
 							DB::table('events_attributes_values')
 								->where([
 									['attributes_values_attributes_id', $location_id],
