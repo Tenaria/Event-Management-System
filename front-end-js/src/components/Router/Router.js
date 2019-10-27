@@ -12,6 +12,7 @@ import AccountDetail from '../AccountDetail';
 import EventManager from '../EventManager';
 import Dashboard from '../Dashboard';
 import Event from '../Event';
+import EventViewer from '../EventViewer';
 import Test from '../Test';
 
 const {  Content, Sider } = Layout;
@@ -31,12 +32,18 @@ class RouterComponent extends React.PureComponent {
                 </Link>
               </Menu.Item>
               <Menu.Item key="2">
+                <Link to="/events_viewer">
+                  <Icon type="eye" />
+                  <span className="nav-text">View Events</span>
+                </Link>
+              </Menu.Item>
+              <Menu.Item key="3">
                 <Link to="/events_manager">
                   <Icon type="file-add" />
                   <span className="nav-text">Manage Events</span>
                 </Link>
               </Menu.Item>
-              <Menu.Item key="3">
+              <Menu.Item key="4">
                 <Link to="/account">
                   <Icon type="user" />
                   <span className="nav-text">Account Detail</span>
@@ -54,11 +61,14 @@ class RouterComponent extends React.PureComponent {
                   <Route path='/event'>
                     <Event />
                   </Route>
-                  <Route path='/account'>
-                    <AccountDetail />
+                  <Route path='/events_viewer'>
+                    <EventViewer />
                   </Route>
                   <Route path='/events_manager'>
                     <EventManager />
+                  </Route>
+                  <Route path='/account'>
+                    <AccountDetail />
                   </Route>
                   <Route path='/'>
                     <Dashboard />

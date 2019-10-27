@@ -724,7 +724,7 @@ class eventAjaxController extends Controller
 						}
 
 						$public = false;
-						if($events_public == 1) {
+						if($event->events_public == 1) {
 							$public = true;
 						}
 
