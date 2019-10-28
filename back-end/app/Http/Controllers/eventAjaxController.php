@@ -442,6 +442,7 @@ class eventAjaxController extends Controller
 		$token = $request->input('token');
 		$event_id = $request->input('event_id');
 		$session_id = $request->input('session_id');
+
 		if(isset($token) && !empty($token) && isset($event_id) && !empty($event_id) && isset($session_id) && !empty($session_id)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
@@ -450,27 +451,24 @@ class eventAjaxController extends Controller
 									['events_active', 1],
 									['events_id', $event_id],
 									['events_status',0]
-									
 								])
 								->first();
+
 				if(!is_null($event_data)) {
 					// check if event is public
-					if($event_data['events_public'] == 1) {
-						
-						
+					if($event_data->events_public == 1) {
 						$session_data = DB::table('events_sessions')
 											->where([
 												['sessions_active', 1],
-												['sessions_events_id', $event_data['events_id']],
+												['sessions_events_id', $event_id],
 												['sessions_id', $session_id]
-												
 											])
 											->first();
 
 						$curr_event_access = DB::table('events_access')
-							->where([
-								['access_events_id', $event_id]
-							]);
+												->where([
+													['access_events_id', $event_id]
+												]);
 
 						$curr_event_access->update(['access_active' => 1]);
 						$curr_event_access->get();
@@ -489,25 +487,23 @@ class eventAjaxController extends Controller
 							
 							return Response::json([], 200);
 						}
-										
-					}
+
 					//event is not public but the user can see it themselves
-					// and they want to go
-					if($event_data['events_public'] == 0) {
-						$session_data = DB::table('event_sessions')
+					// and they want to go					
+					}
+					else if($event_data->events_public == 0) {
+						$session_data = DB::table('event_sessions AS s')
+											->join('events_access AS a', function($join) {
+												$join->on('a.access_events_id', '=', 's.sessions_events_id')
+													->where('a.access_active', 1);
+											})
 											->where([
-												['sessions_active', 1],
-												['sessions_events_id', $event_data['events_id']],
-												['sessions_id', $session_id]
+												['s.sessions_active', 1],
+												['s.sessions_events_id', $event_id],
+												['s.sessions_id', $session_id]
 												
 											])
 											->first();
-						$curr_event_access = DB::table('events_access')
-												->where([
-													['access_events_id', $event_id]
-												])
-												->update(['access_active' => 1])
-												->first();
 						
 								
 						if(!is_null($session_data)){
@@ -515,7 +511,7 @@ class eventAjaxController extends Controller
 								->updateOrInsert([
 									'sessions_attendance_id' => $event_id,
 									'sessions_attendance_sessions_id' => $session_id,
-									'sessions_attendance_access_id' => $curr_event_access['access_id']
+									'sessions_attendance_access_id' => $session_data->access_id
 									],
 									['sessions_attendance_active' => 1,
 									 'sessions_attendance_going' => 1
