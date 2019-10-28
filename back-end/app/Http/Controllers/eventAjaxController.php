@@ -974,7 +974,7 @@ class eventAjaxController extends Controller
 		
 		return Response::json([], 400);
 	}
-	public function search_event(Request $request){
+	public function search_public_event(Request $request){
 		$token = $request->input('token');
 		$search_term = $request->input('search_term');
 

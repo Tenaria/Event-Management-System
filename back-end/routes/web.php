@@ -38,6 +38,7 @@ Route::post('/get_timetable_details', 'eventAjaxController@get_timetable_details
 Route::post('/save_timetable_details', 'eventAjaxController@save_timetable_details');
 Route::post('/load_event_sessions', 'eventAjaxController@load_event_sessions');
 Route::post('/save_event_sessions', 'eventAjaxController@save_event_sessions');
+Route::post('/search_public_event', 'eventAjaxController@search_public_event');
 
 // SPRINT 4 (ROUTES)
 // US-6 (Notify Attendees), US-16 (Mark as Going), US-4 (Cancel Session from Event)
