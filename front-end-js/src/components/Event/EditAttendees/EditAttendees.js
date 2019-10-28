@@ -1,3 +1,6 @@
+/*
+  Edit the attendees of an event.
+ */
 import { Avatar, Button, Icon, message, Row, Select, Spin, Tooltip } from 'antd';
 import React from 'react';
 
@@ -36,6 +39,10 @@ class EditAttendees extends React.Component {
   }
 
   handleSearch = value => {
+    /*
+      Once an user has entered more than 2 characters in the search bar, we will perform an ajax
+      request for a list of users that has an email that contains the character specified.
+    */
     const token = this.context;
 
     if (value.length <= 2) return;
@@ -62,6 +69,7 @@ class EditAttendees extends React.Component {
   }
 
   onSelect = (value, elm) => {
+    // When we select an attendee, add them to the list of attendees
     const { attendees } = this.state;
 
     for (let i = 0; i < attendees.length; ++i) {

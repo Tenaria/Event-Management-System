@@ -997,7 +997,7 @@ class eventAjaxController extends Controller
 									['e.events_public', 1],
 									['e.events_active', 0],
 									['e.events_createdby','!=',$token_data['user_id']],
-								])
+								]);
 								//->havingRaw('a.access_id IS NULL');
 
 				if(isset($search_term) && !is_null($search_term)) {
