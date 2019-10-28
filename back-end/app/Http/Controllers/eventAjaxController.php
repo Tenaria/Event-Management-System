@@ -1065,13 +1065,26 @@ class eventAjaxController extends Controller
 		return Response::json([], 400);
 	}
 
+	//TODO
 	public function load_event_sessions(Request $request) {
 		$token = $request->input('token');
+		$event_id = $request->input('event_id');
 		
-		if(isset($token) && !empty($token)) {
+		if(isset($token) && !empty($token) && isset($event_id) && !empty($event_id)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
-				//TODO
+				$event_data = DB::table('events')
+								->where ([
+									['events_active', 1],
+									['events_id',$token_data['user_id']],
+									['events_id', $event_id],
+									['events_status', 0]
+								])
+								->first();
+
+				if(!is_null($event_data)) {
+
+				}
 
 				return Response::json([], 400);
 			}
@@ -1082,13 +1095,33 @@ class eventAjaxController extends Controller
 
 	public function create_event_sessions(Request $request) {
 		$token = $request->input('token');
+		$event_id = $request->input('event_id');
+		$start_timestamp = $request->input('start_timestamp');
+		$end_timestamp = $request->input('end_timestamp');
 		
-		if(isset($token) && !empty($token)) {
+		if(isset($token) && !empty($token) && isset($event_id) && !empty($event_id) && isset($start_timestamp) && !empty($start_timestamp) && isset($end_timestamp) && !empty($end_timestamp)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
-				//TODO
+				$event_data = DB::table('events')
+								->where ([
+									['events_active', 1],
+									['events_id',$token_data['user_id']],
+									['events_id', $event_id],
+									['events_status', 0]
+								])
+								->first();
 
-				return Response::json([], 400);
+				if(!is_null($event_data)) {
+					DB::table('events_sessions')
+						->insertGetId([
+							'sessions_start_time' => $start_timestamp,
+							'sessions_end_time' => $end_timestamp,
+							'sessions_active' => 1,
+							'sessions_events_id' => $event_id
+						]);
+
+					return Response::json([], 200);
+				}
 			}
 		}
 		
@@ -1097,13 +1130,33 @@ class eventAjaxController extends Controller
 
 	public function edit_event_sessions(Request $request) {
 		$token = $request->input('token');
+		$session_id = $request->input('session_id');
+		$event_id = $request->input('event_id');
+		$start_timestamp = $request->input('start_timestamp');
+		$end_timestamp = $request->input('end_timestamp');
 		
-		if(isset($token) && !empty($token)) {
+		if(isset($token) && !empty($token) && isset($event_id) && !empty($event_id) && isset($session_id) && !empty($session_id) && isset($start_timestamp) && !empty($start_timestamp) && isset($end_timestamp) && !empty($end_timestamp)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
-				//TODO
+				$event_data = DB::table('events')
+								->where ([
+									['events_active', 1],
+									['events_id',$token_data['user_id']],
+									['events_id', $event_id],
+									['events_status', 0]
+								])
+								->first();
 
-				return Response::json([], 400);
+				if(!is_null($event_data)) {
+					DB::table('events_sessions')
+						->where([
+							['sessions_events_id', $event_id],
+							['sessions_id', $session_id]
+						])
+						->update(['sessions_start_time' => $start_timestamp, 'sessions_end_time' => $end_timestamp]);
+
+					return Response::json([], 200);
+				}
 			}
 		}
 		
@@ -1112,13 +1165,31 @@ class eventAjaxController extends Controller
 
 	public function remove_event_sessions(Request $request) {
 		$token = $request->input('token');
+		$session_id = $request->input('session_id');
+		$event_id = $request->input('event_id');
 		
-		if(isset($token) && !empty($token)) {
+		if(isset($token) && !empty($token) && isset($event_id) && !empty($event_id) && isset($session_id) && !empty($session_id)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
-				//TODO
+				$event_data = DB::table('events')
+								->where ([
+									['events_active', 1],
+									['events_id',$token_data['user_id']],
+									['events_id', $event_id],
+									['events_status', 0]
+								])
+								->first();
 
-				return Response::json([], 400);
+				if(!is_null($event_data)) {
+					DB::table('events_sessions')
+						->where([
+							['sessions_events_id', $event_id],
+							['sessions_id', $session_id]
+						])
+						->update(['sessions_active' => 0]);
+
+					return Response::json([], 200);
+				}
 			}
 		}
 		
