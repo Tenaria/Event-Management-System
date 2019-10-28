@@ -995,7 +995,7 @@ class eventAjaxController extends Controller
 								->where([
 									['e.events_status', 0],
 									['e.events_public', 1],
-									['e.events_active', 0],
+									['e.events_active', 1],
 									['e.events_createdby','!=',$token_data['user_id']],
 								]);
 								//->havingRaw('a.access_id IS NULL');
