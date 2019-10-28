@@ -1065,7 +1065,6 @@ class eventAjaxController extends Controller
 		return Response::json([], 400);
 	}
 
-	//TODO
 	public function load_event_sessions(Request $request) {
 		$token = $request->input('token');
 		$event_id = $request->input('event_id');
@@ -1083,10 +1082,26 @@ class eventAjaxController extends Controller
 								->first();
 
 				if(!is_null($event_data)) {
+					$sessions = [];
 
+					$session_data = DB::table('event_sessions')
+										->where([
+											['sessions_active', 1],
+											['sessions_events_id', $event_id]
+										])
+										->get();
+
+					if(!is_null($session_data)) {
+						foreach($session_data as $data) {
+							$sessions[] = [
+								'start_timestamp' => $data->sessions_start_time,
+								'end_timestamp' => $data->sessions_end_time
+							];
+						}
+					}
+
+					return Response::json(['sessions' => $sessions], 200);
 				}
-
-				return Response::json([], 400);
 			}
 		}
 		
