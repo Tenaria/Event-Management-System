@@ -450,7 +450,7 @@ class eventAjaxController extends Controller
 								->where ([
 									['events_active', 1],
 									['events_id', $event_id],
-									['events_status',0]
+									['events_status', 0]
 								])
 								->first();
 
@@ -465,25 +465,43 @@ class eventAjaxController extends Controller
 											])
 											->first();
 
-						$curr_event_access = DB::table('events_access')
-												->where([
-													['access_events_id', $event_id]
-												]);
-
-						$curr_event_access->update(['access_active' => 1]);
-						$curr_event_access->get();
-
 						if(!is_null($session_data)){
-							DB::table('events_sessions_attendance')
-								->updateOrInsert([
-									'sessions_attendance_id' => $event_id,
-									'sessions_attendance_sessions_id' => $session_id,
-									'sessions_attendance_access_id' => $curr_event_access['access_id']
-									],
-									['sessions_attendance_active' => 1,
-									 'sessions_attendance_going' => 1
-									]
-								);
+							$acess_id = 0;
+							//CHECK iF USER ALREADY HAS ACCESS TO A TABLE
+							$curr_event_access = DB::table('events_access')
+												->where([
+													['access_events_id', $event_id],
+													['access_active', 1]
+												])
+												->first();
+
+							//IF SO, THEN SESSIONS ATTENDANCE
+							if(!is_null($curr_event_access)) {
+								$access_id = $curr_event_access->access_id;
+							//IF NOT THEN INESRT ACCESS, THEN SESSIONS ATTENDANCE
+							} else{
+								$access_id = DB::table('events_access')
+												->insertGetId([
+													'access_user_id' => $token_data['user_id'],
+													'access_active' => 1,
+													'access_events_id' => $event_id,
+													'access_archived' => 0
+												]);
+							}
+							
+
+							if($access_id != 0) {
+								DB::table('events_sessions_attendance')
+									->updateOrInsert([
+										'sessions_attendance_id' => $event_id,
+										'sessions_attendance_sessions_id' => $session_id,
+										'sessions_attendance_access_id' => $access_id
+										],
+										['sessions_attendance_active' => 1,
+										 'sessions_attendance_going' => 1
+										]
+									);
+							}
 							
 							return Response::json([], 200);
 						}
@@ -606,7 +624,7 @@ class eventAjaxController extends Controller
 				$event_data = DB::table('events')
 								->where ([
 									['events_active', 1],
-									['events_createdby',$token_data['user_id']],
+									['events_createdby', $token_data['user_id']],
 									['events_id', $event_id]
 									
 								])
@@ -615,7 +633,7 @@ class eventAjaxController extends Controller
 					DB::table('events')
 								->where ([
 									['events_active', 1],
-									['events_createdby',$token_data['user_id']],
+									['events_createdby', $token_data['user_id']],
 									['events_id', $event_id]
 									
 								])
