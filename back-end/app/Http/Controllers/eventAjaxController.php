@@ -983,24 +983,31 @@ class eventAjaxController extends Controller
 			if($token_data == true) {
 				$results = [];
 
-				$event_data = DB::table('events')
+				$event_data = DB::table('events AS e')
+								->select('e.*', DB::raw("(SELECT count(a.access_user_id) FROM events_access AS a WHERE a.access_events_id=e.events_id) as 'num_attendees'"))
 								->where([
-									['events_status', 0],
-									['events_public', 1]
+									['e.events_status', 0],
+									['e.events_public', 1]
 								]);
 
 				if(isset($search_term) && !is_null($search_term)) {
-					$event_data = $event_data->where('events_name', 'like', '%'.$search_term.'%');
+					$event_data = $event_data->where('e.events_name', 'like', '%'.$search_term.'%');
 				}
 
 				$event_data = $event_data->get();
 
 				if(!is_null($event_data)) {
 					foreach($event_data as $data) {
+						$num_attendees = 0;
+						if(isset($data->num_attendees) && !empty($data->num_attendees)) {
+							$num_attendees = $data->num_attendees;
+						}
+						
 						$results[] = [
 							'id' => $data->events_id,
 							'events_name' => $data->events_name,
-							'events_desc' => $data->events_desc
+							'events_desc' => $data->events_desc,
+							'events_attendees_count' => $num_attendees
 						];
 					}
 				}
