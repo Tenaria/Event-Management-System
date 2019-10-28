@@ -775,9 +775,9 @@ class eventAjaxController extends Controller
 					foreach($event_data as $event) {
 						//this means that the user is already attending the event
 						//so skip
-						// if(isset($event->access_id) && !empty($event->access_id)) {
-						// 	continue;
-						// }
+						if(isset($event->access_id) && !empty($event->access_id)) {
+							continue;
+						}
 
 						$cancelled = false;
 						if($event->events_status) {
@@ -984,7 +984,7 @@ class eventAjaxController extends Controller
 				$results = [];
 
 				$event_data = DB::table('events AS e')
-								->select('e.*', DB::raw("(SELECT count(a.access_user_id) FROM events_access AS a WHERE a.access_events_id=e.events_id) as 'num_attendees'"))
+								->select('e.*', 'a.access_id', DB::raw("(SELECT count(a.access_user_id) FROM events_access AS a WHERE a.access_events_id=e.events_id) as 'num_attendees'"))
 								->leftJoin('events_access AS a', function($join) use ($token_data) {
 									$join->on('a.access_events_id', '=', 'e.events_id')
 										->where([
@@ -1008,6 +1008,12 @@ class eventAjaxController extends Controller
 
 				if(!is_null($event_data)) {
 					foreach($event_data as $data) {
+						//this means that the user is already attending the event
+						//so skip
+						if(isset($data->access_id) && !empty($data->access_id)) {
+							continue;
+						}
+
 						$num_attendees = 0;
 						if(isset($data->num_attendees) && !empty($data->num_attendees)) {
 							$num_attendees = $data->num_attendees;
