@@ -1182,7 +1182,8 @@ class eventAjaxController extends Controller
 
 				if(!is_null($event_data)) {
 					$sessions = [];
-
+					//TODO: CLAIRE: RETURN ALL ATTENDEES
+					//TODO: CLAIRE: RETURN WHETHER LOGGED IN USER IS GOING OR NOT
 					$session_data = DB::table('event_sessions')
 										->where([
 											['sessions_active', 1],
