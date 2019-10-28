@@ -1,9 +1,9 @@
 /*
   Edit the sessions of an event
  */
-import { Button, DatePicker, Icon, List, message, Row, Select, Spin, Tooltip } from 'antd';
+import { Button, DatePicker, Icon, List, message, Spin, Tooltip } from 'antd';
 import React from 'react';
-import WrappedAddSession from './AddSession';
+import AddSession from './AddSession';
 
 import TokenContext from '../../../context/TokenContext';
 
@@ -56,7 +56,7 @@ class EditSessions extends React.Component {
           >
           </Button>
         </div>
-        <WrappedAddSession
+        <AddSession
           onCancel={this.hideAddModal}
           visible={adding}
         />

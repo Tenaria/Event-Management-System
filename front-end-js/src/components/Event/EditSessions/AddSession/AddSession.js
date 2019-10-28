@@ -1,12 +1,13 @@
 /*
   Edit the sessions of an event
  */
-import { Form, Modal, Typography } from 'antd';
+import { DatePicker, Form, InputNumber, Modal, Row, Typography } from 'antd';
 import React from 'react';
 
 import TokenContext from '../../../../context/TokenContext';
 
 const { Title } = Typography;
+const { RangePicker } = DatePicker;
 
 class AddSession extends React.Component {
   render() {
@@ -17,9 +18,17 @@ class AddSession extends React.Component {
         onCancel={onCancel}
         visible={visible}
       >
-        <Form>
-          <Title level={2}>Create New Event</Title>
-        </Form>
+        <Title level={2}>Create New Event</Title>
+        <Row>
+          <Form.Item label="Session Date">
+            <RangePicker style={{width: '100%'}}/>
+          </Form.Item>
+        </Row>
+        <Row>
+          <Form.Item label="Recurrences">
+            <InputNumber defaultValue={1} min={1} />
+          </Form.Item>
+        </Row>
       </Modal>
     );
   }
@@ -27,6 +36,4 @@ class AddSession extends React.Component {
 
 AddSession.contextType = TokenContext;
 
-const WrappedAddSession = Form.create({name: 'add_session_form'})(AddSession);
-
-export default WrappedAddSession;
+export default AddSession;
