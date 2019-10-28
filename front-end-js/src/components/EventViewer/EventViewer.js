@@ -1,7 +1,7 @@
 /*
   This allows you to view the events that are available for the user
  */
-import { Card, Divider, Empty, Icon, Input, Row, Spin, Tooltip, Typography } from 'antd';
+import { Button, Card, Divider, Empty, Icon, Input, Row, Spin, Tooltip, Typography } from 'antd';
 import React from 'react';
 
 import TokenContext from '../../context/TokenContext';
@@ -16,8 +16,36 @@ class EventViewer extends React.Component {
     loaded: false
   };
 
-  searchForEvents = value => {
-    console.log(value);
+  componentDidMount = () => {
+    this.loadEvents('');
+  }
+
+  loadEvents = async term => {
+    const token = this.context;
+
+    this.setState({loaded: false});
+
+    const res = await fetch('http://localhost:8000/search_public_event', {
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        search_term: term,
+        token
+      })
+    });
+
+    const data = await res.json();
+
+    console.log(data);
+
+    this.setState({
+      upcomingEvents: data.results,
+      loaded: true
+    });
   }
 
   render() {
@@ -33,13 +61,40 @@ class EventViewer extends React.Component {
     };
     let eventElms = <div style={spinStyle}><Spin indicator={spinIcon}/></div>;
 
+    if (loaded && upcomingEvents.length > 0) {
+      eventElms = [];
+      for (let i = 0; i < upcomingEvents.length; ++i) {
+        const upcomingEvent = upcomingEvents[i];
+        eventElms.push(
+          <Card
+            className="my-event-card"
+            key={i}
+            style={cardStyle}
+            size="small"
+            title={upcomingEvent.events_name}
+          >
+            <p>{upcomingEvent.events_desc ? upcomingEvent.events_desc : 'No description'}</p>
+            <Row style={{
+              position: 'absolute',
+              right: '1em',
+              bottom: '1em'
+            }}>
+              <Button type="primary">Go To Event</Button>
+            </Row>
+          </Card>
+        );
+      }
+    } else if (loaded) {
+      eventElms = <Empty description="Could not find any events ..." style={{margin: 'auto'}} />;
+    }
+
     return (
       <React.Fragment>
         <Title level={2}>Event Viewer</Title>
         <p>View a list of upcoming events made by other users. You can also search for events here</p>
         <Search
           placeholder="Name of event ..."
-          onSearch={this.searchForEvents}
+          onSearch={value => this.loadEvents(value)}
           enterButton
         />
         <Divider orientation="left">Events</Divider>
