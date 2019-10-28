@@ -97,7 +97,7 @@ class EditEventForm extends React.Component {
         </Row>
         <Row>
           <Form.Item>
-            <Button type="primary" htmlType="submit" style={{width: '100%'}}>Update Event Details</Button>
+            <Button type="primary" htmlType="submit" block>Update Event Details</Button>
           </Form.Item>
         </Row>
       </Form>

@@ -19,13 +19,13 @@
   cursor: pointer;
 
   &:hover {
-    background: #2D3748;
+    background: $PRIMARY_COLOUR;
     color: #EDF2F7;
   }
 }
 
 .my-event-card .ant-card-head {
-  background-color: #2D3748;
+  background-color: $PRIMARY_COLOUR;
   color: white;
 }
 
@@ -45,4 +45,10 @@
   .ant-card-body {
     padding-bottom: 2.5em;
   }
+}
+
+.custom-sessions .ant-list-header{
+  background-color: $PRIMARY_COLOUR;
+  color: white;
+  font-weight: 500;
 }

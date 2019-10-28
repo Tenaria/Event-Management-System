@@ -157,8 +157,9 @@ class EditAttendees extends React.Component {
           <Row>
             <Button
               type="primary"
-              style={{marginTop: '1em', width: '100%'}}
+              style={{marginTop: '1em'}}
               onClick={this.updateAttendees}
+              block
             >Update Attendees</Button>
           </Row>
         </React.Fragment>

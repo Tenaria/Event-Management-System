@@ -8,6 +8,7 @@ import React from 'react';
 
 import EditEventForm from './EditEventForm';
 import EditAttendee from './EditAttendees';
+import EditSessions from './EditSessions';
 
 import TokenContext from '../../context/TokenContext';
 
@@ -78,7 +79,7 @@ class Event extends React.Component {
     if (loaded) {
       if (valid) {
         eventElm =  (
-          <Collapse defaultActiveKey={['1', '2']}>
+          <Collapse defaultActiveKey={['2', '3']}>
             <Panel header="General Information" key="1">
               <EditEventForm
                 id={id}
@@ -88,7 +89,10 @@ class Event extends React.Component {
                 location={location}
               />
             </Panel>
-            <Panel header="Attendees" key="2">
+            <Panel header="Sessions" key="2">
+              <EditSessions />
+            </Panel>
+            <Panel header="Attendees" key="3">
               <EditAttendee
                 id={id}
                 name={name}

@@ -135,7 +135,7 @@ class AccountEdit extends React.Component {
                 <Button
                   type="primary"
                   htmlType="submit"
-                  style={{width: '100%'}}
+                  block
                 >Edit Account</Button>
               </Col>
               <Col span={12}>
@@ -145,7 +145,7 @@ class AccountEdit extends React.Component {
                   okText="Yes"
                   cancelText="No"
                 >
-                  <Button type="danger" style={{width: '100%'}}>Cancel</Button>
+                  <Button type="danger" block>Cancel</Button>
                 </Popconfirm>
               </Col>
             </Row>

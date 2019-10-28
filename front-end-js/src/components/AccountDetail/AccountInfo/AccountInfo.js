@@ -22,7 +22,7 @@ class AccountDetail extends React.Component {
         </Row>
         <Divider orientation="left">Account Actions</Divider>
         <Row>
-          <Button type="primary" onClick={() => this.props.toggleEdit()} style={{width: '100%'}}>
+          <Button type="primary" onClick={() => this.props.toggleEdit()} block>
             Edit
           </Button>
         </Row>
