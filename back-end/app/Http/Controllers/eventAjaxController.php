@@ -172,6 +172,7 @@ class eventAjaxController extends Controller
 		$event_location = $request->input('event_location'); //STRING
 		$event_attendees = $request->input('event_attendees'); //ASSUME IS PASSED THROUGH AS AN ARRAY OF USER IDS
 		$event_public = $request->input('event_public');
+		$tags = $request->input('event_tags'); //takes in array of ids
 		
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
@@ -219,6 +220,21 @@ class eventAjaxController extends Controller
 						}
 					}
 
+					//INSERT TAGS
+					if(isset($tags) && !empty($tags)) {
+						$tags_insert = [];
+						foreach($tags as $tag) {
+							$tags_insert = [
+								'tags_linking_events_id' => $new_event_id,
+								'tags_linking_tags_id' => $tag,
+								'tags_linking_active' => 1
+							];	
+						}
+
+						DB::table('events_tags_linking')
+							->insert($tags_insert);
+					}
+
 					return Response::json([], 200);
 				}
 
@@ -237,6 +253,7 @@ class eventAjaxController extends Controller
 		$new_event_location = $request->input('event_location');
 		$new_event_attendees = $request->input('event_attendees');
 		$new_event_public = $request->input('event_public');
+		$new_tags = $request->input('event_tags');
 
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
@@ -362,6 +379,51 @@ class eventAjaxController extends Controller
 								->insert($insert);
 						}
 						
+						//DEALING WITH TAGS
+						if(!isset($new_tags) || empty($new_tags)) {
+							$new_tags = [];
+						}
+
+						$tags = DB::table('events_tags_linking')
+									->where([
+										['tags_linking_events_id', $event_id],
+										['tags_linking_active', 1]
+									])
+									->get();
+
+						$current_tags = [];
+						if(!is_null($tags)) {
+							foreach($tags as $tag) {
+								$current_tags[] = $tag->tags_linking_tags_id;
+							}
+						}
+
+						$new_tags = array_diff($new_tags, $current_tags);
+						$old_tags = array_diff($current_tags, $new_tags);
+
+						//REMOVE TAGS
+						DB::table('events_tags_linking')
+							->where([
+								['tags_linking_events_id', $event_id],
+								['tags_linking_active', 1]
+							])
+							->whereIn('tags_linking_tags_id', $old_tags)
+							->update(['tags_active' => 0]);
+
+						//ADD NEW TAGS
+						$insert_tags = [];
+						if(!empty($new_tags)) {
+							foreach($new_tags as $new_tag) {
+								$insert_tags[] = [
+									'tags_linking_active' => 1,
+									'tags_linking_tags_id' => $new_tag,
+									'tags_linking_events_id' => $event_id
+								];
+							}
+
+							DB::table('events_tags_linking')
+								->insert($insert_tags);
+						}
 
 						return Response::json([], 200);
 					}	
