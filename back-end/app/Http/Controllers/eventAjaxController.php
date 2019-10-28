@@ -977,7 +977,8 @@ class eventAjaxController extends Controller
 	public function search_event(Request $request){
 		$token = $request->input('token');
 		$search_term = $request->input('search_term');
-		if(isset($token) && !empty($token) && isset($search_term) && !is_null($search_term)) {
+
+		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
 				$results = [];
@@ -985,9 +986,14 @@ class eventAjaxController extends Controller
 				$event_data = DB::table('events')
 								->where([
 									['events_status', 0],
-									['events_name', 'like', '%'.$search_term.'%']
-								])
-								->get();
+									['events_public', 1]
+								]);
+
+				if(isset($search_term) && !is_null($search_term)) {
+					$event_data = $event_data->where('events_name', 'like', '%'.$search_term.'%');
+				}
+
+				$event_data = $event_data->get();
 
 				if(!is_null($event_data)) {
 					foreach($event_data as $data) {
