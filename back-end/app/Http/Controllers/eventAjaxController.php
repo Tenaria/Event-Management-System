@@ -408,7 +408,7 @@ class eventAjaxController extends Controller
 								['tags_linking_active', 1]
 							])
 							->whereIn('tags_linking_tags_id', $old_tags)
-							->update(['tags_active' => 0]);
+							->update(['tags_linking_active' => 0]);
 
 						//ADD NEW TAGS
 						$insert_tags = [];
