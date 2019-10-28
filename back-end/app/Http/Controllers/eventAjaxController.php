@@ -941,6 +941,42 @@ class eventAjaxController extends Controller
 		return Response::json([], 400);
 	}
 
+	public function get_tags(Request $request) {
+		$token = $request->input('token');
+		$search_term = $request->input('search_term');
+		
+		if(isset($token) && !empty($token)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				$results = [];
+
+				$tag_data = DB::table('tags')
+								->where([
+									['tags_active', 1]
+								]);
+
+				if(isset($search_term) && !is_null($search_term)) {
+					$tag_data = $tag_data->where('tags_name', 'like', '%'.$search_term.'%');
+				}
+
+				$tag_data = $tag_data->get();
+
+				if(!is_null($tag_data)) {
+					foreach($tag_data as $data) {
+						$results[] = [
+							'id' => $data->tags_id,
+							'tag' => $data->tags_name
+						];
+					}
+				}
+
+				return Response::json(['results' => $results], 200);
+			}
+		}
+		
+		return Response::json([], 400);
+	}
+
 	//ASSUMES THAT USER PUTS IN ATLEAST ONE
 	public function get_emails_exclude_user(Request $request) {
 		$token = $request->input('token');
@@ -974,6 +1010,7 @@ class eventAjaxController extends Controller
 		
 		return Response::json([], 400);
 	}
+
 	public function search_public_event(Request $request){
 		$token = $request->input('token');
 		$search_term = $request->input('search_term');
