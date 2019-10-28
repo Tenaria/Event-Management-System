@@ -1,4 +1,4 @@
-# Event Management System
+# GoMeet
 To run the project, you will need both a backend server and a frontend server to be running at the same timeas such, run each in a separate terminal.
 
 ### Common Commands
