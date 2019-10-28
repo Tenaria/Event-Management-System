@@ -1074,7 +1074,37 @@ class eventAjaxController extends Controller
 		return Response::json([], 400);
 	}
 
-	public function save_event_sessions(Request $request) {
+	public function create_event_sessions(Request $request) {
+		$token = $request->input('token');
+		
+		if(isset($token) && !empty($token)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				//TODO
+
+				return Response::json([], 400);
+			}
+		}
+		
+		return Response::json([], 400);
+	}
+
+	public function edit_event_sessions(Request $request) {
+		$token = $request->input('token');
+		
+		if(isset($token) && !empty($token)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				//TODO
+
+				return Response::json([], 400);
+			}
+		}
+		
+		return Response::json([], 400);
+	}
+
+	public function remove_event_sessions(Request $request) {
 		$token = $request->input('token');
 		
 		if(isset($token) && !empty($token)) {

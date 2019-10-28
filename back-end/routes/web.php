@@ -37,7 +37,9 @@ Route::post('/get_past_events', 'eventAjaxController@get_past_events');
 Route::post('/get_timetable_details', 'eventAjaxController@get_timetable_details');
 Route::post('/save_timetable_details', 'eventAjaxController@save_timetable_details');
 Route::post('/load_event_sessions', 'eventAjaxController@load_event_sessions');
-Route::post('/save_event_sessions', 'eventAjaxController@save_event_sessions');
+Route::post('/create_event_sessions', 'eventAjaxController@create_event_sessions');
+Route::post('/edit_event_sessions', 'eventAjaxController@edit_event_sessions');
+Route::post('/remove_event_sessions', 'eventAjaxController@remove_event_sessions');
 Route::post('/search_public_event', 'eventAjaxController@search_public_event');
 
 // SPRINT 4 (ROUTES)
