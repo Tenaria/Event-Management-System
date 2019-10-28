@@ -1112,15 +1112,15 @@ class eventAjaxController extends Controller
 								->first();
 
 				if(!is_null($event_data)) {
-					DB::table('events_sessions')
-						->insertGetId([
-							'sessions_start_time' => $start_timestamp,
-							'sessions_end_time' => $end_timestamp,
-							'sessions_active' => 1,
-							'sessions_events_id' => $event_id
-						]);
+					$new_session_id = DB::table('events_sessions')
+											->insertGetId([
+												'sessions_start_time' => $start_timestamp,
+												'sessions_end_time' => $end_timestamp,
+												'sessions_active' => 1,
+												'sessions_events_id' => $event_id
+											]);
 
-					return Response::json([], 200);
+					return Response::json(['id' => $new_session_id], 200);
 				}
 			}
 		}
