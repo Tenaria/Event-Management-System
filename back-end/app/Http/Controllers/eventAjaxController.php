@@ -987,7 +987,8 @@ class eventAjaxController extends Controller
 								->select('e.*', DB::raw("(SELECT count(a.access_user_id) FROM events_access AS a WHERE a.access_events_id=e.events_id) as 'num_attendees'"))
 								->where([
 									['e.events_status', 0],
-									['e.events_public', 1]
+									['e.events_public', 1],
+									['e.events_active', 0]
 								]);
 
 				if(isset($search_term) && !is_null($search_term)) {
@@ -1002,7 +1003,7 @@ class eventAjaxController extends Controller
 						if(isset($data->num_attendees) && !empty($data->num_attendees)) {
 							$num_attendees = $data->num_attendees;
 						}
-						
+
 						$results[] = [
 							'id' => $data->events_id,
 							'events_name' => $data->events_name,
