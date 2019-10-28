@@ -440,7 +440,7 @@ class eventAjaxController extends Controller
 												
 											])
 											->first();
-						$curr_event_access = DB::table('access_id')
+						$curr_event_access = DB::table('events_access')
 												->where([
 													['access_events_id', $event_id]
 												])
@@ -767,7 +767,7 @@ class eventAjaxController extends Controller
 									['e.events_createdby','!=',$token_data['user_id']],
 									['e.events_public', 1]
 								])
-								->havingRaw('a.access_id IS NULL')
+								//->havingRaw('a.access_id IS NULL')
 								->havingRaw('dates_latest=0 OR dates_latest > '.time())
 								->get();
 
@@ -998,7 +998,7 @@ class eventAjaxController extends Controller
 									['e.events_active', 0],
 									['e.events_createdby','!=',$token_data['user_id']],
 								])
-								->havingRaw('a.access_id IS NULL');
+								//->havingRaw('a.access_id IS NULL');
 
 				if(isset($search_term) && !is_null($search_term)) {
 					$event_data = $event_data->where('e.events_name', 'like', '%'.$search_term.'%');
