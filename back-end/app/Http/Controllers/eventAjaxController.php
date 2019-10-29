@@ -1199,7 +1199,7 @@ class eventAjaxController extends Controller
 				if(!is_null($event_data)) {
 					$sessions = [];
 					$session_data = DB::table('events_sessions AS s')
-										->select('s.sessions_id', 's.sessions_start_time', 's.sessions_end_time', DB::raw("(SELECT GROUP_CONCAT(DISTINCT CONCAT(u.users_fname, '~', u.users_lname, '~', IFNULL(sa.sessions_attendance_going, 0), '~', a.access_id, '~', u.users_email) SEPARATOR '`') FROM events_access a JOIN events_sessions_attendance sa ON sa.sessions_attendance_access_id=a.access_id INNER JOIN users u on u.users_id=a.access_user_id WHERE a.access_events_id=s.sessions_events_id AND a.access_active=1 AND u.users_active=1) as 'attendees'"))
+										->select('s.sessions_id', 's.sessions_start_time', 's.sessions_end_time', 's.sessions_status', DB::raw("(SELECT GROUP_CONCAT(DISTINCT CONCAT(u.users_fname, '~', u.users_lname, '~', IFNULL(sa.sessions_attendance_going, 0), '~', a.access_id, '~', u.users_email) SEPARATOR '`') FROM events_access a JOIN events_sessions_attendance sa ON sa.sessions_attendance_access_id=a.access_id INNER JOIN users u on u.users_id=a.access_user_id WHERE a.access_events_id=s.sessions_events_id AND a.access_active=1 AND u.users_active=1) as 'attendees'"))
 										->where([
 											['s.sessions_active', 1],
 											['s.sessions_events_id', $event_id]
@@ -1231,11 +1231,17 @@ class eventAjaxController extends Controller
 								}
 							}
 
+							$cancelled = false;
+							if($data->sessions_status == 1) {
+								$cancelled = true;
+							}
+
 							$sessions[] = [
 								'id' => $data->sessions_id,
 								'start_timestamp' => $data->sessions_start_time,
 								'end_timestamp' => $data->sessions_end_time,
-								'attendees_going' => $attendess_arr
+								'attendees_going' => $attendess_arr,
+								'cancelled' => $cancelled
 							];
 						}
 					}
@@ -1352,38 +1358,39 @@ class eventAjaxController extends Controller
 
 	public function cancel_event_sessions(Request $request){
 		$token = $request->input('token');
+		$session_id = $request->input('session_id');
+		$events_id = $request->input('events_id');
 			
-			if(isset($token) && !empty($token)) {
+			if(isset($token) && !empty($token) && isset($session_id) && !empty($session_id)) {
 				$token_data = validate_jwt($token);
 				if($token_data == true) {
-					$event = DB::table('events')->select('events_createdby', 'events_status')
-						->where(['events_id',$token_data['events_id']])->get();
+					$event = DB::table('events')
+								->select('events_createdby', 'events_status')
+								->where([
+									['events_id', $events_id],
+									['events_createdby', $token_data['user_id']],
+									['events_status', 0]
+								])
+								->get();
 
 
-					if(isset($event) && !is_null($event)){
-						if($event['events_createdby'] == $token_data['user_id']){
-							if($event['events_status'] == 0){
-								$session_exists = DB::table('events_sessions')
-									->where([
-											['sessions_events_id', $token_data['events_id']],
-											['sessions_id', $token_data['sessions_id']]
+					if(!is_null($event)){
+						$session_exists = DB::table('events_sessions')
+											->where([
+												['sessions_events_id', $token_data['events_id']],
+												['sessions_id', $token_data['sessions_id']]
 											])
-									->exists();
-								if($session_exists){
-									DB::table('events_sessions')->where(['sessions_id', $token_data['sessions_id']])
-									->update(['sessions_id' => 1]);
-									return Response::json([],200);
-								}else{
-									return Response::json(['status' => "no such session"], 400);
-								}
-							}else{
-								return Response::json(['status' => "event not active"], 400);
-							}
-						}else{
-							return Response::json(['status' => "invalid user"],400);
+											->first();
+
+						if(!is_null($session_exists)) {
+							DB::table('events_sessions')
+								->where([
+									['sessions_id', $session_id
+								]])
+								->update(['sessions_status' => 1]);
+
+							return Response::json([],200);
 						}
-					}else{
-						return Response::json(['status' => "no such event"],400);
 					}
 
 					return Response::json([], 400);
