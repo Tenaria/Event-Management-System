@@ -933,38 +933,47 @@ class eventAjaxController extends Controller
 
 	// S P R I N T 3 S T A R T //
 	public function get_attendees_of_event(Request $request) {
+		/*
+			Returns the attendees of the event
+		*/
 		$token = $request->input('token');
 		$event_id = $request->input('event_id');
-		
-		if(isset($token) && !empty($token)) {
-			$token_data = validate_jwt($token);
-			if($token_data == true && isset($event_id) && !empty($event_id)) {
-				$return = [];
-				$attendees = DB::table('events_access AS a')
-								->select('u.users_email', 'u.users_id')
-								->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
-								->join('users AS u', 'a.access_user_id', '=', 'u.users_id')
-								->where([
-									['a.access_events_id', $event_id],
-									['e.events_active', 1],
-									['a.access_active', 1]
-								])
-								->get();
 
-				if(!is_null($attendees)) {
-					foreach($attendees AS $attendee) {
-						$return[] = [
-							'email' => $attendee->users_email,
-							'id' => $attendee->users_id
-						];
-					}
-				}
+		if(!isset($token) && empty($token)) {
+			return Response::json(['error' => 'You need to provide a JWT', 400]);
+		}
 
-				return Response::json(['attendees' => $return], 200);
-			}
+		if(!isset($event_id) && empty($event_id)) {
+			return Response::json(['error' => 'You need to provide a value for parameter "event_id"', 400]);
 		}
 		
-		return Response::json([], 400);
+		$token_data = validate_jwt($token);
+		if($token_data == true) {
+			$return = [];
+			$attendees = DB::table('events_access AS a')
+							->select('u.users_email', 'u.users_id')
+							->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
+							->join('users AS u', 'a.access_user_id', '=', 'u.users_id')
+							->where([
+								['a.access_events_id', $event_id],
+								['e.events_active', 1],
+								['a.access_active', 1]
+							])
+							->get();
+
+			if(!is_null($attendees)) {
+				foreach($attendees AS $attendee) {
+					$return[] = [
+						'email' => $attendee->users_email,
+						'id' => $attendee->users_id
+					];
+				}
+			}
+
+			return Response::json(['attendees' => $return], 200);
+		} else {
+			return Response::json(['error' => 'Your JWT is invalid'], 400);
+		}
 	}
 
 	public function get_past_events(Request $request) {
@@ -1056,8 +1065,11 @@ class eventAjaxController extends Controller
 		return Response::json([], 400);
 	}
 
-	//ASSUMES THAT USER PUTS IN ATLEAST ONE
 	public function get_emails_exclude_user(Request $request) {
+		/*
+			This function will return a list of users based on the search term provided in the parameter
+			'search_term'.
+		*/
 		$token = $request->input('token');
 		$search_term = $request->input('search_term');
 
