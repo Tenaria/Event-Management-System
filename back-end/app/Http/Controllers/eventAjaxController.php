@@ -1151,35 +1151,6 @@ class eventAjaxController extends Controller
 		return Response::json([], 400);
 
 	}
-	public function get_timetable_details(Request $request) {
-		$token = $request->input('token');
-		
-		if(isset($token) && !empty($token)) {
-			$token_data = validate_jwt($token);
-			if($token_data == true) {
-				//TODO
-
-				return Response::json([], 400);
-			}
-		}
-		
-		return Response::json([], 400);
-	}
-
-	public function save_timetable_details(Request $request) {
-		$token = $request->input('token');
-		
-		if(isset($token) && !empty($token)) {
-			$token_data = validate_jwt($token);
-			if($token_data == true) {
-				//TODO
-
-				return Response::json([], 400);
-			}
-		}
-		
-		return Response::json([], 400);
-	}
 
 	public function load_event_sessions(Request $request) {
 		$token = $request->input('token');
@@ -1359,47 +1330,74 @@ class eventAjaxController extends Controller
 	public function cancel_event_sessions(Request $request){
 		$token = $request->input('token');
 		$session_id = $request->input('session_id');
-		$events_id = $request->input('events_id');
+		$events_id = $request->input('event_id');
 			
-			if(isset($token) && !empty($token) && isset($session_id) && !empty($session_id)) {
-				$token_data = validate_jwt($token);
-				if($token_data == true) {
-					$event = DB::table('events')
-								->select('events_createdby', 'events_status')
-								->where([
-									['events_id', $events_id],
-									['events_createdby', $token_data['user_id']],
-									['events_status', 0]
-								])
-								->get();
+		if(isset($token) && !empty($token) && isset($session_id) && !empty($session_id)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				$event = DB::table('events')
+							->select('events_createdby', 'events_status')
+							->where([
+								['events_id', $events_id],
+								['events_createdby', $token_data['user_id']],
+								['events_status', 0]
+							])
+							->get();
 
+				if(!is_null($event)){
+					$session_exists = DB::table('events_sessions')
+										->where([
+											['sessions_events_id', $events_id],
+											['sessions_id', $session_id]
+										])
+										->first();
 
-					if(!is_null($event)){
-						$session_exists = DB::table('events_sessions')
-											->where([
-												['sessions_events_id', $token_data['events_id']],
-												['sessions_id', $token_data['sessions_id']]
-											])
-											->first();
+					if(!is_null($session_exists)) {
+						DB::table('events_sessions')
+							->where([
+								['sessions_id', $session_id]
+							])
+							->update(['sessions_status' => 1]);
 
-						if(!is_null($session_exists)) {
-							DB::table('events_sessions')
-								->where([
-									['sessions_id', $session_id
-								]])
-								->update(['sessions_status' => 1]);
-
-							return Response::json([],200);
-						}
+						return Response::json([],200);
 					}
-
-					return Response::json([], 400);
 				}
 			}
+		}
 			
 		return Response::json([], 400);
 	}
 	// S P R I N T 3 E N D //
+
+	public function get_timetable_details(Request $request) {
+		$token = $request->input('token');
+		
+		if(isset($token) && !empty($token)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				//TODO
+
+				return Response::json([], 400);
+			}
+		}
+		
+		return Response::json([], 400);
+	}
+
+	public function save_timetable_details(Request $request) {
+		$token = $request->input('token');
+		
+		if(isset($token) && !empty($token)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				//TODO
+
+				return Response::json([], 400);
+			}
+		}
+		
+		return Response::json([], 400);
+	}
 
 
 	// public function test (Request $request) {
