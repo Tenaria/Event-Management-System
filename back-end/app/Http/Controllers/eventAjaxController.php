@@ -330,6 +330,8 @@ class eventAjaxController extends Controller
 						//UPDATE THE ATTENDEES
 						if(!isset($new_event_attendees) || empty($new_event_attendees)) {
 							$new_event_attendees = [];
+						} else if (!in_array($token_data['user_id'], $new_event_attendees)) {
+						    $new_event_attendees[] = $token_data['user_id'];
 						}
 
 						$attendees = DB::table('events_access')
@@ -944,7 +946,8 @@ class eventAjaxController extends Controller
 								->join('users AS u', 'a.access_user_id', '=', 'u.users_id')
 								->where([
 									['a.access_events_id', $event_id],
-									['e.events_active', 1]
+									['e.events_active', 1],
+									['a.access_active', 1]
 								])
 								->get();
 
@@ -1197,13 +1200,14 @@ class eventAjaxController extends Controller
 					$sessions = [];
 					//TODO: CLAIRE: RETURN ALL ATTENDEES
 					//TODO: CLAIRE: RETURN WHETHER LOGGED IN USER IS GOING OR NOT
-					$session_data = DB::table('events_sessions')
+					$session_data = DB::table('events_sessions AS s')
+										->select('s.sessions_id', 's.sessions_start_time', 's.sessions_end_time', DB::raw("(SELECT GROUP_CONCAT(DISTINCT CONCAT(u.users_fname, '~', u.users_lname, '~', sa.sessions_attendance_going) SEPARATOR '`') FROM events_access a INNER JOIN events_sessions_attendance sa ON sa.sessions_attendance_access_id=a.access_id INNER JOIN users u on u.users_id=a.access_user_id WHERE a.access_events_id=s.sessions_events_id AND a.access_active=1 AND sa.sessions_attendance_active=1 AND u.users_active=1) as 'attendees'"))
 										->where([
-											['sessions_active', 1],
-											['sessions_events_id', $event_id]
+											['s.sessions_active', 1],
+											['s.sessions_events_id', $event_id]
 										])
 										->get();
-
+die(var_dump($session_data));
 					if(!is_null($session_data)) {
 						foreach($session_data as $data) {
 							$sessions[] = [
