@@ -1198,22 +1198,44 @@ class eventAjaxController extends Controller
 
 				if(!is_null($event_data)) {
 					$sessions = [];
-					//TODO: CLAIRE: RETURN ALL ATTENDEES
-					//TODO: CLAIRE: RETURN WHETHER LOGGED IN USER IS GOING OR NOT
 					$session_data = DB::table('events_sessions AS s')
-										->select('s.sessions_id', 's.sessions_start_time', 's.sessions_end_time', DB::raw("(SELECT GROUP_CONCAT(DISTINCT CONCAT(u.users_fname, '~', u.users_lname, '~', sa.sessions_attendance_going) SEPARATOR '`') FROM events_access a INNER JOIN events_sessions_attendance sa ON sa.sessions_attendance_access_id=a.access_id INNER JOIN users u on u.users_id=a.access_user_id WHERE a.access_events_id=s.sessions_events_id AND a.access_active=1 AND sa.sessions_attendance_active=1 AND u.users_active=1) as 'attendees'"))
+										->select('s.sessions_id', 's.sessions_start_time', 's.sessions_end_time', DB::raw("(SELECT GROUP_CONCAT(DISTINCT CONCAT(u.users_fname, '~', u.users_lname, '~', IFNULL(sa.sessions_attendance_going, 0), '~', a.access_id) SEPARATOR '`') FROM events_access a LEFT JOIN events_sessions_attendance sa ON sa.sessions_attendance_access_id=a.access_id INNER JOIN users u on u.users_id=a.access_user_id WHERE a.access_events_id=s.sessions_events_id AND a.access_active=1 AND (sa.sessions_attendance_active=1 OR sa.sessions_attendance_active IS NULL) AND u.users_active=1) as 'attendees'"))
 										->where([
 											['s.sessions_active', 1],
 											['s.sessions_events_id', $event_id]
 										])
 										->get();
-die(var_dump($session_data));
+
 					if(!is_null($session_data)) {
 						foreach($session_data as $data) {
+							$attendess_arr = [];
+							if(isset($data->attendees) && !empty($data->attendees)) {
+								$attendees = explode('`', $data->attendees);
+
+								foreach($attendees AS $attendee) {
+									$attendee = explode('~', $attendee);
+									//0 is first name
+									//1 is last name
+									//2 is attendance going
+									//3 is access id
+									$going = false;
+									if(isset($attendee[2]) && !empty($attendee[2])) {
+										$going = true;
+									}
+
+									$attendess_arr[] = [
+										'access_id' => $attendee[3],
+										'name' => $attendee[0].' '.$attendee[1],
+										'going' => $going
+									];
+								}
+							}
+
 							$sessions[] = [
 								'id' => $data->sessions_id,
 								'start_timestamp' => $data->sessions_start_time,
-								'end_timestamp' => $data->sessions_end_time
+								'end_timestamp' => $data->sessions_end_time,
+								'attendees' => $attendess_arr
 							];
 						}
 					}
