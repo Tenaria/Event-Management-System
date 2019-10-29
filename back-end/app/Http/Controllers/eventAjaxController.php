@@ -510,7 +510,7 @@ class eventAjaxController extends Controller
 					// and they want to go					
 					}
 					else if($event_data->events_public == 0) {
-						$session_data = DB::table('event_sessions AS s')
+						$session_data = DB::table('events_sessions AS s')
 											->join('events_access AS a', function($join) {
 												$join->on('a.access_events_id', '=', 's.sessions_events_id')
 													->where('a.access_active', 1);
@@ -1188,7 +1188,6 @@ class eventAjaxController extends Controller
 				$event_data = DB::table('events')
 								->where ([
 									['events_active', 1],
-									['events_id',$token_data['user_id']],
 									['events_id', $event_id],
 									['events_status', 0]
 								])
@@ -1198,7 +1197,7 @@ class eventAjaxController extends Controller
 					$sessions = [];
 					//TODO: CLAIRE: RETURN ALL ATTENDEES
 					//TODO: CLAIRE: RETURN WHETHER LOGGED IN USER IS GOING OR NOT
-					$session_data = DB::table('event_sessions')
+					$session_data = DB::table('events_sessions')
 										->where([
 											['sessions_active', 1],
 											['sessions_events_id', $event_id]
