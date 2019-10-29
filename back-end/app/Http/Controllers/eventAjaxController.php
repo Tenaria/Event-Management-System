@@ -1282,30 +1282,52 @@ class eventAjaxController extends Controller
 		$event_id = $request->input('event_id');
 		$start_timestamp = $request->input('start_timestamp');
 		$end_timestamp = $request->input('end_timestamp');
+
+		if (!isset($token) && empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null', 400]);
+		}
+
+		if (!isset($event_id) && empty($event_id)) {
+			return Response::json(['error' => 'Parameter "event_id" is not set', 400]);
+		}
+
+		if (!isset($session_id) && empty($session_id)) {
+			return Response::json(['error' => 'Parameter "session_id" is not set', 400]);
+		}
+
+		if (!isset($start_timestamp) && empty($start_timestamp)) {
+			return Response::json(['error' => 'Parameter "start_timestamp" is not set', 400]);
+		}
+
+		if (!isset($end_timestamp) && empty($end_timestamp)) {
+			return Response::json(['error' => 'Parameter "end_timestamp" is not set', 400]);
+		}
 		
-		if(isset($token) && !empty($token) && isset($event_id) && !empty($event_id) && isset($session_id) && !empty($session_id) && isset($start_timestamp) && !empty($start_timestamp) && isset($end_timestamp) && !empty($end_timestamp)) {
-			$token_data = validate_jwt($token);
-			if($token_data == true) {
-				$event_data = DB::table('events')
-								->where ([
-									['events_active', 1],
-									['events_id',$token_data['user_id']],
-									['events_id', $event_id],
-									['events_status', 0]
-								])
-								->first();
+		$token_data = validate_jwt($token);
+		if($token_data == true) {
+			$event_data = DB::table('events')
+							->where ([
+								['events_active', 1],
+								['events_id', $event_id],
+								['events_status', 0]
+							])
+							->first();
 
-				if(!is_null($event_data)) {
-					DB::table('events_sessions')
-						->where([
-							['sessions_events_id', $event_id],
-							['sessions_id', $session_id]
-						])
-						->update(['sessions_start_time' => $start_timestamp, 'sessions_end_time' => $end_timestamp]);
+			if(!is_null($event_data)) {
+				DB::table('events_sessions')
+					->where([
+						['sessions_events_id', $event_id],
+						['sessions_id', $session_id]
+					])
+					->update([
+						'sessions_start_time' => $start_timestamp,
+						'sessions_end_time' => $end_timestamp
+					]);
 
-					return Response::json([], 200);
-				}
+				return Response::json([], 200);
 			}
+		} else {
+			return Response::json(['error' => 'Your JWT is invalid!'], 400);
 		}
 		
 		return Response::json([], 400);

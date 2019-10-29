@@ -14,8 +14,9 @@ class EditSession extends React.Component {
     editing: false
   }
 
-  deleteSession = async sessionId => {
+  deleteSession = async () => {
     const { id, token } = this.context;
+    const sessionId = this.props.id;
 
     const res = await fetch('http://localhost:8000/remove_event_sessions', {
       method: 'POST',
@@ -38,12 +39,43 @@ class EditSession extends React.Component {
       message.error('The system has encountered an error. Contact your admin!');
     }
   }
+  
+  editSession = async () => {
+    const { id, token } = this.context;
+    const sessionId = this.props.id;
+    const { start_timestamp, end_timestamp } = this.props;
+    
+    this.setState({editing: false});
+
+    const res = await fetch('http://localhost:8000/edit_event_sessions', {
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        event_id: id,
+        session_id: sessionId,
+        start_timestamp,
+        end_timestamp,
+        token
+      })
+    })
+
+    if (res.status === 200) {
+      message.success('You have successfully edited a session!');
+      this.props.refresh();
+    } else {
+      message.error('The system has encountered an error. Contact your admin!');
+    }
+  }
 
   toggleSession = () => this.setState({editing: !this.state.editing});
 
   render() {
     const { editing } = this.state;
-    const { id, start_timestamp, end_timestamp } = this.props;
+    const { start_timestamp, end_timestamp } = this.props;
 
     return (
       <List.Item style={{display: 'flex'}}>
@@ -76,7 +108,7 @@ class EditSession extends React.Component {
               style={{
                 marginRight: '0.5em'
               }}
-              onClick={() => this.deleteSession(id)}
+              onClick={this.deleteSession}
             />
           }
           {editing ?
@@ -87,6 +119,7 @@ class EditSession extends React.Component {
                 border: 'none',
                 color: 'white',
               }}
+              onClick={this.editSession}
             /> :
             <Button
               icon="edit"
