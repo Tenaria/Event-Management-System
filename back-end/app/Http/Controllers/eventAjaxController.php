@@ -1207,6 +1207,7 @@ class eventAjaxController extends Controller
 					if(!is_null($session_data)) {
 						foreach($session_data as $data) {
 							$sessions[] = [
+								'id' => $data->sessions_id,
 								'start_timestamp' => $data->sessions_start_time,
 								'end_timestamp' => $data->sessions_end_time
 							];
