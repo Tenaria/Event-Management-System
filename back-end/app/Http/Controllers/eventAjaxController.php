@@ -1060,34 +1060,39 @@ class eventAjaxController extends Controller
 	public function get_emails_exclude_user(Request $request) {
 		$token = $request->input('token');
 		$search_term = $request->input('search_term');
-		
-		if(isset($token) && !empty($token) && isset($search_term) && !is_null($search_term)) {
-			$token_data = validate_jwt($token);
-			if($token_data == true) {
-				$results = [];
 
-				$user_data = DB::table('users')
-								->where([
-									['users_active', 1],
-									['users_id', '!=', $token_data['user_id']],
-									['users_email', 'like', '%'.$search_term.'%']
-								])
-								->get();
+		if (!isset($token) && empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null', 400]);
+		}
 
-				if(!is_null($user_data)) {
-					foreach($user_data as $data) {
-						$results[] = [
-							'id' => $data->users_id,
-							'email' => $data->users_email
-						];
-					}
-				}
-
-				return Response::json(['results' => $results], 200);
-			}
+		if (!isset($search_term) && is_null($search_term)) {
+			return Response::json(['error' => 'Parameter "search_term" is not given', 400]);
 		}
 		
-		return Response::json([], 400);
+		$token_data = validate_jwt($token);
+		if($token_data == true) {
+			$results = [];
+
+			$user_data = DB::table('users')
+							->where([
+								['users_active', 1],
+								['users_id', '!=', $token_data['user_id']],
+								['users_email', 'like', '%'.$search_term.'%']
+							])
+							->get();
+
+			if(!is_null($user_data)) {
+				foreach($user_data as $data) {
+					$results[] = [
+						'id' => $data->users_id,
+						'email' => $data->users_email
+					];
+				}
+			}
+			return Response::json(['results' => $results], 200);
+		} else {
+			return Response::json(['error' => 'Your JWT is invalid!'], 400);
+		}
 	}
 
 	public function search_public_event(Request $request){
