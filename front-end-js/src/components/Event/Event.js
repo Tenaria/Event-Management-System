@@ -8,7 +8,7 @@ import React from 'react';
 
 import EditEventForm from './EditEventForm';
 import EditAttendee from './EditAttendees';
-import EditSessions from './EditSessions';
+import ListSessions from './ListSessions';
 
 import EventContext from '../../context/EventContext';
 import TokenContext from '../../context/TokenContext';
@@ -87,7 +87,7 @@ class Event extends React.Component {
                 <EditEventForm />
               </Panel>
               <Panel header="Sessions" key="2">
-                <EditSessions />
+                <ListSessions />
               </Panel>
               <Panel header="Attendees" key="3">
                 <EditAttendee />

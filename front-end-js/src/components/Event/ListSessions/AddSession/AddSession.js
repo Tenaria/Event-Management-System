@@ -46,6 +46,8 @@ class AddSession extends React.Component {
       })
     });
 
+    this.setState({disabled: false});
+
     if (res.status === 200) {
       message.success('You have successfully added a session!');
       this.props.onCancel();

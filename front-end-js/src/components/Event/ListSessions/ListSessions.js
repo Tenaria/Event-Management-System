@@ -5,13 +5,13 @@ import { Button, Icon, List, message, Spin } from 'antd';
 import React from 'react';
 
 import AddSession from './AddSession';
-import ListSession from './ListSession';
+import EditSession from './EditSession';
 
 import EventContext from '../../../context/EventContext';
 
 const spinIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
 
-class EditSessions extends React.Component {
+class ListSessions extends React.Component {
   state = {
     adding: false,
     data: [],
@@ -65,7 +65,7 @@ class EditSessions extends React.Component {
             dataSource={data}
             header="Sessions"
             renderItem = {item => (
-              <ListSession
+              <EditSession
                 id={item.id}
                 start_timestamp={item.start_timestamp}
                 end_timestamp={item.end_timestamp}
@@ -99,6 +99,6 @@ class EditSessions extends React.Component {
   }
 }
 
-EditSessions.contextType = EventContext;
+ListSessions.contextType = EventContext;
 
-export default EditSessions;
+export default ListSessions;

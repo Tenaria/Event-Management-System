@@ -9,7 +9,7 @@ import EventContext from '../../../../context/EventContext';
 
 const { RangePicker } = DatePicker;
 
-class AddSession extends React.Component {
+class EditSession extends React.Component {
   state = {
     editing: false
   }
@@ -104,6 +104,6 @@ class AddSession extends React.Component {
   }
 }
 
-AddSession.contextType = EventContext;
+EditSession.contextType = EventContext;
 
-export default AddSession;
+export default EditSession;
