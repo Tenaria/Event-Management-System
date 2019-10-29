@@ -1,7 +1,7 @@
 import { Button, Form, Checkbox, Icon, Input, message, Row } from 'antd';
 import React from 'react';
 
-import TokenContext from '../../../context/TokenContext';
+import EventContext from '../../../context/EventContext';
 
 const { TextArea } = Input;
 
@@ -13,8 +13,7 @@ class EditEventForm extends React.Component {
 
   handleSubmit = e => {
     e.preventDefault();
-    const token = this.context;
-    const { id } = this.props;
+    const { id, token } = this.context;
 
     this.props.form.validateFieldsAndScroll( async (err, values) => {
       if (!err) {
@@ -46,7 +45,7 @@ class EditEventForm extends React.Component {
   }
 
   render() {
-    const { name, desc, event_public, location } = this.props;
+    const { name, desc, event_public, location } = this.context;
     const { getFieldDecorator } = this.props.form;
 
     return (
@@ -96,16 +95,14 @@ class EditEventForm extends React.Component {
           </Form.Item>
         </Row>
         <Row>
-          <Form.Item>
-            <Button type="primary" htmlType="submit" block>Update Event Details</Button>
-          </Form.Item>
+          <Button type="primary" htmlType="submit" block>Update Event Details</Button>
         </Row>
       </Form>
     );
   }
 }
 
-EditEventForm.contextType = TokenContext;
+EditEventForm.contextType = EventContext;
 
 const WrappedEditEventForm = Form.create({name: 'edit_event_form'})(EditEventForm);
 

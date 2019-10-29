@@ -4,7 +4,7 @@
 import { Avatar, Button, Icon, message, Row, Select, Spin, Tooltip } from 'antd';
 import React from 'react';
 
-import TokenContext from '../../../context/TokenContext';
+import EventContext from '../../../context/EventContext';
 
 const { Option } = Select;
 const spinIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
@@ -18,8 +18,7 @@ class EditAttendees extends React.Component {
   };
 
   componentDidMount = async () => {
-    const { id } = this.props;
-    const token = this.context;
+    const { id, token } = this.context;
 
     const res = await fetch('http://localhost:8000/get_attendees_of_event', {
       method: 'POST',
@@ -88,9 +87,8 @@ class EditAttendees extends React.Component {
       We are going to update the attendees by hijacking the general edit event URL. This url will
       ignore attendees updates if it is set to NULL but we will provide an actual value.
      */
-    const { id, name, desc, event_public, location } = this.props;
+    const { id, name, desc, event_public, location, token } = this.context;
     const { attendees } = this.state;
-    const token = this.context;
 
     const attendeeIDs = attendees.map(a => a.id);
 
@@ -174,6 +172,6 @@ class EditAttendees extends React.Component {
   }
 }
 
-EditAttendees.contextType = TokenContext;
+EditAttendees.contextType = EventContext;
 
 export default EditAttendees;

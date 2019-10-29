@@ -10,6 +10,7 @@ import EditEventForm from './EditEventForm';
 import EditAttendee from './EditAttendees';
 import EditSessions from './EditSessions';
 
+import EventContext from '../../context/EventContext';
 import TokenContext from '../../context/TokenContext';
 
 const { Title } = Typography;
@@ -69,6 +70,7 @@ class Event extends React.Component {
 
   render() {
     const { id, name, desc, created, event_public, loaded, location, valid } = this.state;
+    const token = this.context;
     const spinStyle = {
       padding: '2em',
       textAlign: 'center',
@@ -79,29 +81,19 @@ class Event extends React.Component {
     if (loaded) {
       if (valid) {
         eventElm =  (
-          <Collapse defaultActiveKey={['2', '3']}>
-            <Panel header="General Information" key="1">
-              <EditEventForm
-                id={id}
-                name={name}
-                desc={desc}
-                event_public={event_public}
-                location={location}
-              />
-            </Panel>
-            <Panel header="Sessions" key="2">
-              <EditSessions />
-            </Panel>
-            <Panel header="Attendees" key="3">
-              <EditAttendee
-                id={id}
-                name={name}
-                desc={desc}
-                event_public={event_public}
-                location={location}
-              />
-            </Panel>
-          </Collapse>
+          <EventContext.Provider value={{ id, name, desc, event_public, location, token }}>
+            <Collapse defaultActiveKey={['2', '3']}>
+              <Panel header="General Information" key="1">
+                <EditEventForm />
+              </Panel>
+              <Panel header="Sessions" key="2">
+                <EditSessions />
+              </Panel>
+              <Panel header="Attendees" key="3">
+                <EditAttendee />
+              </Panel>
+            </Collapse>
+          </EventContext.Provider>
         );
       } else {
         eventElm = <Empty description={<span>No event found with the ID</span>}/>;

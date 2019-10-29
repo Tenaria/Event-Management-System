@@ -21,7 +21,6 @@ class EditSessions extends React.Component {
 
   render() {
     const { adding, loaded } = this.state;
-  
     const spinStyle = {
       padding: '2em',
       textAlign: 'center',
@@ -29,16 +28,32 @@ class EditSessions extends React.Component {
     };
     const loader = <div style={spinStyle}><Spin indicator={spinIcon}/></div>;
 
+    const data = [
+      'Test',
+      'Test2',
+      'Test3',
+      'Test4'
+    ];
+
     return (
       <React.Fragment>
-        <div class="custom-sessions" style={{position: 'relative'}}>
+        <div className="custom-sessions" style={{position: 'relative'}}>
           <List
             bordered
+            dataSource={data}
             header="Sessions"
             renderItem = {item => (
               <List.Item>
+                <div>Session: {item}</div>
+                <RangePicker
+                  placeholder={['Start Time', 'End Time']}
+                  format="YYYY-MM-DD HH:mm"
+                  showTime={{ format: 'HH:mm' }}
+                  disabled
+                />
               </List.Item>
             )}
+            style={{paddingBottom: '3.5em'}}
           >
             {loaded ? null : loader}
           </List>

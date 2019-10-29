@@ -40,8 +40,6 @@ class EventViewer extends React.Component {
 
     const data = await res.json();
 
-    console.log(data);
-
     this.setState({
       upcomingEvents: data.results,
       loaded: true
@@ -79,7 +77,7 @@ class EventViewer extends React.Component {
               right: '1em',
               bottom: '1em'
             }}>
-              <Button type="primary">Go To Event</Button>
+              <Button type="primary">Book Event</Button>
             </Row>
           </Card>
         );
