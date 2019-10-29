@@ -39,7 +39,7 @@ class AddSession extends React.Component {
     }
   }
 
-  editSession = () => this.setState({editing: true});
+  toggleSession = () => this.setState({editing: !this.state.editing});
 
   render() {
     const { editing } = this.state;
@@ -61,32 +61,43 @@ class AddSession extends React.Component {
           />
         </div>
         <div style={{paddingLeft: '0.5em', textAlign: 'right'}}>
-          <Button
-            type="danger"
-            icon="delete"
-            style={{
-              marginRight: '0.5em'
-            }}
-            onClick={() => this.deleteSession(id)}
-          />
           {editing ?
-          <Button
-            icon="check"
-            style={{
-              background: '#48BB78',
-              border: 'none',
-              color: 'white',
-            }}
-          /> :
-          <Button
-            icon="edit"
-            style={{
-              background: '#38B2AC',
-              border: 'none',
-              color: 'white',
-            }}
-            onClick={this.editSession}
-          />}
+            <Button
+              type="danger"
+              icon="stop"
+              style={{
+                marginRight: '0.5em'
+              }}
+              onClick={this.toggleSession}
+            /> :
+            <Button
+              type="danger"
+              icon="delete"
+              style={{
+                marginRight: '0.5em'
+              }}
+              onClick={() => this.deleteSession(id)}
+            />
+          }
+          {editing ?
+            <Button
+              icon="check"
+              style={{
+                background: '#48BB78',
+                border: 'none',
+                color: 'white',
+              }}
+            /> :
+            <Button
+              icon="edit"
+              style={{
+                background: '#38B2AC',
+                border: 'none',
+                color: 'white',
+              }}
+              onClick={this.toggleSession}
+            />
+          }
         </div>
       </List.Item>
     );
