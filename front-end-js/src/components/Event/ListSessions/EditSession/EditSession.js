@@ -11,7 +11,9 @@ const { RangePicker } = DatePicker;
 
 class EditSession extends React.Component {
   state = {
-    editing: false
+    editing: false,
+    startDateTime: this.props.start_timestamp,
+    endDateTime: this.props.end_timestamp
   }
 
   deleteSession = async () => {
@@ -43,7 +45,7 @@ class EditSession extends React.Component {
   editSession = async () => {
     const { id, token } = this.context;
     const sessionId = this.props.id;
-    const { start_timestamp, end_timestamp } = this.props;
+    const { startDateTime, endDateTime } = this.state;
     
     this.setState({editing: false});
 
@@ -57,8 +59,8 @@ class EditSession extends React.Component {
       body: JSON.stringify({
         event_id: id,
         session_id: sessionId,
-        start_timestamp,
-        end_timestamp,
+        startDateTime,
+        endDateTime,
         token
       })
     })
@@ -71,24 +73,31 @@ class EditSession extends React.Component {
     }
   }
 
+  onOk = value => {
+    this.setState({
+      startDateTime: value[0].valueOf(),
+      endDateTime: value[1].valueOf()
+    })
+  }
+
   toggleSession = () => this.setState({editing: !this.state.editing});
 
   render() {
-    const { editing } = this.state;
-    const { start_timestamp, end_timestamp } = this.props;
+    const { editing, startDateTime, endDateTime } = this.state;
 
     return (
       <List.Item style={{display: 'flex'}}>
         <div style={{flexGrow: 1}}>
           <RangePicker
             defaultValue={[
-              moment(start_timestamp),
-              moment(end_timestamp)
+              moment(startDateTime),
+              moment(endDateTime)
             ]}
             placeholder={['Start Time', 'End Time']}
             format="YYYY-MM-DD HH:mm"
             showTime={{ format: 'HH:mm' }}
             style={{width: '100%'}}
+            onOk={this.onOk}
             disabled={!editing}
           />
         </div>
