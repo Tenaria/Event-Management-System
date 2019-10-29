@@ -1,7 +1,7 @@
 /*
   Edit the sessions of an event
  */
-import { DatePicker, Form, InputNumber, Modal, Row, Typography } from 'antd';
+import { DatePicker, Form, InputNumber, message, Modal, Row, Typography } from 'antd';
 import React from 'react';
 
 import EventContext from '../../../../context/EventContext';
@@ -11,6 +11,7 @@ const { Title } = Typography;
 
 class AddSession extends React.Component {
   state = {
+    disabled: false,
     startDateTime: null,
     endDateTime: null
   }
@@ -24,7 +25,11 @@ class AddSession extends React.Component {
 
   submitSession = async () => {
     const { id, token } = this.context;
-    const { startDateTime, endDateTime } = this.state;
+    const { disabled, startDateTime, endDateTime } = this.state;
+
+    if (disabled) return;
+    console.log('Not disabled!');
+    this.setState({disabled: true});
 
     const res = await fetch('http://localhost:8000/create_event_sessions', {
       method: 'POST',
@@ -41,7 +46,12 @@ class AddSession extends React.Component {
       })
     });
 
-    console.log(res);
+    if (res.status === 200) {
+      message.success('You have successfully added a session!');
+      this.props.onCancel();
+    } else {
+      message.error('The system has encountered an error. Contact your admin!');
+    }
   }
 
   render() {

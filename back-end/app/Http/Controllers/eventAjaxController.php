@@ -1305,7 +1305,6 @@ class eventAjaxController extends Controller
 				$event_data = DB::table('events')
 								->where ([
 									['events_active', 1],
-									['events_id',$token_data['user_id']],
 									['events_id', $event_id],
 									['events_status', 0]
 								])
