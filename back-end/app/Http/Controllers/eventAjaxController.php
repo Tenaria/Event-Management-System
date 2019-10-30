@@ -1140,7 +1140,7 @@ class eventAjaxController extends Controller
 				$thisWk_event_number = 0;
 				
 				//getting last week events
-				$past_event_data = DB::table('events AS e')
+				$past_public_event_data = DB::table('events AS e')
 								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'dates_earliest'"))
 								->where ([
 									['e.events_active', 1],
@@ -1151,11 +1151,29 @@ class eventAjaxController extends Controller
 								->havingRaw('dates_earliest > '.time())
 								->get();
 				
-				if(!is_null($past_event_data)) {
-					foreach($event_data as $past_events) {
+				if(!is_null($past_public_event_data)) {
+					foreach($past_public_event_data as $events) {
 						$lastWk_event_number++;
 					}
 				}
+				
+				
+				$past_private_event_data = DB::table('events_access AS a')
+								->select('e.events_id', 'e.events_name', 'e.events_public', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'dates_earliest'"))
+								->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
+								->where([
+									["a.access_user_id", $token_data['user_id']],
+									["a.access_active", 1], 
+									["a.access_archived", 0],
+									["e.events_createdby", '!=', $token_data['user_id']]
+								])
+								->havingRaw('dates_earliest > '.time())
+								->get();
+				if(!is_null($past_private_event_data)) {
+					foreach($past_private_event_data as $events) {
+						$lastWk_event_number++;
+					}
+				}				
 				
 				//getting future private event
 				$next_private_events = 0;
@@ -1201,6 +1219,8 @@ class eventAjaxController extends Controller
 					}
 				}
 				$nextWk_event_number = $next_private_events + $next_public_events;
+				
+				
 				
 				
 			}
