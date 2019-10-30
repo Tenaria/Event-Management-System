@@ -41,6 +41,7 @@ Route::post('/edit_event_sessions', 'eventAjaxController@edit_event_sessions');
 Route::post('/remove_event_sessions', 'eventAjaxController@remove_event_sessions');
 Route::post('/search_public_event', 'eventAjaxController@search_public_event');
 Route::post('/get_tags', 'eventAjaxController@get_tags');
+Route::post('/get_summary_dashboard', 'eventAjaxController@get_summary_dashboard');
 Route::post('/cancel_event_sessions', 'eventAjaxController@cancel_event_sessions');
 
 // SPRINT 4 (ROUTES)

@@ -744,6 +744,50 @@ class eventAjaxController extends Controller
 		
 		return Response::json([], 400);
 	}
+	public function uncancel_event(Request $request) {
+		$token = $request->input('token');
+		$event_id = $request->input('event_id');
+
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+
+		if (!isset($event_id) || empty($event_id)) {
+			return Response::json(['error' => 'event id is either not set or null'], 400);
+		}
+		
+		if(isset($token) && !empty($token) && isset($event_id) && !empty($event_id)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				$event_data = DB::table('events')
+								->where ([
+									['events_active', 1],
+									['events_createdby', $token_data['user_id']],
+									['events_id', $event_id]
+									
+								])
+								->first();
+				if(!is_null($event_data)) {
+					DB::table('events')
+								->where ([
+									['events_active', 1],
+									['events_createdby', $token_data['user_id']],
+									['events_id', $event_id],
+									['events_status', 1]
+									
+								])
+								->update(['events_status' => 0]);
+
+					return Response::json([], 200);
+				} else {
+					return Response::json(['error' => 'event does not exist'], 400);
+				}
+			}
+		}
+		
+		return Response::json([], 400);
+		
+	}
 
 	public function get_upcoming_events(Request $request) {
 		$token = $request->input('token');
@@ -1079,6 +1123,90 @@ class eventAjaxController extends Controller
 		} else {
 			return Response::json(['error' => 'Your JWT is invalid'], 400);
 		}
+	}
+	
+	public function get_summary_dashboard(Request $request){
+		$token = $request->input('token');
+
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+		
+		if (isset($token) && !empty($token)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				$lastWk_event_number = 0;
+				$nextWk_event_number = 0;
+				$thisWk_event_number = 0;
+				
+				//getting last week events
+				$past_event_data = DB::table('events AS e')
+								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'dates_earliest'"))
+								->where ([
+									['e.events_active', 1],
+									['e.events_createdby', $token_data['user_id']]
+									//['e.events_status', 0]
+									
+								])
+								->havingRaw('dates_earliest > '.time())
+								->get();
+				
+				if(!is_null($past_event_data)) {
+					foreach($event_data as $past_events) {
+						$lastWk_event_number++;
+					}
+				}
+				
+				//getting future private event
+				$next_private_events = 0;
+				$next_private_event_data = DB::table('events_access AS a')
+								->select('e.events_id', 'e.events_name', 'e.events_public', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"))
+								->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
+								->where([
+									["a.access_user_id", $token_data['user_id']],
+									["a.access_active", 1], 
+									["a.access_accepted", 0],
+									["e.events_createdby", '!=', $token_data['user_id']],
+									["a.access_archived", 0]
+								])
+								->havingRaw('dates_latest=0 OR dates_latest > '.time())
+								->get();
+				if(!is_null($next_private_event_data)) {
+					foreach($next_private_event_data as $private_events) {
+						$next_private_events++;
+					}
+				}
+				//getting future public event
+				$next_public_events = 0;
+				$next_public_event_data = DB::table('events AS e')
+								->select('e.*', 'a.access_id', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"))
+								->leftJoin('events_access AS a', function($join) use ($token_data) {
+									$join->on('a.access_events_id', '=', 'e.events_id')
+										->where([
+											["a.access_user_id", $token_data['user_id']],
+											["a.access_active", 1]
+										]);
+								})
+								->where ([
+									['e.events_active', 1],
+									['e.events_createdby','!=',$token_data['user_id']],
+									['e.events_public', 1]
+								])
+								->havingRaw('dates_latest=0 OR dates_latest > '.time())
+								->get();
+								
+				if(!is_null($next_public_event_data)) {
+					foreach($next_public_event_data as $public_events) {
+						$next_public_events++;
+					}
+				}
+				$nextWk_event_number = $next_private_events + $next_public_events;
+				
+				
+			}
+		}
+	
+		
 	}
 
 	public function get_past_events(Request $request) {
@@ -1579,6 +1707,8 @@ class eventAjaxController extends Controller
 			
 		return Response::json([], 400);
 	}
+	
+	
 	// S P R I N T 3 E N D //
 
 	public function get_timetable_details(Request $request) {
