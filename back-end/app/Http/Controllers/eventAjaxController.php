@@ -721,8 +721,8 @@ class eventAjaxController extends Controller
 								->where ([
 									['events_active', 1],
 									['events_createdby', $token_data['user_id']],
-									['events_id', $event_id]
-									
+									['events_id', $event_id],
+									['events_status', 0]
 								])
 								->first();
 				if(!is_null($event_data)) {
