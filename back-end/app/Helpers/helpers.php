@@ -43,6 +43,7 @@ if (!function_exists('get_event_attributes_pk')) {
 }
 
 if (!function_exists('send_generic_email')) {
+    //e.g you have been added to an event, click here to view it!
     function send_generic_email($email, $email_subject, $to_name, $text_block, $button_url, $button_name) {
         $client = new PostmarkClient(env('POSTMARKCLIENT_KEY', ''));
         $sendResult = $client->sendEmailWithTemplate(
@@ -54,6 +55,23 @@ if (!function_exists('send_generic_email')) {
                 "text_block" => $text_block,
                 "button_url" => env('APP_URL', 'http://localhost:3000').$button_url,
                 "button_name" => $button_name,
+                "email_subject" => $email_subject
+            ]
+        );
+    }
+}
+
+if (!function_exists('send_generic_email')) {
+    //e.g you have been removed from the event blah by Claire. Sorry!
+    function send_buttonless_email($email, $email_subject, $to_name, $text_block) {
+        $client = new PostmarkClient(env('POSTMARKCLIENT_KEY', ''));
+        $sendResult = $client->sendEmailWithTemplate(
+            "admin@go-meet.org",
+            $email,
+            14480864,
+            [
+                "to_name" => $to_name,
+                "text_block" => $text_block,
                 "email_subject" => $email_subject
             ]
         );
