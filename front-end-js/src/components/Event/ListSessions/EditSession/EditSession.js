@@ -61,8 +61,8 @@ class EditSession extends React.Component {
       body: JSON.stringify({
         event_id: id,
         session_id: sessionId,
-        startDateTime,
-        endDateTime,
+        start_timestamp: startDateTime,
+        end_timestamp: endDateTime,
         token
       })
     })
