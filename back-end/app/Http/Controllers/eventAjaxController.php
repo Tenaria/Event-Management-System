@@ -58,6 +58,14 @@ class eventAjaxController extends Controller
 		$email = $request->input('email');
         $password = $request->input('password');
 
+        if (!isset($email) || empty($email)) {
+			return Response::json(['error' => 'email is either not set or null'], 400);
+		}
+
+		if (!isset($password) || empty($password)) {
+			return Response::json(['error' => 'password is either not set or null'], 400);
+		}
+
         if(isset($email) && !is_null($email) && isset($password) && !is_null($password)) {
         	$user = DB::table('users')
 	                    ->where([
@@ -83,6 +91,8 @@ class eventAjaxController extends Controller
 	        	return Response::json([
 	        		'token' => $jwt
 	        	], 200);
+	        } else {
+				return Response::json(['error' => 'user does not exist or password is wrong'], 400);
 	        }
         }
 
@@ -91,6 +101,10 @@ class eventAjaxController extends Controller
 
 	public function get_account_details(Request $request) {
 		$token = $request->input('token');
+
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
 
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
@@ -108,6 +122,8 @@ class eventAjaxController extends Controller
 		        		'users_lname' => $user_data->users_lname,
 		        		'users_email' => $user_data->users_email
 		        	], 200);
+				} else {
+					return Response::json(['error' => 'user does not exist'], 400);
 				}
 			}
 		}
@@ -122,6 +138,26 @@ class eventAjaxController extends Controller
 		$password_confirm= $request->input('password_confirm'); 
 		
 		$token = $request->input('token');
+
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+
+		if (!isset($fnameInput) || empty($fnameInput)) {
+			return Response::json(['error' => 'first name is either not set or null'], 400);
+		}
+
+		if (!isset($lnameInput) || empty($lnameInput)) {
+			return Response::json(['error' => 'last name is either not set or null'], 400);
+		}
+
+		if (!isset($password) || empty($password)) {
+			return Response::json(['error' => 'password is either not set or null'], 400);
+		}
+
+		if (!isset($password_confirm) || empty($password_confirm)) {
+			return Response::json(['error' => 'password confirmation is either not set or null'], 400);
+		}
 
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
@@ -158,6 +194,8 @@ class eventAjaxController extends Controller
 					}
 					
 					return Response::json([], 200);
+				} else {
+					return Response::json(['error' => 'user does not exist'], 400);
 				}
 			}
 		}
@@ -173,6 +211,14 @@ class eventAjaxController extends Controller
 		$event_attendees = $request->input('event_attendees'); //ASSUME IS PASSED THROUGH AS AN ARRAY OF USER IDS
 		$event_public = $request->input('event_public');
 		$tags = $request->input('event_tags'); //takes in array of ids
+
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+
+		if (!isset($event_name) || empty($event_name)) {
+			return Response::json(['error' => 'event name is either not set or null'], 400);
+		}
 		
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
@@ -254,6 +300,18 @@ class eventAjaxController extends Controller
 		$new_event_attendees = $request->input('event_attendees');
 		$new_event_public = $request->input('event_public');
 		$new_tags = $request->input('event_tags');
+
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+
+		if (!isset($event_id) || empty($event_id)) {
+			return Response::json(['error' => 'event id is either not set or null'], 400);
+		}
+
+		if (!isset($new_event_name) || empty($new_event_name)) {
+			return Response::json(['error' => 'event name is either not set or null'], 400);
+		}
 
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
@@ -431,9 +489,7 @@ class eventAjaxController extends Controller
 					}	
 				}
 				
-				Response::json([
-	        	'status' => 'Event name required'
-				], 400);
+				Response::json(['status' => 'Event does not exist'], 400);
 			} 
 		
 		return Response::json([], 400);
@@ -444,6 +500,18 @@ class eventAjaxController extends Controller
 		$token = $request->input('token');
 		$event_id = $request->input('event_id');
 		$session_id = $request->input('session_id');
+
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+
+		if (!isset($event_id) || empty($event_id)) {
+			return Response::json(['error' => 'event id is either not set or null'], 400);
+		}
+
+		if (!isset($session_id) || empty($session_id)) {
+			return Response::json(['error' => 'session id is either not set or null'], 400);
+		}
 
 		if(isset($token) && !empty($token) && isset($event_id) && !empty($event_id) && isset($session_id) && !empty($session_id)) {
 			$token_data = validate_jwt($token);
@@ -503,9 +571,13 @@ class eventAjaxController extends Controller
 										 'sessions_attendance_going' => 1
 										]
 									);
+							} else {
+								return Response::json(['error' => 'access id has not been set (bacekend issue)'], 400);
 							}
 							
 							return Response::json([], 200);
+						} else {
+							return Response::json(['error' => 'session does not exist'], 400);
 						}
 
 					//event is not public but the user can see it themselves
@@ -539,9 +611,13 @@ class eventAjaxController extends Controller
 								);
 							
 							return Response::json([], 200);
+						} else {
+							return Response::json(['error' => 'session or access does not exist and it should'], 400);
 						}
 					}
-				}				
+				} else {
+					return Response::json(['error' => 'event does not exist'], 400);
+				}			
 			}					
 		}						
 		return Response::json([], 400);
@@ -550,6 +626,15 @@ class eventAjaxController extends Controller
 	public function get_event_details(Request $request) {
 		$token = $request->input('token');
 		$event_id = $request->input('event_id');
+
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+
+		if (!isset($event_id) || empty($event_id)) {
+			return Response::json(['error' => 'event id is either not set or null'], 400);
+		}
+
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
@@ -608,8 +693,9 @@ class eventAjaxController extends Controller
 						'events_cancelled' => $cancelled
 						//attributes['location'] WILL GIVE YOU THE LOCATION
 		        	], 200);
+				} else {
+					return Response::json(['error' => 'event does not exist'], 400);
 				}
-				return Response::json([], 400);
 			}
 		}
 		
@@ -619,6 +705,14 @@ class eventAjaxController extends Controller
 	public function cancel_event(Request $request) {
 		$token = $request->input('token');
 		$event_id = $request->input('event_id');
+
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+
+		if (!isset($event_id) || empty($event_id)) {
+			return Response::json(['error' => 'event id is either not set or null'], 400);
+		}
 		
 		if(isset($token) && !empty($token) && isset($event_id) && !empty($event_id)) {
 			$token_data = validate_jwt($token);
@@ -642,9 +736,9 @@ class eventAjaxController extends Controller
 								->update(['events_status' => 1]);
 
 					return Response::json([], 200);
+				} else {
+					return Response::json(['error' => 'event does not exist'], 400);
 				}
-
-				return Response::json([], 400);
 			}
 		}
 		
@@ -653,11 +747,14 @@ class eventAjaxController extends Controller
 
 	public function get_upcoming_events(Request $request) {
 		$token = $request->input('token');
+
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
 		
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
-				//TODO: CLAIRE: TEST
 				$events_array = [];
 				$event_data = DB::table('events AS e')
 								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"), DB::raw("(SELECT count(a.access_user_id) FROM events_access AS a WHERE a.access_events_id=e.events_id) as 'num_attendees'"))
@@ -668,18 +765,6 @@ class eventAjaxController extends Controller
 								])
 								->havingRaw('dates_latest=0 OR dates_latest > '.time())
 								->get();
-
-				/*
-					->select('e.events_id', 'e.events_name', 'e.events_public', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"))
-								->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
-								->where([
-									["a.access_user_id", $token_data['user_id']],
-									["a.access_active", 1], 
-									["a.access_accepted", 0],
-									["e.events_createdby", '!=', $token_data['user_id']],
-									["a.access_archived", 0]
-								])
-				*/
 
 				if(!is_null($event_data)) {
 					foreach($event_data as $event) {
@@ -722,6 +807,11 @@ class eventAjaxController extends Controller
 	}
 	public function get_invited_events_upcoming(Request $request){
 		$token = $request->input('token');
+
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true){
@@ -766,15 +856,23 @@ class eventAjaxController extends Controller
 						];
 					}
 				}
-				return Response::json(['events'=>$events_array],200);
+
+				return Response::json(['events' => $events_array], 200);
 			}
+
 			return Response::json([],400);
 		}
+
 		return Response::json([],400);
 	}
 
 	public function get_invited_events_past(Request $request){
 		$token = $request->input('token');
+
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true){
@@ -827,6 +925,11 @@ class eventAjaxController extends Controller
 
 	public function get_upcoming_public_events(Request $request) {
 		$token = $request->input('token');
+
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true){
@@ -980,11 +1083,14 @@ class eventAjaxController extends Controller
 
 	public function get_past_events(Request $request) {
 		$token = $request->input('token');
+
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
 		
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
-				//TODO: CLAIRE: TEST
 				$events_array = [];
 				$event_data = DB::table('events AS e')
 								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'dates_earliest'"))
@@ -1035,6 +1141,10 @@ class eventAjaxController extends Controller
 		$token = $request->input('token');
 		$search_term = $request->input('search_term');
 		
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
@@ -1113,6 +1223,10 @@ class eventAjaxController extends Controller
 		$token = $request->input('token');
 		$search_term = $request->input('search_term');
 
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
@@ -1174,6 +1288,14 @@ class eventAjaxController extends Controller
 	public function load_event_sessions(Request $request) {
 		$token = $request->input('token');
 		$event_id = $request->input('event_id');
+
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+
+		if (!isset($event_id) || empty($event_id)) {
+			return Response::json(['error' => 'event id is either not set or null'], 400);
+		}
 		
 		if(isset($token) && !empty($token) && isset($event_id) && !empty($event_id)) {
 			$token_data = validate_jwt($token);
@@ -1237,6 +1359,8 @@ class eventAjaxController extends Controller
 					}
 
 					return Response::json(['sessions' => $sessions], 200);
+				} else {
+					return Response::json(['error' => 'event does not exist'], 400);
 				}
 			}
 		}
@@ -1249,6 +1373,22 @@ class eventAjaxController extends Controller
 		$event_id = $request->input('event_id');
 		$start_timestamp = $request->input('start_timestamp');
 		$end_timestamp = $request->input('end_timestamp');
+
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+
+		if (!isset($event_id) || empty($event_id)) {
+			return Response::json(['error' => 'event_id is either not set or null'], 400);
+		}
+
+		if (!isset($start_timestamp) || empty($start_timestamp)) {
+			return Response::json(['error' => 'start timestamp is either not set or null'], 400);
+		}
+
+		if (!isset($end_timestamp) || empty($end_timestamp)) {
+			return Response::json(['error' => 'end timestamp is either not set or null'], 400);
+		}
 		
 		if(isset($token) && !empty($token) && isset($event_id) && !empty($event_id) && isset($start_timestamp) && !empty($start_timestamp) && isset($end_timestamp) && !empty($end_timestamp)) {
 			$token_data = validate_jwt($token);
@@ -1271,6 +1411,8 @@ class eventAjaxController extends Controller
 											]);
 
 					return Response::json(['id' => $new_session_id], 200);
+				} else {
+					return Response::json(['error' => 'event oes not exist'], 400);
 				}
 			}
 		}
@@ -1341,6 +1483,18 @@ class eventAjaxController extends Controller
 		$token = $request->input('token');
 		$session_id = $request->input('session_id');
 		$event_id = $request->input('event_id');
+
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+
+		if (!isset($session_id) || empty($sessions_id)) {
+			return Response::json(['error' => 'session id is either not set or null'], 400);
+		}
+
+		if (!isset($event_id) || empty($event_id)) {
+			return Response::json(['error' => 'event id is either not set or null'], 400);
+		}
 		
 		if(isset($token) && !empty($token) && isset($event_id) && !empty($event_id) && isset($session_id) && !empty($session_id)) {
 			$token_data = validate_jwt($token);
@@ -1362,6 +1516,8 @@ class eventAjaxController extends Controller
 						->update(['sessions_active' => 0]);
 
 					return Response::json([], 200);
+				} else {
+					return Response::json(['error' => 'event does not exist'], 400);
 				}
 			}
 		}
@@ -1373,6 +1529,18 @@ class eventAjaxController extends Controller
 		$token = $request->input('token');
 		$session_id = $request->input('session_id');
 		$events_id = $request->input('event_id');
+
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+
+		if (!isset($session_id) || empty($session_id)) {
+			return Response::json(['error' => 'session id is either not set or null'], 400);
+		}
+
+		if (!isset($events_id) || empty($events_id)) {
+			return Response::json(['error' => 'event id is either not set or null'], 400);
+		}
 			
 		if(isset($token) && !empty($token) && isset($session_id) && !empty($session_id)) {
 			$token_data = validate_jwt($token);
@@ -1404,6 +1572,8 @@ class eventAjaxController extends Controller
 						return Response::json([],200);
 					}
 				}
+			} else {
+				return Response::json(['error' => 'event does not exist or belong to user'], 400);
 			}
 		}
 			
@@ -1413,6 +1583,10 @@ class eventAjaxController extends Controller
 
 	public function get_timetable_details(Request $request) {
 		$token = $request->input('token');
+
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
 		
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
@@ -1428,6 +1602,10 @@ class eventAjaxController extends Controller
 
 	public function save_timetable_details(Request $request) {
 		$token = $request->input('token');
+
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
 		
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
