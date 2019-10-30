@@ -46,6 +46,8 @@ class EditSession extends React.Component {
     const { id, token } = this.context;
     const sessionId = this.props.id;
     const { startDateTime, endDateTime } = this.state;
+
+    console.log('START: ', startDateTime, ' END: ', endDateTime);
     
     this.setState({editing: false});
 

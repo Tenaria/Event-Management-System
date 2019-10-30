@@ -939,12 +939,14 @@ class eventAjaxController extends Controller
 		$token = $request->input('token');
 		$event_id = $request->input('event_id');
 
-		if(!isset($token) && empty($token)) {
-			return Response::json(['error' => 'You need to provide a JWT', 400]);
+		if(!isset($token) || empty($token)) {
+			return Response::json(['error' => 'You need to provide a JWT'], 400);
 		}
 
-		if(!isset($event_id) && empty($event_id)) {
-			return Response::json(['error' => 'You need to provide a value for parameter "event_id"', 400]);
+		if(!isset($event_id) || empty($event_id)) {
+			return Response::json([
+				'error' => 'You need to provide a value for parameter "event_id"'
+			], 400);
 		}
 		
 		$token_data = validate_jwt($token);
@@ -1073,12 +1075,12 @@ class eventAjaxController extends Controller
 		$token = $request->input('token');
 		$search_term = $request->input('search_term');
 
-		if (!isset($token) && empty($token)) {
-			return Response::json(['error' => 'JWT is either not set or null', 400]);
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
 		}
 
-		if (!isset($search_term) && is_null($search_term)) {
-			return Response::json(['error' => 'Parameter "search_term" is not given', 400]);
+		if (!isset($search_term) || is_null($search_term)) {
+			return Response::json(['error' => 'Parameter "search_term" is not given'], 400);
 		}
 		
 		$token_data = validate_jwt($token);
@@ -1283,24 +1285,24 @@ class eventAjaxController extends Controller
 		$start_timestamp = $request->input('start_timestamp');
 		$end_timestamp = $request->input('end_timestamp');
 
-		if (!isset($token) && empty($token)) {
-			return Response::json(['error' => 'JWT is either not set or null', 400]);
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
 		}
 
-		if (!isset($event_id) && empty($event_id)) {
-			return Response::json(['error' => 'Parameter "event_id" is not set', 400]);
+		if (!isset($event_id) || empty($event_id)) {
+			return Response::json(['error' => 'Parameter "event_id" is not set'], 400);
 		}
 
-		if (!isset($session_id) && empty($session_id)) {
-			return Response::json(['error' => 'Parameter "session_id" is not set', 400]);
+		if (!isset($session_id) || empty($session_id)) {
+			return Response::json(['error' => 'Parameter "session_id" is not set'], 400);
 		}
 
-		if (!isset($start_timestamp) && empty($start_timestamp)) {
-			return Response::json(['error' => 'Parameter "start_timestamp" is not set', 400]);
+		if (!isset($start_timestamp) || empty($start_timestamp)) {
+			return Response::json(['error' => 'Parameter "start_timestamp" is not set'], 400);
 		}
 
-		if (!isset($end_timestamp) && empty($end_timestamp)) {
-			return Response::json(['error' => 'Parameter "end_timestamp" is not set', 400]);
+		if (!isset($end_timestamp) || empty($end_timestamp)) {
+			return Response::json(['error' => 'Parameter "end_timestamp" is not set'], 400);
 		}
 		
 		$token_data = validate_jwt($token);
