@@ -721,8 +721,8 @@ class eventAjaxController extends Controller
 								->where ([
 									['events_active', 1],
 									['events_createdby', $token_data['user_id']],
-									['events_id', $event_id]
-									
+									['events_id', $event_id],
+									['events_status', 0]
 								])
 								->first();
 				if(!is_null($event_data)) {
@@ -833,8 +833,8 @@ class eventAjaxController extends Controller
 
 						$events_array[] = [
 							'events_id' => $event->events_id,
-							'events_name' => htmlspecialchars($event->events_name),
-							'events_desc' => htmlspecialchars($event->events_desc),
+							'events_name' => $event->events_name,
+							'events_desc' => $event->events_desc,
 							'events_status' => $event_status,
 							'events_public' => $public,
 							'events_cancelled' => $cancelled,
@@ -892,8 +892,8 @@ class eventAjaxController extends Controller
 
 						$events_array[] = [
 							'events_id' => $event->events_id,
-							'events_name' => htmlspecialchars($event->events_name),
-							'events_desc' => htmlspecialchars($event->events_desc),
+							'events_name' => $event->events_name,
+							'events_desc' => $event->events_desc,
 							'events_status' => $event_status,
 							'events_public' => $public,
 							'events_cancelled' => $cancelled
@@ -952,8 +952,8 @@ class eventAjaxController extends Controller
 
 						$events_array[] = [
 							'events_id' => $event->events_id,
-							'events_name' => htmlspecialchars($event->events_name),
-							'events_desc' => htmlspecialchars($event->events_desc),
+							'events_name' => $event->events_name,
+							'events_desc' => $event->events_desc,
 							'events_status' => $event_status,
 							'events_public' => $public,
 							'events_cancelled' => $cancelled
@@ -1014,8 +1014,8 @@ class eventAjaxController extends Controller
 
 						$events_array[] = [
 							'events_id' => $event->events_id,
-							'events_name' => htmlspecialchars($event->events_name),
-							'events_desc' => htmlspecialchars($event->events_desc),
+							'events_name' => $event->events_name,
+							'events_desc' => $event->events_desc,
 							'events_status' => $event_status,
 							'events_public' => $public,
 							'events_cancelled' => $cancelled
@@ -1249,8 +1249,8 @@ class eventAjaxController extends Controller
 
 						$events_array[] = [
 							'events_id' => $event->events_id,
-							'events_name' => htmlspecialchars($event->events_name),
-							'events_desc' => htmlspecialchars($event->events_desc),
+							'events_name' => $event->events_name,
+							'events_desc' => $event->events_desc,
 							'events_status' => $event_status,
 							'events_public' => $public,
 							'events_cancelled' => $cancelled
@@ -1501,6 +1501,7 @@ class eventAjaxController extends Controller
 		$event_id = $request->input('event_id');
 		$start_timestamp = $request->input('start_timestamp');
 		$end_timestamp = $request->input('end_timestamp');
+		$recurring = $request->input('recurring');
 
 		if (!isset($token) || empty($token)) {
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
@@ -1516,6 +1517,10 @@ class eventAjaxController extends Controller
 
 		if (!isset($end_timestamp) || empty($end_timestamp)) {
 			return Response::json(['error' => 'end timestamp is either not set or null'], 400);
+		}
+
+		if (!isset($recurring) || empty($recurring)) {
+			return Response::json(['error' => 'reccurng is either not set or null. Recurring should be atleast 1.'], 400);
 		}
 		
 		if(isset($token) && !empty($token) && isset($event_id) && !empty($event_id) && isset($start_timestamp) && !empty($start_timestamp) && isset($end_timestamp) && !empty($end_timestamp)) {
