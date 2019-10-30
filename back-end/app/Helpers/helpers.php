@@ -55,7 +55,10 @@ if (!function_exists('send_generic_email')) {
                 "text_block" => $text_block,
                 "button_url" => env('APP_URL', 'http://localhost:3000').$button_url,
                 "button_name" => $button_name,
-                "email_subject" => $email_subject
+                "email_subject" => $email_subject,
+                "product_name" => "GoMeet",
+                "company_name" => "GoMeet",
+                "company_address" => "Block G13, UNSW"
             ]
         );
     }
@@ -72,7 +75,10 @@ if (!function_exists('send_generic_email')) {
             [
                 "to_name" => $to_name,
                 "text_block" => $text_block,
-                "email_subject" => $email_subject
+                "email_subject" => $email_subject,
+                "product_name" => "GoMeet",
+                "company_name" => "GoMeet",
+                "company_address" => "Block G13, UNSW"
             ]
         );
     }
