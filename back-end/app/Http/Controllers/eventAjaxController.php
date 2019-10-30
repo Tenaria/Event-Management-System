@@ -789,8 +789,8 @@ class eventAjaxController extends Controller
 
 						$events_array[] = [
 							'events_id' => $event->events_id,
-							'events_name' => htmlspecialchars($event->events_name),
-							'events_desc' => htmlspecialchars($event->events_desc),
+							'events_name' => $event->events_name,
+							'events_desc' => $event->events_desc,
 							'events_status' => $event_status,
 							'events_public' => $public,
 							'events_cancelled' => $cancelled,
@@ -848,8 +848,8 @@ class eventAjaxController extends Controller
 
 						$events_array[] = [
 							'events_id' => $event->events_id,
-							'events_name' => htmlspecialchars($event->events_name),
-							'events_desc' => htmlspecialchars($event->events_desc),
+							'events_name' => $event->events_name,
+							'events_desc' => $event->events_desc,
 							'events_status' => $event_status,
 							'events_public' => $public,
 							'events_cancelled' => $cancelled
@@ -908,8 +908,8 @@ class eventAjaxController extends Controller
 
 						$events_array[] = [
 							'events_id' => $event->events_id,
-							'events_name' => htmlspecialchars($event->events_name),
-							'events_desc' => htmlspecialchars($event->events_desc),
+							'events_name' => $event->events_name,
+							'events_desc' => $event->events_desc,
 							'events_status' => $event_status,
 							'events_public' => $public,
 							'events_cancelled' => $cancelled
@@ -970,8 +970,8 @@ class eventAjaxController extends Controller
 
 						$events_array[] = [
 							'events_id' => $event->events_id,
-							'events_name' => htmlspecialchars($event->events_name),
-							'events_desc' => htmlspecialchars($event->events_desc),
+							'events_name' => $event->events_name,
+							'events_desc' => $event->events_desc,
 							'events_status' => $event_status,
 							'events_public' => $public,
 							'events_cancelled' => $cancelled
@@ -1121,8 +1121,8 @@ class eventAjaxController extends Controller
 
 						$events_array[] = [
 							'events_id' => $event->events_id,
-							'events_name' => htmlspecialchars($event->events_name),
-							'events_desc' => htmlspecialchars($event->events_desc),
+							'events_name' => $event->events_name,
+							'events_desc' => $event->events_desc,
 							'events_status' => $event_status,
 							'events_public' => $public,
 							'events_cancelled' => $cancelled
