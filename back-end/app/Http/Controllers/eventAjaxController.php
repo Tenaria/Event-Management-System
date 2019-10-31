@@ -345,8 +345,9 @@ class eventAjaxController extends Controller
 
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
-			
 			if($token_data == true) {
+				// check that event exists and is created by user
+				// cannot edit events that you do not own
 				$event_data = DB::table('events')
 								->where ([
 									['events_active', 1],
@@ -356,6 +357,7 @@ class eventAjaxController extends Controller
 								->first();
 
 				if(!is_null($event_data)) {
+					//grab the attributes that match a string to the primary key in the database
 					$attributes_name_to_id = get_event_attributes_pk();
 
 					if(isset($new_event_name) && !empty($new_event_name)) {
@@ -372,6 +374,7 @@ class eventAjaxController extends Controller
 								'events_desc' => $new_event_desc
 							]);
 
+						//grab all event attributes related to the event
 						$event_attributes = DB::table('events_attributes_values')
 												->where([
 													['attributes_values_events_id', $event_id],
@@ -379,6 +382,7 @@ class eventAjaxController extends Controller
 												])
 												->get();
 
+						//map the attribute id (primary key) to the attribute value for the event
 						$current_attributes_array = [];
 						if(!is_null($event_attributes)) {
 							foreach($event_attributes as $attribute) {
@@ -392,7 +396,7 @@ class eventAjaxController extends Controller
 							}
 						}
 				
-						// INSERT LOCATION IF NOT EXIST
+						// INSERT LOCATION IF NOT EXIST IN DATABASE ALREADY
 						$location_id = $attributes_name_to_id['location'];
 						if(!isset($current_attributes_array[$location_id])) {
 							DB::table('events_attributes_values')
@@ -415,13 +419,14 @@ class eventAjaxController extends Controller
 							}
 						}
 
-						//UPDATE THE ATTENDEES
+						// UPDATE THE ATTENDEES
 						if(!isset($new_event_attendees) || empty($new_event_attendees)) {
 							$new_event_attendees = [];
 						} else if (!in_array($token_data['user_id'], $new_event_attendees)) {
 						    $new_event_attendees[] = $token_data['user_id'];
 						}
 
+						// grab all the attendees currently in the database for calculations
 						$attendees = DB::table('events_access')
 										->where([
 											//['access_active', 1],
@@ -440,12 +445,13 @@ class eventAjaxController extends Controller
 								}
 							}
 						}
-						//var_dump($current_attendees);
-//die(var_dump($new_event_attendees));
+
+						// figure out what attendees have been newly added in this edit transaction
 						$new_attendees = array_diff($new_event_attendees, $current_attendees);
+						// figure out what attendees have been removed in this edit transaction
 						$old_attendees = array_diff($current_attendees, $new_event_attendees);
 
-						//REMOVE OLD ATTENDEES
+						// REMOVE OLD ATTENDEES
 						$attendees = DB::table('events_access')
 										->where([
 											['access_active', 1],
@@ -454,7 +460,7 @@ class eventAjaxController extends Controller
 										->whereIn('access_user_id', $old_attendees)
 										->update(['access_active' => 0]);
 
-						//ADD IN NEW ATTENDEES
+						// ADD IN NEW ATTENDEES
 						$insert = [];
 						if(!empty($new_attendees)) {
 							foreach($new_attendees as $new_attendee) {
@@ -469,11 +475,12 @@ class eventAjaxController extends Controller
 								->insert($insert);
 						}
 						
-						//DEALING WITH TAGS
+						// UPDATE THE TAGS
 						if(!isset($new_tags) || empty($new_tags)) {
 							$new_tags = [];
 						}
 
+						// grab a list of tags alreayd existing in the database for calculation
 						$tags = DB::table('events_tags_linking')
 									->where([
 										['tags_linking_events_id', $event_id],
@@ -488,10 +495,12 @@ class eventAjaxController extends Controller
 							}
 						}
 
+						// figure out what tags have been newly added in this update
 						$new_tags = array_diff($new_tags, $current_tags);
+						// figure out what tags have been removed in this update
 						$old_tags = array_diff($current_tags, $new_tags);
 
-						//REMOVE TAGS
+						// REMOVE TAGS
 						DB::table('events_tags_linking')
 							->where([
 								['tags_linking_events_id', $event_id],
@@ -500,7 +509,7 @@ class eventAjaxController extends Controller
 							->whereIn('tags_linking_tags_id', $old_tags)
 							->update(['tags_linking_active' => 0]);
 
-						//ADD NEW TAGS
+						// ADD NEW TAGS
 						$insert_tags = [];
 						if(!empty($new_tags)) {
 							foreach($new_tags as $new_tag) {
@@ -519,18 +528,20 @@ class eventAjaxController extends Controller
 					}	
 				}
 				
-				Response::json(['status' => 'Event does not exist'], 400);
+				return Response::json(['status' => 'Event does not exist'], 400);
 			} 
 		
-		return Response::json([], 400);
+			return Response::json([], 400);
 		}	
 	}
 	
+	// function to mark the logged in user as going to an event's session
 	public function mark_as_going(Request $request) {
-		$token = $request->input('token');
-		$event_id = $request->input('event_id');
-		$session_id = $request->input('session_id');
+		$token = $request->input('token'); // STRING; NOT EMPTY
+		$event_id = $request->input('event_id'); // INTEGER; NOT EMPTY
+		$session_id = $request->input('session_id'); // INTEGER; NOT EMPTY
 
+		// check all values exist as necessary
 		if (!isset($token) || empty($token)) {
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
 		}
@@ -546,6 +557,7 @@ class eventAjaxController extends Controller
 		if(isset($token) && !empty($token) && isset($event_id) && !empty($event_id) && isset($session_id) && !empty($session_id)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
+				//check that event is valid and exists
 				$event_data = DB::table('events')
 								->where ([
 									['events_active', 1],
@@ -555,8 +567,9 @@ class eventAjaxController extends Controller
 								->first();
 
 				if(!is_null($event_data)) {
-					// check if event is public
+					// check if event is public - anyone can join these events
 					if($event_data->events_public == 1) {
+						// check that session is valid and exists
 						$session_data = DB::table('events_sessions')
 											->where([
 												['sessions_active', 1],
@@ -567,7 +580,7 @@ class eventAjaxController extends Controller
 
 						if(!is_null($session_data)){
 							$acess_id = 0;
-							//CHECK iF USER ALREADY HAS ACCESS TO A TABLE
+							//CHECK iF USER ALREADY HAS ACCESS TO A EVENT
 							$curr_event_access = DB::table('events_access')
 												->where([
 													['access_events_id', $event_id],
@@ -589,7 +602,7 @@ class eventAjaxController extends Controller
 												]);
 							}
 							
-
+							//UPDATE OR INSERT AS NECESSARYY
 							if($access_id != 0) {
 								DB::table('events_sessions_attendance')
 									->updateOrInsert([
@@ -610,10 +623,9 @@ class eventAjaxController extends Controller
 							return Response::json(['error' => 'session does not exist'], 400);
 						}
 
-					//event is not public but the user can see it themselves
-					// and they want to go					
-					}
-					else if($event_data->events_public == 0) {
+					//event is not public - user must be invited to be able to attend				
+					} else if($event_data->events_public == 0) {
+						// check that user has been invited to a session and has been given access
 						$session_data = DB::table('events_sessions AS s')
 											->join('events_access AS a', function($join) {
 												$join->on('a.access_events_id', '=', 's.sessions_events_id')
@@ -627,8 +639,8 @@ class eventAjaxController extends Controller
 											])
 											->first();
 						
-								
 						if(!is_null($session_data)){
+							//update or insert attendance in database as necessary
 							DB::table('events_sessions_attendance')
 								->updateOrInsert([
 									'sessions_attendance_id' => $event_id,
@@ -653,10 +665,12 @@ class eventAjaxController extends Controller
 		return Response::json([], 400);
 	}
 
+	// grab the details of an event such as locatoin, name, description, etc.
 	public function get_event_details(Request $request) {
-		$token = $request->input('token');
-		$event_id = $request->input('event_id');
+		$token = $request->input('token'); // STRING; NOT EMPTY
+		$event_id = $request->input('event_id'); // INTEGER; NOT EMPTY
 
+		// check all values are set as necessary
 		if (!isset($token) || empty($token)) {
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
 		}
@@ -668,18 +682,19 @@ class eventAjaxController extends Controller
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
+				// check event exists
 				$event_data = DB::table('events')
 								->where ([
 									['events_active', 1],
-									//['events_id',$token_data['user_id']],
 									['events_id', $event_id]
-									
 								])
 								->first();
 
 				if(!is_null($event_data)) {
+					// grab string to primary key mapping of attributes
 					$attributes_name_to_id = get_event_attributes_pk();
 
+					// grab all the attribute values of an event
 					$event_attributes = DB::table('events_attributes_values')
 												->where([
 													['attributes_values_events_id', $event_id],
@@ -687,6 +702,7 @@ class eventAjaxController extends Controller
 												])
 												->get();
 
+					// map the primary key to a human readable string
 					$current_attributes_array = [];
 					$id_to_name_array = [];
 					if(!empty($attributes_name_to_id)) {
@@ -696,6 +712,7 @@ class eventAjaxController extends Controller
 						}
 					}
 
+					// map the string to the attribute value of an event
 					if(!is_null($event_attributes)) {
 						foreach($event_attributes as $attribute) {
 							$attribute_id = $attribute->attributes_values_attributes_id;
@@ -707,11 +724,13 @@ class eventAjaxController extends Controller
 						}
 					}
 
+					//check if event is cancelled
 					$cancelled = false;
 					if($event_data->events_status == 1) {
 						$cancelled = true;
 					}
 
+					// return details
 					return Response::json([
 						'events_id' => $event_data->events_id,
 						'events_name' => $event_data->events_name,
@@ -732,10 +751,12 @@ class eventAjaxController extends Controller
 		return Response::json([], 400);
 	}
 
+	// functoinality to cancel the entirety of an event
 	public function cancel_event(Request $request) {
-		$token = $request->input('token');
-		$event_id = $request->input('event_id');
+		$token = $request->input('token'); // STRING; NOT EMPTY
+		$event_id = $request->input('event_id'); // INTEGER; NOT EMPTY
 
+		// check all values are set as necessary
 		if (!isset($token) || empty($token)) {
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
 		}
@@ -747,6 +768,7 @@ class eventAjaxController extends Controller
 		if(isset($token) && !empty($token) && isset($event_id) && !empty($event_id)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
+				// check event exists, belongs to user (as you cannot cancel another person's event) and has not already been cancelled or deleted
 				$event_data = DB::table('events')
 								->where ([
 									['events_active', 1],
@@ -755,7 +777,9 @@ class eventAjaxController extends Controller
 									['events_status', 0]
 								])
 								->first();
+
 				if(!is_null($event_data)) {
+					//perform the actual update to set the event status to cancelled
 					DB::table('events')
 								->where ([
 									['events_active', 1],
@@ -774,10 +798,13 @@ class eventAjaxController extends Controller
 		
 		return Response::json([], 400);
 	}
-	public function uncancel_event(Request $request) {
-		$token = $request->input('token');
-		$event_id = $request->input('event_id');
 
+	// uncancel event, the reverse of cancel event to uncancel an event in the case the user has accidently cancelled it or would like to revert a cancellation for some reason
+	public function uncancel_event(Request $request) {
+		$token = $request->input('token'); // STRING; NOT EMPTY
+		$event_id = $request->input('event_id'); // INTEGER; NOT EMPTY
+
+		// check all values are set as necessary
 		if (!isset($token) || empty($token)) {
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
 		}
@@ -789,6 +816,7 @@ class eventAjaxController extends Controller
 		if(isset($token) && !empty($token) && isset($event_id) && !empty($event_id)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
+				// check event exists, belongs to user (as you cannot ucancel another person's event) and has already been cancelled but not deleted as you need an event to be cancelled before you can uncancel it
 				$event_data = DB::table('events')
 								->where ([
 									['events_active', 1],
@@ -797,7 +825,9 @@ class eventAjaxController extends Controller
 									['events_status', 1]
 								])
 								->first();
+
 				if(!is_null($event_data)) {
+					//perform the actual update to set the event status to cuncancelled
 					DB::table('events')
 								->where ([
 									['events_active', 1],
@@ -819,17 +849,22 @@ class eventAjaxController extends Controller
 		
 	}
 
+	// function to get events created by the logged in user that have sessions in the future 
+	// or do not have sessions set yet
 	public function get_upcoming_events(Request $request) {
-		$token = $request->input('token');
+		$token = $request->input('token'); // STRING; NOT EMPTY
 
 		if (!isset($token) || empty($token)) {
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
 		}
 		
+		// check token is set
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
+				// build an array of upcoming events (session set in future or no session set)
 				$events_array = [];
+				// figure out which events are upcoming under the definition written above
 				$event_data = DB::table('events AS e')
 								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"), DB::raw("(SELECT count(a.access_user_id) FROM events_access AS a WHERE a.access_events_id=e.events_id) as 'num_attendees'"))
 								->where ([
@@ -843,24 +878,26 @@ class eventAjaxController extends Controller
 				if(!is_null($event_data)) {
 					foreach($event_data as $event) {
 						$event_status = "ONGOING";
-						// if($event_status == 1) {
-						// 	$event_status = "CANCELLED";
-						// }
+
+						// check if event has been cancelled
 						$cancelled = false;
 						if($event->events_status) {
 							$cancelled = true;
 						}
 
+						// check if event is public or private
 						$public = false;
 						if($event->events_public == 1) {
 							$public = true;
 						}
 
+						// calculate the number of people invited to the event
 						$num_attendees = 0;
 						if(isset($event->num_attendees) && !empty($event->num_attendees)) {
 							$num_attendees = $event->num_attendees;
 						}
 
+						// build array containing all relevant data
 						$events_array[] = [
 							'events_id' => $event->events_id,
 							'events_name' => $event->events_name,
@@ -873,15 +910,20 @@ class eventAjaxController extends Controller
 					}
 				}
 
+				// return events array
 				return Response::json(['events' => $events_array], 200);
 			}
 		}
 		
 		return Response::json([], 400);
 	}
-	public function get_invited_events_upcoming(Request $request){
-		$token = $request->input('token');
 
+	// function to return upcoming events (with a session in the future or no session set) 
+	// that the logged in user is invited to but the logged in user is not the creator of
+	public function get_invited_events_upcoming(Request $request){
+		$token = $request->input('token'); // STRING; NOT EMPTY
+
+		//check token is set
 		if (!isset($token) || empty($token)) {
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
 		}
@@ -889,7 +931,10 @@ class eventAjaxController extends Controller
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true){
+				//build array of event details of upcomig events
 				$events_array = [];
+				//query for events that a user has not created but has been invited to 
+				// and is in the future under the definitions specified in the function explanation
 				$event_data = DB::table('events_access AS a')
 								->select('e.events_id', 'e.events_name', 'e.events_public', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"))
 								->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
@@ -906,20 +951,20 @@ class eventAjaxController extends Controller
 				if(!is_null($event_data)){
 					foreach($event_data as $event){
 						$event_status = "ONGOING";
-						// if($event_status == 1) {
-						// 	$event_status = "CANCELLED";
-						// }
 
+						// chekc if event has been cancelled
 						$cancelled = false;
 						if($event->events_status) {
 							$cancelled = true;
 						}
 
+						// check if event is public or private
 						$public = false;
 						if($event->events_public == 1) {
 							$public = true;
 						}
 
+						// build array of event details for upcoming events that user is invited to
 						$events_array[] = [
 							'events_id' => $event->events_id,
 							'events_name' => $event->events_name,
@@ -940,9 +985,11 @@ class eventAjaxController extends Controller
 		return Response::json([],400);
 	}
 
+	// get events that a user has been invited to but did not create that has had a session in the past
 	public function get_invited_events_past(Request $request){
-		$token = $request->input('token');
+		$token = $request->input('token'); // STRING; NOT EMPTY
 
+		// check if token is set
 		if (!isset($token) || empty($token)) {
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
 		}
@@ -950,7 +997,10 @@ class eventAjaxController extends Controller
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true){
+				// build array of event details of events that the logged in user has been invited to but did not create 
+				// and where the event has had a session that has already occured
 				$events_array = [];
+				//query the database for these events
 				$event_data = DB::table('events_access AS a')
 								->select('e.events_id', 'e.events_name', 'e.events_public', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'dates_earliest'"))
 								->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
@@ -966,20 +1016,20 @@ class eventAjaxController extends Controller
 				if(!is_null($event_data)){
 					foreach($event_data as $event){
 						$event_status = "PAST";
-						// if($event_status == 1) {
-						// 	$event_status = "CANCELLED";
-						// }
 
+						// check if event has been cancelled
 						$cancelled = false;
 						if($event->events_status) {
 							$cancelled = true;
 						}
 
+						// check if event is public or private
 						$public = false;
 						if($event->events_public == 1) {
 							$public = true;
 						}
 
+						//build event details in the array following the restrictons mentioned earlier in the function
 						$events_array[] = [
 							'events_id' => $event->events_id,
 							'events_name' => $event->events_name,
@@ -990,16 +1040,21 @@ class eventAjaxController extends Controller
 						];
 					}
 				}
+
 				return Response::json(['events'=>$events_array],200);
 			}
+
 			return Response::json([],400);
 		}
+
 		return Response::json([],400);
 	}
 
+	// get public events with sessions that have not happened yet
 	public function get_upcoming_public_events(Request $request) {
-		$token = $request->input('token');
+		$token = $request->input('token'); // STRING; NOT EMPTY
 
+		// check token is set
 		if (!isset($token) || empty($token)) {
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
 		}
@@ -1007,7 +1062,9 @@ class eventAjaxController extends Controller
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true){
+				// build events array with details of public events that have a session that has not ocurred yet
 				$events_array = [];
+				// query the events that are public, were not created by the logged in user and have a session in the future
 				$event_data = DB::table('events AS e')
 								->select('e.*', 'a.access_id', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"))
 								->leftJoin('events_access AS a', function($join) use ($token_data) {
@@ -1028,12 +1085,13 @@ class eventAjaxController extends Controller
 
 				if(!is_null($event_data)){
 					foreach($event_data as $event) {
-						//this means that the user is already attending the event
-						//so skip
+						// this means that the user is already attending the event
+						// so skip the event as we don't want to show events the logged in user is already aware of
 						if(isset($event->access_id) && !empty($event->access_id)) {
 							continue;
 						}
 
+						// check if event is cancelled
 						$cancelled = false;
 						if($event->events_status) {
 							$cancelled = true;
@@ -1042,6 +1100,7 @@ class eventAjaxController extends Controller
 						$event_status = "ONGOING";
 						$public = "PUBLIC";
 
+						// build array containing event details
 						$events_array[] = [
 							'events_id' => $event->events_id,
 							'events_name' => $event->events_name,
@@ -1106,16 +1165,13 @@ class eventAjaxController extends Controller
 	// 
 	// 	return Response::json([], 400);
 	// }
-	// S P R I N T 2 E N D //
 
-	// S P R I N T 3 S T A R T //
+	// given an event id, returns the attendees of the event
 	public function get_attendees_of_event(Request $request) {
-		/*
-			Returns the attendees of the event
-		*/
-		$token = $request->input('token');
-		$event_id = $request->input('event_id');
+		$token = $request->input('token'); // STRING; NOT EMPTY
+		$event_id = $request->input('event_id'); // INTEGER; NOT EMPTY
 
+		// check parameters are set as necessary
 		if(!isset($token) || empty($token)) {
 			return Response::json(['error' => 'You need to provide a JWT'], 400);
 		}
@@ -1128,7 +1184,10 @@ class eventAjaxController extends Controller
 		
 		$token_data = validate_jwt($token);
 		if($token_data == true) {
+			//array to store all user info for users that are attending an event
 			$return = [];
+
+			//get all the attendees of an evnet where the event is active and the user has been invited to the event
 			$attendees = DB::table('events_access AS a')
 							->select('u.users_email', 'u.users_id')
 							->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
@@ -1142,6 +1201,7 @@ class eventAjaxController extends Controller
 
 			if(!is_null($attendees)) {
 				foreach($attendees AS $attendee) {
+					// build array of user details
 					$return[] = [
 						'email' => $attendee->users_email,
 						'id' => $attendee->users_id
@@ -1149,13 +1209,16 @@ class eventAjaxController extends Controller
 				}
 			}
 
+			// return user details if applicable
 			return Response::json(['attendees' => $return], 200);
 		} else {
 			return Response::json(['error' => 'Your JWT is invalid'], 400);
 		}
 	}
 	
-	public function get_summary_dashboard(Request $request){
+	// function to get simple details including a count of how many events the user has attended in the past week
+	// and how many events the user will attend in the next week
+	public function get_summary_dashboard(Request $request) {
 		$token = $request->input('token');
 
 		if (!isset($token) || empty($token)) {
@@ -1255,13 +1318,13 @@ class eventAjaxController extends Controller
 				
 			}
 		}
-	
-		
 	}
 
+	// function to get past events created by the logged in user
 	public function get_past_events(Request $request) {
-		$token = $request->input('token');
+		$token = $request->input('token'); // STRINg; NOT EMPTY
 
+		// check token is set
 		if (!isset($token) || empty($token)) {
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
 		}
@@ -1269,7 +1332,10 @@ class eventAjaxController extends Controller
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
+				// build array of event details of events that have already had a session occur 
+				// and was created by the user
 				$events_array = [];
+				// query for events that were created by the user, not deleted/removed and have had atleast one session in the past
 				$event_data = DB::table('events AS e')
 								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'dates_earliest'"))
 								->where ([
@@ -1315,10 +1381,12 @@ class eventAjaxController extends Controller
 		return Response::json([], 400);
 	}
 
+	// function for "select" in front-end to get tags
 	public function get_tags(Request $request) {
-		$token = $request->input('token');
-		$search_term = $request->input('search_term');
+		$token = $request->input('token'); // STRING; NOT EMPTY
+		$search_term = $request->input('search_term'); // STRING
 		
+		// check token is set
 		if (!isset($token) || empty($token)) {
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
 		}
@@ -1328,11 +1396,13 @@ class eventAjaxController extends Controller
 			if($token_data == true) {
 				$results = [];
 
+				// grab all the tags from the database
 				$tag_data = DB::table('tags')
 								->where([
 									['tags_active', 1]
 								]);
 
+				// filter out tags to what the user is looking for if necessary
 				if(isset($search_term) && !is_null($search_term)) {
 					$tag_data = $tag_data->where('tags_name', 'like', '%'.$search_term.'%');
 				}
@@ -1341,6 +1411,7 @@ class eventAjaxController extends Controller
 
 				if(!is_null($tag_data)) {
 					foreach($tag_data as $data) {
+						// build array containing data about tags
 						$results[] = [
 							'id' => $data->tags_id,
 							'tag' => $data->tags_name
@@ -1355,14 +1426,15 @@ class eventAjaxController extends Controller
 		return Response::json([], 400);
 	}
 
+	/*
+		This function will return a list of users based on the search term provided in the parameter
+		'search_term'.
+	*/
 	public function get_emails_exclude_user(Request $request) {
-		/*
-			This function will return a list of users based on the search term provided in the parameter
-			'search_term'.
-		*/
-		$token = $request->input('token');
-		$search_term = $request->input('search_term');
+		$token = $request->input('token'); // STRING; NOT EMPTY
+		$search_term = $request->input('search_term'); // STRING; NOT EMPTY
 
+		// check all fields are set as necessary
 		if (!isset($token) || empty($token)) {
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
 		}
@@ -1375,6 +1447,7 @@ class eventAjaxController extends Controller
 		if($token_data == true) {
 			$results = [];
 
+			// query the database for users matcihng the search paramter entered
 			$user_data = DB::table('users')
 							->where([
 								['users_active', 1],
@@ -1385,6 +1458,7 @@ class eventAjaxController extends Controller
 
 			if(!is_null($user_data)) {
 				foreach($user_data as $data) {
+					//build array containing user data of user searched for before returning to front-end
 					$results[] = [
 						'id' => $data->users_id,
 						'email' => $data->users_email
@@ -1411,7 +1485,7 @@ class eventAjaxController extends Controller
 				$results = [];
 
 				$event_data = DB::table('events AS e')
-								->select('e.*', 'a.access_id', DB::raw("(SELECT count(a.access_user_id) FROM events_access AS a WHERE a.access_events_id=e.events_id) as 'num_attendees'"))
+								->select('e.*', 'a.access_id', DB::raw("(SELECT count(a.access_user_id) FROM events_access AS a WHERE a.access_events_id=e.events_id) as 'num_attendees'"), DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"))
 								->leftJoin('events_access AS a', function($join) use ($token_data) {
 									$join->on('a.access_events_id', '=', 'e.events_id')
 										->where([
@@ -1424,7 +1498,9 @@ class eventAjaxController extends Controller
 									['e.events_public', 1],
 									['e.events_active', 1],
 									['e.events_createdby','!=',$token_data['user_id']],
-								]);
+								])
+								->orderBy('e.events_createdat', 'desc')
+								->havingRaw('dates_earliest > '.time());
 								//->havingRaw('a.access_id IS NULL');
 
 				if(isset($search_term) && !is_null($search_term)) {
