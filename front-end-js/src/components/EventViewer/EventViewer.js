@@ -1,7 +1,7 @@
 /*
   This allows you to view the events that are available for the user
  */
-import { Button, Card, Divider, Empty, Icon, Input, Row, Spin, Tooltip, Typography } from 'antd';
+import { Button, Card, Divider, Empty, Icon, Input, Row, Spin, Switch, Typography } from 'antd';
 import React from 'react';
 
 import TokenContext from '../../context/TokenContext';
@@ -90,6 +90,10 @@ class EventViewer extends React.Component {
       <React.Fragment>
         <Title level={2}>Event Viewer</Title>
         <p>View a list of upcoming events made by other users. You can also search for events here</p>
+        <Row style={{marginBottom: '1em'}}>
+          <span style={{marginRight: '1em'}}>Search for new events</span>
+          <Switch defaultChecked></Switch>
+        </Row>
         <Search
           placeholder="Name of event ..."
           onSearch={value => this.loadEvents(value)}
