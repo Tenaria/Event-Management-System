@@ -10,14 +10,17 @@ use Illuminate\Support\Facades\Hash;
 
 class eventAjaxController extends Controller
 {
+	// function to add a user to the users database given a set of information
 	public function sign_up(Request $request) {
-        $fname = $request->input('fname');
-        $lname = $request->input('lname');
-        $email = $request->input('email');
-        $password = $request->input('password');
-        $password_confirm = $request->input('password_confirm');
+        $fname = $request->input('fname'); // STRING; NOT EMPTY
+        $lname = $request->input('lname'); // STRING; NOT EMPTY
+        $email = $request->input('email'); // STRING; NOT EMPTY
+        $password = $request->input('password'); //STRING; NOT EMPTY
+        $password_confirm = $request->input('password_confirm'); //STRING; NOT EMPTY
 
+        // Check all details have values
         if(!empty($fname) && !empty($lname) && !empty($email) && !empty($password) && !empty($password_confirm)) {
+        	//check that another user has not already registered with the same email address
              $check = DB::table('users')
 	                        ->where([
 	                            ['users_email', $email],
@@ -26,6 +29,7 @@ class eventAjaxController extends Controller
 	                        ->first();
 
 	        if(is_null($check)) {
+	        	// check that the two passwords match, that user has not made a typo
 	           	if($password == $password_confirm) {
 		            $user_id = DB::table('users')
 			                            ->insertGetId([
@@ -54,9 +58,10 @@ class eventAjaxController extends Controller
         ], 400);
     }
 
+    //log in functionality, that given some credentials will check they match against the database for some user
 	public function log_in(Request $request) {
-		$email = $request->input('email');
-        $password = $request->input('password');
+		$email = $request->input('email'); // STRING; NOT EMPTY
+        $password = $request->input('password'); // STRING; NOT EMPTY
 
         if (!isset($email) || empty($email)) {
 			return Response::json(['error' => 'email is either not set or null'], 400);
@@ -66,6 +71,7 @@ class eventAjaxController extends Controller
 			return Response::json(['error' => 'password is either not set or null'], 400);
 		}
 
+		// check all fields exist
         if(isset($email) && !is_null($email) && isset($password) && !is_null($password)) {
         	$user = DB::table('users')
 	                    ->where([
@@ -74,11 +80,15 @@ class eventAjaxController extends Controller
 	                    ])
 	                    ->first();
 
+	        // check that email exists in the database, with a valid matching password as wat is stored
 	        if (!is_null($user) && !is_null($password) && Hash::check($password, $user->users_password)) {
+	        	// grab secret key from env file for JWT
 	        	$key = env('JWT_KEY');
 
+	        	// set expiration date of JWt token
 	        	$timestamp = strtotime('+30 days', time());
 
+	        	// set necessary details of JWT token that may be usefull
 	        	$token = [
 	        		'user_id' => $user->users_id,
 	        		'expiration' => $timestamp,
@@ -86,8 +96,10 @@ class eventAjaxController extends Controller
 	        		'name' => $user->users_fname." ".$user->users_lname
 	        	];
 
+	        	// create JWT token
 	        	$jwt = JWT::encode($token, $key);
 
+	        	// pass JWT token back to front-end
 	        	return Response::json([
 	        		'token' => $jwt
 	        	], 200);
@@ -99,8 +111,9 @@ class eventAjaxController extends Controller
         return Response::json([], 400);
 	}
 
+	// function to get a user's details including name and email
 	public function get_account_details(Request $request) {
-		$token = $request->input('token');
+		$token = $request->input('token'); // STRING; NOT EMPTY
 
 		if (!isset($token) || empty($token)) {
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
@@ -109,6 +122,7 @@ class eventAjaxController extends Controller
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
+				// query the database to check that a user exists and that the user that the person is trying to access is the same user as the person logged in (for security)
 				$user_data = DB::table('users')
 								 ->where([
 									['users_active', 1],
@@ -117,6 +131,7 @@ class eventAjaxController extends Controller
 								->first();
 
 				if(!is_null($user_data)) {
+					// return first name, last name and email
 					return Response::json([
 		        		'users_fname' => $user_data->users_fname,
 		        		'users_lname' => $user_data->users_lname,
@@ -131,14 +146,15 @@ class eventAjaxController extends Controller
 		return Response::json([], 400);
 	}
 
+	// function to modify a user's account given some new information
 	public function edit_account(Request $request) {
-		$fnameInput = $request->input('fname');
-		$lnameInput = $request->input('lname');
-		$password = $request->input('password');
-		$password_confirm= $request->input('password_confirm'); 
-		
-		$token = $request->input('token');
+		$fnameInput = $request->input('fname'); // STRING; NOT EMPTY;
+		$lnameInput = $request->input('lname'); // STRING; NOT EMPTY;
+		$password = $request->input('password'); // STRING; NOT EMPTY;
+		$password_confirm= $request->input('password_confirm'); // STRING; NOT EMPTY;
+		$token = $request->input('token'); // STRING; NOT EMPTY
 
+		// check valus are set
 		if (!isset($token) || empty($token)) {
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
 		}
@@ -162,6 +178,7 @@ class eventAjaxController extends Controller
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
+				// query the database to check that a user exists and that the user that the person is trying to access is the same user as the person logged in (for security)
 				$user_data = DB::table('users')
 								 ->where([
 									['users_active', 1],
@@ -170,6 +187,7 @@ class eventAjaxController extends Controller
 								->first();
 
 				if(!is_null($user_data)) {
+					// if the user wishes to change their password, chack that the new passwords match so that the user hasn't made an error
 					if(!is_null($password) && $password == $password_confirm && proper_empty_check($password)) {
 						DB::table('users')
 							->where([
@@ -181,6 +199,7 @@ class eventAjaxController extends Controller
 								'users_lname' => $lnameInput,
 								'users_password' => Hash::make($password)	
 							]);
+					//otherwise we are editing other details not password related such as first name and last name
 					} else {
 						DB::table('users')
 							->where([
@@ -202,22 +221,27 @@ class eventAjaxController extends Controller
 		return Response::json([], 400);
 	}
 
-	// S P R I N T 2 S T A R T //
+	// basic function to create an event in the database given a set of details
 	public function create_event(Request $request) {
-		$token = $request->input('token');
-		$event_name = $request->input('event'); //STRING
-		$event_desc = $request->input('desc'); //STRING
-		$event_location = $request->input('event_location'); //STRING
-		$event_attendees = $request->input('event_attendees'); //ASSUME IS PASSED THROUGH AS AN ARRAY OF USER IDS
-		$event_public = $request->input('event_public');
-		$tags = $request->input('event_tags'); //takes in array of ids
+		$token = $request->input('token'); // STRING; NOT EMPTY
+		$event_name = $request->input('event'); // STRING; NOT EPTY
+		$event_desc = $request->input('desc'); // STRING
+		$event_location = $request->input('event_location'); // STRING; NOT EMPTY
+		$event_attendees = $request->input('event_attendees'); // ARRAY OF INTEGERS
+		$event_public = $request->input('event_public'); // INTEGER 1 OR 0; NOT NULL
+		$tags = $request->input('event_tags'); // ARRAY OF INTEGERS
 
+		// check all fields are set as necessary
 		if (!isset($token) || empty($token)) {
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
 		}
 
 		if (!isset($event_name) || empty($event_name)) {
 			return Response::json(['error' => 'event name is either not set or null'], 400);
+		}
+
+		if (!isset($event_location) || empty($event_location)) {
+			return Response::json(['error' => 'event location is either not set or null'], 400);
 		}
 		
 		if(isset($token) && !empty($token)) {
@@ -291,16 +315,18 @@ class eventAjaxController extends Controller
 		return Response::json([], 400);
 	}
 
+	// given a new set of details, modifies and updates database to reflect these changes for an existing event
 	public function edit_event(Request $request) {
-		$token = $request->input('token');
-		$event_id = $request->input('event_id');
-		$new_event_name = $request->input('event_name');
-		$new_event_desc = $request->input('event_desc');
-		$new_event_location = $request->input('event_location');
-		$new_event_attendees = $request->input('event_attendees');
-		$new_event_public = $request->input('event_public');
-		$new_tags = $request->input('event_tags');
+		$token = $request->input('token'); // STRING; NOT EMPTY
+		$event_id = $request->input('event_id'); // INTEGER; NOT EMPTY
+		$new_event_name = $request->input('event_name'); // STRING; NOT EMPTY
+		$new_event_desc = $request->input('event_desc'); // STRING
+		$new_event_location = $request->input('event_location'); // STRING; NOT EMPTY
+		$new_event_attendees = $request->input('event_attendees'); // ARRAY OF INTEGERS
+		$new_event_public = $request->input('event_public'); // INTEGER 0 OR 1; NOT NULL
+		$new_tags = $request->input('event_tags'); // ARRAY OF INTEGERS
 
+		// check all fields are set as necessary
 		if (!isset($token) || empty($token)) {
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
 		}
@@ -311,6 +337,10 @@ class eventAjaxController extends Controller
 
 		if (!isset($new_event_name) || empty($new_event_name)) {
 			return Response::json(['error' => 'event name is either not set or null'], 400);
+		}
+
+		if (!isset($new_event_location) || empty($new_event_location)) {
+			return Response::json(['error' => 'event location is either not set or null'], 400);
 		}
 
 		if(isset($token) && !empty($token)) {
