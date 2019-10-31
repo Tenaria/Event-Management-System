@@ -1540,7 +1540,7 @@ class eventAjaxController extends Controller
 									['e.events_createdby','!=',$token_data['user_id']],
 								])
 								->orderBy('e.events_createdat', 'desc')
-								->havingRaw('dates_earliest > '.time());
+								->havingRaw('dates_latest=0 OR dates_latest > '.time());
 								//->havingRaw('a.access_id IS NULL');
 
 				// if a query parameter for the search term has been set, narrow down to events with similar terms
