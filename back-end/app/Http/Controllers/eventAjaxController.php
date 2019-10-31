@@ -1704,7 +1704,7 @@ class eventAjaxController extends Controller
 		}
 
 		if (!isset($recurring) || empty($recurring)) {
-			return Response::json(['error' => 'reccurng is either not set or null. Recurring should be atleast 1.'], 400);
+			return Response::json(['error' => 'recurring is either not set or null. Recurring should be atleast 1.'], 400);
 		}
 
 		// check the the descriptor given is valid for the date range
@@ -1716,37 +1716,35 @@ class eventAjaxController extends Controller
 			return Response::json(['error' => 'invalid descriptor.'], 400);
 		}
 		
-		if(isset($token) && !empty($token) && isset($event_id) && !empty($event_id) && isset($start_timestamp) && !empty($start_timestamp) && isset($end_timestamp) && !empty($end_timestamp)) {
-			$token_data = validate_jwt($token);
-			if($token_data == true) {
-				// check events exists and is valid, not cancelled nad not set
-				$event_data = DB::table('events')
-								->where ([
-									['events_active', 1],
-									['events_id', $event_id],
-									['events_createdby', $token_data['user_id']],
-									['events_status', 0]
-								])
-								->first();
+		$token_data = validate_jwt($token);
+		if($token_data == true) {
+			// check events exists and is valid, not cancelled nad not set
+			$event_data = DB::table('events')
+							->where ([
+								['events_active', 1],
+								['events_id', $event_id],
+								['events_createdby', $token_data['user_id']],
+								['events_status', 0]
+							])
+							->first();
 
-				if(!is_null($event_data)) {
-					// create the session in the database
-					$new_session_id = DB::table('events_sessions')
-											->insertGetId([
-												'sessions_start_time' => $start_timestamp,
-												'sessions_end_time' => $end_timestamp,
-												'sessions_active' => 1,
-												'sessions_events_id' => $event_id
-											]);
+			if(!is_null($event_data)) {
+				// create the session in the database
+				$new_session_id = DB::table('events_sessions')
+										->insertGetId([
+											'sessions_start_time' => $start_timestamp,
+											'sessions_end_time' => $end_timestamp,
+											'sessions_active' => 1,
+											'sessions_events_id' => $event_id
+										]);
 
-					return Response::json(['id' => $new_session_id], 200);
-				} else {
-					return Response::json(['error' => 'event does not exist'], 400);
-				}
+				return Response::json(['id' => $new_session_id], 200);
 			}
+
+			return Response::json(['error' => 'Event does not exist'], 400);
 		}
-		
-		return Response::json([], 400);
+
+		return Response::json(['error' => 'Token data is not valid'], 400);
 	}
 
 	/*

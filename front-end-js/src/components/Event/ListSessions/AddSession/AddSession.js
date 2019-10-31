@@ -1,7 +1,7 @@
 /*
   Edit the sessions of an event
  */
-import { DatePicker, Form, InputNumber, message, Modal, Row, Typography } from 'antd';
+import { DatePicker, Form, InputNumber, message, Modal, Row, Col, Select, Typography } from 'antd';
 import React from 'react';
 
 import EventContext from '../../../../context/EventContext';
@@ -13,8 +13,13 @@ class AddSession extends React.Component {
   state = {
     disabled: false,
     startDateTime: null,
-    endDateTime: null
+    endDateTime: null,
+    freq: 1,
+    freqType: 'daily'
   }
+
+  changeFreq = value => this.setState({ freq: value });
+  changeFreqType = value => this.setState({ freqType: value });
 
   onOk = value => {
     this.setState({
@@ -25,7 +30,7 @@ class AddSession extends React.Component {
 
   submitSession = async () => {
     const { id, token } = this.context;
-    const { disabled, startDateTime, endDateTime } = this.state;
+    const { disabled, freq, freqType, startDateTime, endDateTime } = this.state;
 
     if (disabled) return;
     console.log('Not disabled!');
@@ -42,6 +47,8 @@ class AddSession extends React.Component {
         event_id: id,
         start_timestamp: startDateTime,
         end_timestamp: endDateTime,
+        recurring: freq,
+        recurring_descriptor: freqType,
         token
       })
     });
@@ -65,7 +72,7 @@ class AddSession extends React.Component {
         onOk={this.submitSession}
         visible={visible}
       >
-        <Title level={2}>Create New Event</Title>
+        <Title level={2}>Create New Session</Title>
         <Row>
           <Form.Item label="Session Date" style={{margin: 0}}>
             <RangePicker
@@ -77,10 +84,31 @@ class AddSession extends React.Component {
             />
           </Form.Item>
         </Row>
-        <Row>
-          <Form.Item label="Recurrences" style={{margin: 0}}>
-            <InputNumber defaultValue={1} min={1} />
-          </Form.Item>
+        <Row gutter={12}>
+          <Col span={12}>
+            <Form.Item label="Frequency" style={{margin: 0}}>
+              <InputNumber
+                defaultValue={1}
+                min={1}
+                style={{width: '100%'}}
+                onChange={this.changeFreq}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item label="Type" style={{margin: 0}}>
+              <Select
+                defaultValue="daily"
+                style={{width: '100%'}}
+                onChange={this.changeFreqType}
+              >
+                <Select.Option value="daily">Daily</Select.Option>
+                <Select.Option value="weekly">Weekly</Select.Option>
+                <Select.Option value="month">Montly</Select.Option>
+                <Select.Option value="yearly">Yearly</Select.Option>
+              </Select>
+            </Form.Item>
+          </Col>
         </Row>
       </Modal>
     );
