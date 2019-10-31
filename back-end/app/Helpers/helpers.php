@@ -111,7 +111,7 @@ if (!function_exists('check_valid_time_descriptor')) {
             $start_month = date('Y-m', $start_timestamp);
             $end_month = date('Y-m', $end_timestamp);
 
-            if($first != $second) {
+            if($start_month != $end_month) {
                return false;
             }
         //recurrence to happen yearly
