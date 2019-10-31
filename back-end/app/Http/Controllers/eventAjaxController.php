@@ -730,8 +730,8 @@ class eventAjaxController extends Controller
 								->where ([
 									['events_active', 1],
 									['events_createdby', $token_data['user_id']],
-									['events_id', $event_id]
-									
+									['events_id', $event_id],
+									['events_status', 0]
 								])
 								->update(['events_status' => 1]);
 
@@ -763,8 +763,8 @@ class eventAjaxController extends Controller
 								->where ([
 									['events_active', 1],
 									['events_createdby', $token_data['user_id']],
-									['events_id', $event_id]
-									
+									['events_id', $event_id],
+									['events_status', 1]
 								])
 								->first();
 				if(!is_null($event_data)) {
