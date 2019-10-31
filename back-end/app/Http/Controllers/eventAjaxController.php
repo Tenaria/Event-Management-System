@@ -1802,14 +1802,12 @@ class eventAjaxController extends Controller
 					]);
 
 				return Response::json([], 200);
-			} else {
-				return Response::json(['error' => 'Could not find the event!'], 400);
 			}
-		} else {
-			return Response::json(['error' => 'Your JWT is invalid!'], 400);
+			
+			return Response::json(['error' => 'Could not find the event!'], 400);
 		}
 		
-		return Response::json([], 400);
+		return Response::json(['error' => 'Your JWT is invalid!'], 400);
 	}
 
 	/*
