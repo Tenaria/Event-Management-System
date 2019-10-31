@@ -1968,12 +1968,4 @@ class eventAjaxController extends Controller
 		
 		return Response::json([], 400);
 	}
-
-
-	// public function test (Request $request) {
-	// 	$name = $request->input('name');
-	// 	error_log($name);
-
-	// 	return Response::json([], 200);
-	// }
 }

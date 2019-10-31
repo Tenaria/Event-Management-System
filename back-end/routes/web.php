@@ -54,7 +54,4 @@ Route::post('/cancel_event_sessions', 'eventAjaxController@cancel_event_sessions
 // SPRINT 6 (ROUTES)
 // US-9 (View Clashing Events)/US-7 (Manage Availabilities), US-13 (Summary Dashboard)
 
-Route::post('/create_account', 'eventController@create_account');
-
-//Route::post('/test', 'eventAjaxController@test');
-
+// error_log($fnameInput);
