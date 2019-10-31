@@ -84,3 +84,49 @@ if (!function_exists('send_generic_email')) {
     }
 }
 
+if (!function_exists('check_valid_time_descriptor')) {
+    //returns false if something went wrong, otherwise whether the given timestamps can recurr "weekly", "monthly" or "yearly"
+    function check_valid_time_descriptor($start_timestamp, $end_timestamp, $descriptor) {
+        $difference = $end_timestamp-$start_timestamp;
+
+        //recurrence to happen daily
+        if($descriptor == "daily") {
+            //24 hours in a day, 60 minutes, 60 seconds
+            $daily = 24*60*60;
+
+            if($difference >= $daily) {
+                return false;
+            }
+        //recurrence to happen weekly
+        } else if($descriptor == "weekly") {
+            //7 days in a week, same as above
+            $weekly = 7*24*60*60;
+
+            if($difference >= $weekly) {
+                return false;
+            }
+        //recurrence to happen monthly
+        } else if($descriptor == "month") {
+            //check both timestamps return the same month in the same year, otherwise can't do a monthly timestamp
+            $start_month = date('Y-m', $start_timestamp);
+            $end_month = date('Y-m', $end_timestamp);
+
+            if($first != $second) {
+               return false;
+            }
+        //recurrence to happen yearly
+        } else if($descriptor == "yearly") {
+            $yearly = 365*24*60*60;
+
+            if($difference >= $yearly) {
+                return false;
+            }
+        //recurrence to happen some other invalid way
+        } else {
+            return false;
+        }
+
+        return true;
+    }
+}
+

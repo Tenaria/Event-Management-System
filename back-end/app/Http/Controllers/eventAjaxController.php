@@ -1522,6 +1522,7 @@ class eventAjaxController extends Controller
 		$start_timestamp = $request->input('start_timestamp');
 		$end_timestamp = $request->input('end_timestamp');
 		$recurring = $request->input('recurring');
+		$recurring_descriptor = $request->input('recurring_descriptor');
 
 		if (!isset($token) || empty($token)) {
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
@@ -1541,6 +1542,12 @@ class eventAjaxController extends Controller
 
 		if (!isset($recurring) || empty($recurring)) {
 			return Response::json(['error' => 'reccurng is either not set or null. Recurring should be atleast 1.'], 400);
+		}
+
+		$valid_recurring_descriptor = check_valid_time_descriptor($start_timestamp, $end_timestamp, $recurring_descriptor);
+
+		if($valid_recurring_descriptor == false) {
+			return Response::json(['error' => 'invalid descriptor.'], 400);
 		}
 		
 		if(isset($token) && !empty($token) && isset($event_id) && !empty($event_id) && isset($start_timestamp) && !empty($start_timestamp) && isset($end_timestamp) && !empty($end_timestamp)) {
