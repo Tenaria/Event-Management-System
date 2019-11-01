@@ -1074,78 +1074,79 @@ class eventAjaxController extends Controller
 
 		return Response::json([],400);
 	}
+
 	/*
-		 get public events with sessions that have not happened yet
+		 DO NOT USE: OLD CODE
 	*/
-	public function get_upcoming_public_events(Request $request) {
-		$token = $request->input('token'); // STRING; NOT EMPTY
+	// public function get_upcoming_public_events(Request $request) {
+	// 	$token = $request->input('token'); // STRING; NOT EMPTY
 
-		// check token is set
-		if (!isset($token) || empty($token)) {
-			return Response::json(['error' => 'JWT is either not set or null'], 400);
-		}
+	// 	// check token is set
+	// 	if (!isset($token) || empty($token)) {
+	// 		return Response::json(['error' => 'JWT is either not set or null'], 400);
+	// 	}
 
-		if(isset($token) && !empty($token)) {
-			$token_data = validate_jwt($token);
-			if($token_data == true){
-				// build events array with details of public events that have a session that has not ocurred yet
-				$events_array = [];
-				// query the events that are public, were not created by the logged in user and have a session in the future
-				$event_data = DB::table('events AS e')
-								->select('e.*', 'a.access_id', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"))
-								->leftJoin('events_access AS a', function($join) use ($token_data) {
-									$join->on('a.access_events_id', '=', 'e.events_id')
-										->where([
-											["a.access_user_id", $token_data['user_id']],
-											["a.access_active", 1]
-										]);
-								})
-								->where ([
-									['e.events_active', 1],
-									['e.events_createdby','!=',$token_data['user_id']],
-									['e.events_public', 1]
-								])
-								//->havingRaw('a.access_id IS NULL')
-								->havingRaw('dates_latest=0 OR dates_latest > '.time())
-								->get();
+	// 	if(isset($token) && !empty($token)) {
+	// 		$token_data = validate_jwt($token);
+	// 		if($token_data == true){
+	// 			// build events array with details of public events that have a session that has not ocurred yet
+	// 			$events_array = [];
+	// 			// query the events that are public, were not created by the logged in user and have a session in the future
+	// 			$event_data = DB::table('events AS e')
+	// 							->select('e.*', 'a.access_id', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"))
+	// 							->leftJoin('events_access AS a', function($join) use ($token_data) {
+	// 								$join->on('a.access_events_id', '=', 'e.events_id')
+	// 									->where([
+	// 										["a.access_user_id", $token_data['user_id']],
+	// 										["a.access_active", 1]
+	// 									]);
+	// 							})
+	// 							->where ([
+	// 								['e.events_active', 1],
+	// 								['e.events_createdby','!=',$token_data['user_id']],
+	// 								['e.events_public', 1]
+	// 							])
+	// 							//->havingRaw('a.access_id IS NULL')
+	// 							->havingRaw('dates_latest=0 OR dates_latest > '.time())
+	// 							->get();
 
-				if(!is_null($event_data)){
-					foreach($event_data as $event) {
-						// this means that the user is already attending the event
-						// so skip the event as we don't want to show events the logged in user is already aware of
-						if(isset($event->access_id) && !empty($event->access_id)) {
-							continue;
-						}
+	// 			if(!is_null($event_data)){
+	// 				foreach($event_data as $event) {
+	// 					// this means that the user is already attending the event
+	// 					// so skip the event as we don't want to show events the logged in user is already aware of
+	// 					if(isset($event->access_id) && !empty($event->access_id)) {
+	// 						continue;
+	// 					}
 
-						// check if event is cancelled
-						$cancelled = false;
-						if($event->events_status) {
-							$cancelled = true;
-						}
+	// 					// check if event is cancelled
+	// 					$cancelled = false;
+	// 					if($event->events_status) {
+	// 						$cancelled = true;
+	// 					}
 
-						$event_status = "ONGOING";
-						$public = "PUBLIC";
+	// 					$event_status = "ONGOING";
+	// 					$public = "PUBLIC";
 
-						// build array containing event details
-						$events_array[] = [
-							'events_id' => $event->events_id,
-							'events_name' => $event->events_name,
-							'events_desc' => $event->events_desc,
-							'events_status' => $event_status,
-							'events_public' => $public,
-							'events_cancelled' => $cancelled
-						];
-					}
-				}
+	// 					// build array containing event details
+	// 					$events_array[] = [
+	// 						'events_id' => $event->events_id,
+	// 						'events_name' => $event->events_name,
+	// 						'events_desc' => $event->events_desc,
+	// 						'events_status' => $event_status,
+	// 						'events_public' => $public,
+	// 						'events_cancelled' => $cancelled
+	// 					];
+	// 				}
+	// 			}
 
-				return Response::json(['events'=>$events_array],200);
-			}
+	// 			return Response::json(['events'=>$events_array],200);
+	// 		}
 
-			return Response::json([],400);
-		}
+	// 		return Response::json([],400);
+	// 	}
 
-		return Response::json([],400);
-	}
+	// 	return Response::json([],400);
+	// }
 
 	// public function get_events_managed_by_user(Request $request) {
 	// 	$token = $request->input('token');
