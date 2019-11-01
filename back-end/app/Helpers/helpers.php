@@ -105,6 +105,13 @@ if (!function_exists('check_valid_time_descriptor')) {
             if($difference >= $weekly) {
                 return false;
             }
+        else if($descriptor == "fortnightly") {
+            //2 weeks in a fornight, 7 days in a week, same as above
+            $fortnightly = 2*7*24*60*60;
+
+            if($difference >= $fortnightly) {
+                return false;
+            }
         //recurrence to happen monthly
         } else if($descriptor == "month") {
             //check both timestamps return the same month in the same year, otherwise can't do a monthly timestamp
