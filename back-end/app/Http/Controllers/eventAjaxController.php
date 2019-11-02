@@ -160,8 +160,8 @@ class eventAjaxController extends Controller
 	public function edit_account(Request $request) {
 		$fnameInput = $request->input('fname'); // STRING; NOT EMPTY;
 		$lnameInput = $request->input('lname'); // STRING; NOT EMPTY;
-		$password = $request->input('password'); // STRING; NOT EMPTY;
-		$password_confirm= $request->input('password_confirm'); // STRING; NOT EMPTY;
+		$password = $request->input('password'); // STRING;;
+		$password_confirm= $request->input('password_confirm'); // STRING;
 		$token = $request->input('token'); // STRING; NOT EMPTY
 
 		// check valus are set
@@ -175,14 +175,6 @@ class eventAjaxController extends Controller
 
 		if (!isset($lnameInput) || empty($lnameInput)) {
 			return Response::json(['error' => 'last name is either not set or null'], 400);
-		}
-
-		if (!isset($password) || empty($password)) {
-			return Response::json(['error' => 'password is either not set or null'], 400);
-		}
-
-		if (!isset($password_confirm) || empty($password_confirm)) {
-			return Response::json(['error' => 'password confirmation is either not set or null'], 400);
 		}
 
 		if(isset($token) && !empty($token)) {
