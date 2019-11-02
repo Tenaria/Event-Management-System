@@ -1723,6 +1723,7 @@ class eventAjaxController extends Controller
 
 			if(!is_null($event_data)) {
 				$insert = [];
+				// insert first timestamp instance
 				$insert[] = [
 							'sessions_start_time' => $start_timestamp,
 							'sessions_end_time' => $end_timestamp,
@@ -1730,31 +1731,38 @@ class eventAjaxController extends Controller
 							'sessions_events_id' => $event_id
 						];
 
-				$recurring--; //decrement recurring number
+				$recurring--; // decrement recurring number
 
+				// if recurring is set to greater than one we need additional insertions
 				if(!is_null($recurring_descriptor) && $recurring >= 1) {
 					while($recurring > 0) {
+						// check if recurrence is daily
 						if($recurring_descriptor == "daily") {
 							$addition = 24*60*60*1000;
 							$start_timestamp += $addition;
 							$end_timestamp += $addition;
+						// or check if recurrence is weekly
 						} else if($recurring_descriptor == "weekly") {
 							$addition = 7*24*60*60*1000;
 							$start_timestamp += $addition;
 							$end_timestamp += $addition;
+						// or check if recurrence is fortnightly
 						} else if($recurring_descriptor == "fortnightly") {
 							$addition = 2*7*24*60*60*1000;
 							$start_timestamp += $addition;
 							$end_timestamp += $addition;
+						// or check if recurrence is monthly
 						} else if($recurring_descriptor == "monthly") {
 							$start_timestamp = strtotime('+1 month', $start_timestamp); 
 							$end_timestamp = strtotime('+1 month', $end_timestamp);
+						// or check if recurrence is yearly
 						} else if($recurring_descriptor == "yearly") {
 							$addition = 365*24*60*60*1000;
 							$start_timestamp += $addition;
 							$end_timestamp += $addition;
 						}
 
+						// create new insertion with incremented timestamps
 						$insert[] = [
 							'sessions_start_time' => $start_timestamp,
 							'sessions_end_time' => $end_timestamp,
