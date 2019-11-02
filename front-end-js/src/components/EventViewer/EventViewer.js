@@ -38,52 +38,20 @@ class EventViewer extends React.Component {
 
       if (res.status === 200) {
         const data = await res.json();
-        resolve(data.results);
+        resolve(data);
       } else {
         resolve([]);
       }
     });
 
-    const publicEvents = new Promise(async (resolve, reject) => {
-      const res = await fetch('http://localhost:8000/search_public_event', {
-        method: 'POST',
-        mode: 'cors',
-        cache: 'no-cache',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ search_term: term, token })
-      });
-
-      if (res.status === 200) {
-        const data = await res.json();
-        resolve(data.results);
-      } else {
-        resolve([]);
-      }
-    });
-
-    const invitedEvents = new Promise(async (resolve, reject) => {
-      const res = await fetch('http://localhost:8000/get_invited_events_upcoming', {
-        method: 'POST',
-        mode: 'cors',
-        cache: 'no-cache',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token })
-      });
-
-      if (res.status === 200) {
-        const data = await res.json();
-        resolve(data.results);
-      } else if (res.status === 500) {
-        resolve([]);
-      } else {
-        resolve([]);
-      }
-    });
-
-    Promise.all([invitedEvents, publicEvents]).then(values => {
+    Promise.all([
+      loadData('http://localhost:8000/get_invited_events_upcoming'),
+      loadData('http://localhost:8000/search_public_event'),
+    ]).then(values => {
+      console.log(values);
       this.setState({
-        upcomingInvitedEvents: values[0],
-        upcomingEvents: values[1],
+        upcomingInvitedEvents: values[0].events,
+        upcomingEvents: values[1].results,
         loaded: true
       });
     })
