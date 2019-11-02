@@ -86,13 +86,13 @@ if (!function_exists('send_generic_email')) {
 
 if (!function_exists('check_valid_time_descriptor')) {
     //returns false if something went wrong, otherwise whether the given timestamps can recurr "weekly", "monthly" or "yearly"
-    function check_valid_time_descriptor($start_timestamp, $end_timestamp, $descriptor) {
+    function check_valid_time_descriptor($start_timestamp, $end_timestamp, $descriptor, $recurrence) {
         $difference = $end_timestamp-$start_timestamp;
 
         //recurrence to happen daily
         if($descriptor == "daily") {
             //24 hours in a day, 60 minutes, 60 seconds
-            $daily = 24*60*60;
+            $daily = 24*60*60*1000;
 
             if($difference >= $daily) {
                 return false;
@@ -100,14 +100,14 @@ if (!function_exists('check_valid_time_descriptor')) {
         //recurrence to happen weekly
         } else if($descriptor == "weekly") {
             //7 days in a week, same as above
-            $weekly = 7*24*60*60;
+            $weekly = 7*24*60*60*1000;
 
             if($difference >= $weekly) {
                 return false;
             }
         } else if($descriptor == "fortnightly") {
             //2 weeks in a fornight, 7 days in a week, same as above
-            $fortnightly = 2*7*24*60*60;
+            $fortnightly = 2*7*24*60*60*1000;
 
             if($difference >= $fortnightly) {
                 return false;
@@ -123,13 +123,15 @@ if (!function_exists('check_valid_time_descriptor')) {
             }
         //recurrence to happen yearly
         } else if($descriptor == "yearly") {
-            $yearly = 365*24*60*60;
+            $yearly = 365*24*60*60*1000;
 
             if($difference >= $yearly) {
                 return false;
             }
         //recurrence to happen some other invalid way
-        } else {
+        } else if(is_null($descriptor) && $recurrence > 1) {
+            return false;
+        } else if(!is_null($descriptor)) {
             return false;
         }
 

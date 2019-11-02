@@ -1702,7 +1702,7 @@ class eventAjaxController extends Controller
 
 		// check the the descriptor given is valid for the date range
 		// e.g you can set it to weekly for a date spanning over a week
-		$valid_recurring_descriptor = check_valid_time_descriptor($start_timestamp, $end_timestamp, $recurring_descriptor);
+		$valid_recurring_descriptor = check_valid_time_descriptor($start_timestamp, $end_timestamp, $recurring_descriptor, $recurring);
 
 		// return error if descriptor isn't valid
 		if($valid_recurring_descriptor == false) {
