@@ -15,6 +15,7 @@ class EventViewer extends React.Component {
     currentMenu: 'public',
     upcomingEvents: null,
     upcomingInvitedEvents: null,
+    pastInvitedEvents: null,
     loaded: false
   };
 
@@ -46,12 +47,14 @@ class EventViewer extends React.Component {
     
     Promise.all([
       loadData('http://localhost:8000/get_invited_events_upcoming'),
+      loadData('http://localhost:8000/get_invited_events_past'),
       loadData('http://localhost:8000/search_public_event'),
     ]).then(values => {
       console.log(values);
       this.setState({
         upcomingInvitedEvents: values[0].events,
-        upcomingEvents: values[1].results,
+        pastInvitedEvents: values[1].events,
+        upcomingEvents: values[2].results,
         loaded: true
       });
     })
@@ -112,6 +115,10 @@ class EventViewer extends React.Component {
               <Icon type="mail" />
               Invited Events
             </Menu.Item>
+            <Menu.Item key="invitedPast">
+              <Icon type="step-backward" />
+              Past Invited Events
+            </Menu.Item>
           </Menu>
           {includedElm}
           <Row type="flex" style={{marginTop: '1em'}}>
@@ -133,8 +140,9 @@ class EventViewer extends React.Component {
         </Row>, upcomingEvents
       );
     } else if (loaded && currentMenu === 'invited') {
-      displayElm = updateDisplay(null, upcomingInvitedEvents
-      );
+      displayElm = updateDisplay(null, upcomingInvitedEvents);
+    } else if (loaded && currentMenu === 'invitedPast') {
+      displayElm = updateDisplay(null, upcomingInvitedEvents);
     }
 
     return (
