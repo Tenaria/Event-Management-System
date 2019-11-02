@@ -1027,7 +1027,7 @@ class eventAjaxController extends Controller
 				$events_array = [];
 				//query the database for these events
 				$event_data = DB::table('events_access AS a')
-								->select('e.events_id', 'e.events_name', 'e.events_public', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'dates_earliest'"))
+								->select('e.events_id', 'e.events_name', 'e.events_public', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start_time ASC LIMIT 1), 2147483647) as 'dates_earliest'"))
 								->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
 								->where([
 									["a.access_user_id", $token_data['user_id']],
