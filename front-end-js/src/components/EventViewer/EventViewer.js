@@ -25,8 +25,6 @@ class EventViewer extends React.Component {
   loadEvents = term => {
     const token = this.context;
 
-    this.setState({loaded: false});
-
     const loadData = url => new Promise(async (resolve, reject) => {
       const res = await fetch(url, {
         method: 'POST',
@@ -44,6 +42,8 @@ class EventViewer extends React.Component {
       }
     });
 
+    this.setState({loaded: false});
+    
     Promise.all([
       loadData('http://localhost:8000/get_invited_events_upcoming'),
       loadData('http://localhost:8000/search_public_event'),
@@ -70,111 +70,70 @@ class EventViewer extends React.Component {
       textAlign: 'center',
       width: '100%'
     };
+    const updateDisplay = (includedElm, events) => {
+      /*
+        Update the display of the elements and show the cards based on what the user selected
+      */
+      let eventElms = ( events.length > 0 ?
+        [] :
+        <Empty description="Could not find any events ..." style={{margin: 'auto'}} />
+      );
+      // Loop through the upcoming events
+      for (let i = 0; i < events.length; ++i) {
+        const upcomingEvent = events[i];
+        eventElms.push(
+          <Card
+            className="my-event-card"
+            key={i}
+            style={cardStyle}
+            size="small"
+            title={upcomingEvent.events_name}
+          >
+            <p>{upcomingEvent.events_desc ? upcomingEvent.events_desc : 'No description'}</p>
+            <Row style={{
+              position: 'absolute',
+              right: '1em',
+              bottom: '1em'
+            }}>
+              <Button type="primary" style={{marginRight: '1em'}}>Confirm Going</Button>
+              <Button type="primary">View Event Detail</Button>
+            </Row>
+          </Card>
+        );
+      }
+      return (
+        <React.Fragment>
+          <Menu mode="horizontal" onClick={this.changeMenu} selectedKeys={[this.state.currentMenu]}>
+            <Menu.Item key="public">
+              <Icon type="eye" />
+              Public Events
+            </Menu.Item>
+            <Menu.Item key="invited">
+              <Icon type="mail" />
+              Invited Events
+            </Menu.Item>
+          </Menu>
+          {includedElm}
+          <Row type="flex" style={{marginTop: '1em'}}>
+            {eventElms}
+          </Row>
+        </React.Fragment>
+      );
+    };
     let displayElm = <div style={spinStyle}><Spin indicator={spinIcon}/></div>;
 
     if (loaded && currentMenu === 'public') {
-      let eventElms = ( upcomingEvents.length > 0 ?
-        [] :
-        <Empty description="Could not find any events ..." style={{margin: 'auto'}} />
-      );
-      // Loop through the upcoming events
-      for (let i = 0; i < upcomingEvents.length; ++i) {
-        const upcomingEvent = upcomingEvents[i];
-        eventElms.push(
-          <Card
-            className="my-event-card"
-            key={i}
-            style={cardStyle}
-            size="small"
-            title={upcomingEvent.events_name}
-          >
-            <p>{upcomingEvent.events_desc ? upcomingEvent.events_desc : 'No description'}</p>
-            <Row style={{
-              position: 'absolute',
-              right: '1em',
-              bottom: '1em'
-            }}>
-              <Button type="primary" style={{marginRight: '1em'}}>Confirm Going</Button>
-              <Button type="primary">View Event Detail</Button>
-            </Row>
-          </Card>
-        );
-      }
-      displayElm = (
-        <React.Fragment>
-          <Menu mode="horizontal" onClick={this.changeMenu} selectedKeys={[this.state.currentMenu]}>
-            <Menu.Item key="public">
-              <Icon type="eye" />
-              Public Events
-            </Menu.Item>
-            <Menu.Item key="invited">
-              <Icon type="mail" />
-              Invited Events
-            </Menu.Item>
-          </Menu>
-          <Row style={{marginTop: '1em'}}>
-            <Search
-              placeholder="Name of event ..."
-              onSearch={value => this.loadEvents(value)}
-              enterButton
-            />
-          </Row>
-          <Row type="flex" style={{marginTop: '1em'}}>
-            {eventElms}
-          </Row>
-        </React.Fragment>
+      displayElm = updateDisplay(
+        <Row style={{marginTop: '1em'}}>
+          <Search
+            placeholder="Name of event ..."
+            onSearch={value => this.loadEvents(value)}
+            enterButton
+          />
+        </Row>, upcomingEvents
       );
     } else if (loaded && currentMenu === 'invited') {
-      let eventElms = ( upcomingInvitedEvents.length > 0 ?
-        [] :
-        <Empty description="Could not find any events ..." style={{margin: 'auto'}} />
-      );
-      // Loop through the upcoming events
-      for (let i = 0; i < upcomingInvitedEvents.length; ++i) {
-        const upcomingEvent = upcomingInvitedEvents[i];
-        eventElms.push(
-          <Card
-            className="my-event-card"
-            key={i}
-            style={cardStyle}
-            size="small"
-            title={upcomingEvent.events_name}
-          >
-            <p>{upcomingEvent.events_desc ? upcomingEvent.events_desc : 'No description'}</p>
-            <Row style={{
-              position: 'absolute',
-              right: '1em',
-              bottom: '1em'
-            }}>
-              <Button type="primary" style={{marginRight: '1em'}}>Confirm Going</Button>
-              <Button type="primary">View Event Detail</Button>
-            </Row>
-          </Card>
-        );
-      }
-      displayElm = (
-        <React.Fragment>
-          <Menu mode="horizontal" onClick={this.changeMenu} selectedKeys={[this.state.currentMenu]}>
-            <Menu.Item key="public">
-              <Icon type="eye" />
-              Public Events
-            </Menu.Item>
-            <Menu.Item key="invited">
-              <Icon type="mail" />
-              Invited Events
-            </Menu.Item>
-          </Menu>
-          <Row style={{marginTop: '1em'}}>
-            <Search
-              placeholder="Name of event ..."
-              onSearch={value => this.loadEvents(value)}
-              enterButton
-            />
-          </Row>
-          <Row type="flex" style={{marginTop: '1em'}}>
-            {eventElms}
-          </Row>
-        </React.Fragment>
+      displayElm = updateDisplay(null, upcomingInvitedEvents
       );
     }
 
