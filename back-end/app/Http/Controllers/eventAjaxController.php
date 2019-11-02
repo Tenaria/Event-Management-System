@@ -1722,16 +1722,55 @@ class eventAjaxController extends Controller
 							->first();
 
 			if(!is_null($event_data)) {
+				$insert = [];
+				$insert[] = [
+							'sessions_start_time' => $start_timestamp,
+							'sessions_end_time' => $end_timestamp,
+							'sessions_active' => 1,
+							'sessions_events_id' => $event_id
+						];
+
+				$recurring--; //decrement recurring number
+
+				if(!is_null($recurring_descriptor) && $recurring >= 1) {
+					while($recurring > 0) {
+						if($recurring_descriptor == "daily") {
+							$addition = 24*60*60*1000;
+							$start_timestamp += $addition;
+							$end_timestamp += $addition;
+						} else if($recurring_descriptor == "weekly") {
+							$addition = 7*24*60*60*1000;
+							$start_timestamp += $addition;
+							$end_timestamp += $addition;
+						} else if($recurring_descriptor == "fortnightly") {
+							$addition = 2*7*24*60*60*1000;
+							$start_timestamp += $addition;
+							$end_timestamp += $addition;
+						} else if($recurring_descriptor == "monthly") {
+							$start_timestamp = strtotime('+1 month', $start_timestamp); 
+							$end_timestamp = strtotime('+1 month', $end_timestamp);
+						} else if($recurring_descriptor == "yearly") {
+							$addition = 365*24*60*60*1000;
+							$start_timestamp += $addition;
+							$end_timestamp += $addition;
+						}
+
+						$insert[] = [
+							'sessions_start_time' => $start_timestamp,
+							'sessions_end_time' => $end_timestamp,
+							'sessions_active' => 1,
+							'sessions_events_id' => $event_id
+						];
+
+						$recurring--; //decrement recurring number
+					}
+				}
+
 				// create the session in the database
 				$new_session_id = DB::table('events_sessions')
-										->insertGetId([
-											'sessions_start_time' => $start_timestamp,
-											'sessions_end_time' => $end_timestamp,
-											'sessions_active' => 1,
-											'sessions_events_id' => $event_id
-										]);
+										->insert($insert);
 
-				return Response::json(['id' => $new_session_id], 200);
+				return Response::json([], 200);
 			}
 
 			return Response::json(['error' => 'Event does not exist'], 400);
