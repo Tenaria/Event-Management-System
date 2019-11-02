@@ -40,7 +40,7 @@ class RouterComponent extends React.PureComponent {
               <Menu.Item key="3">
                 <Link to="/events_manager">
                   <Icon type="file-add" />
-                  <span className="nav-text">Manage Events</span>
+                  <span className="nav-text">Manage Your Events</span>
                 </Link>
               </Menu.Item>
               <Menu.Item key="4">

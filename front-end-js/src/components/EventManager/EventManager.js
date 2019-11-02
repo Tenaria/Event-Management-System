@@ -2,7 +2,7 @@
   This is a component that is responsible for managing your event. So you are able to view a list
   of events you host.
  */
-import { Button, Card, Divider, Icon, Row, Spin, Tooltip, Typography } from 'antd';
+import { Button, Card, Divider, Empty, Icon, Menu, Row, Spin, Tooltip, Typography } from 'antd';
 import React from 'react';
 import { Redirect } from "react-router-dom";
 
@@ -16,7 +16,9 @@ const spinIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
 class EventManager extends React.Component {
   state = {
     addEvent: false,
+    currentMenu: 'current',
     loaded: false,
+    pastEvents: null,
     upcomingEvents: null,
     editingEvent: false,
   }
@@ -25,19 +27,33 @@ class EventManager extends React.Component {
 
   loadData = async () => {
     const token = this.context;
-
-    const res = await fetch('http://localhost:8000/get_upcoming_events', {
-      method: 'POST',
-      mode: 'cors',
-      cache: 'no-cache',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({token})
+    const loadData = url => new Promise(async (resolve, reject) => {
+      const res = await fetch(url, {
+        method: 'POST',
+        mode: 'cors',
+        cache: 'no-cache',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({token})
+      });
+      if (res.status === 200) {
+        const data = await res.json();
+        resolve(data);
+      } else {
+        resolve([]);
+      }
     });
 
-    const data = await res.json();
-    this.setState({upcomingEvents: data.events, loaded: true});
+    Promise.all([
+      loadData('http://localhost:8000/get_upcoming_events'),
+      loadData('http://localhost:8000/get_past_events')
+    ]).then(values => {
+      console.log(values);
+      this.setState({
+        upcomingEvents: values[0].events,
+        pastEvents: values[1],
+        loaded: true
+      });
+    })
   }
 
   // Collection of functions used to show/hide the add event form modal
@@ -70,8 +86,12 @@ class EventManager extends React.Component {
     this.loadData();
   }
 
+  changeMenu = e => this.setState({currentMenu: e.key})
+
   render() {
-    const { addEvent, loaded, upcomingEvents, editingEvent } = this.state;
+    const {
+      addEvent, currentMenu, loaded, pastEvents, upcomingEvents, editingEvent
+    } = this.state;
     const cardStyle = {
       margin: '1%',
       width: '30%'
@@ -81,16 +101,17 @@ class EventManager extends React.Component {
       textAlign: 'center',
       width: '100%'
     };
-    let eventElms = <div style={spinStyle}><Spin indicator={spinIcon}/></div>;
-
-    if (upcomingEvents && loaded && !editingEvent) {
-      eventElms = [
-        <Card key={-1} className="add-event-card" style={cardStyle} onClick={this.toggleAddForm}>
-          <Icon type="plus" style={{fontSize: 48}} />
-        </Card>
-      ];
-      for (let i = 0; i < upcomingEvents.length; ++i) {
-        const upcomingEvent = upcomingEvents[i];
+    const updateDisplay = (initialCard, events) => {
+      /*
+        Update the display of the elements and show the cards based on what the user selected
+      */
+      let eventElms = ( events.length > 0 ?
+        [initialCard] :
+        <Empty description="Could not find any events ..." style={{margin: 'auto'}} />
+      );
+      // Loop through the upcoming events
+      for (let i = 0; i < events.length; ++i) {
+        const upcomingEvent = events[i];
         eventElms.push(
           <Card
             className={upcomingEvent.events_cancelled ? "my-event-cancelled" : "my-event-card"}
@@ -146,18 +167,44 @@ class EventManager extends React.Component {
           </Card>
         );
       }
+      return (
+        <React.Fragment>
+          <Menu mode="horizontal" onClick={this.changeMenu} selectedKeys={[this.state.currentMenu]}>
+            <Menu.Item key="current">
+              <Icon type="caret-right" />
+              Current Events
+            </Menu.Item>
+            <Menu.Item key="past">
+              <Icon type="step-backward" />
+              Past Events
+            </Menu.Item>
+          </Menu>
+          <Row type="flex" style={{marginTop: '1em'}}>
+            {eventElms}
+          </Row>
+        </React.Fragment>
+      );
+    };
+    let displayElm = <div style={spinStyle}><Spin indicator={spinIcon}/></div>;
+
+    if (loaded && currentMenu === 'current') {
+      displayElm = updateDisplay(
+        <Card key={-1} className="add-event-card" style={cardStyle} onClick={this.toggleAddForm}>
+          <Icon type="plus" style={{fontSize: 48}} />
+        </Card>
+        , upcomingEvents
+      );
+    } else if (loaded && currentMenu === 'past') {
+      displayElm = updateDisplay(null, pastEvents)
     } else if (editingEvent) {
-      eventElms = <Redirect to="/event" />
+      displayElm = <Redirect to="/event" />
     }
 
     return (
       <div>
         <Title level={2}>Event Manager</Title>
         <p>Manage the events you have made.</p>
-        <Divider orientation="left">Your Events</Divider>
-        <Row type="flex">
-          {eventElms}
-        </Row>
+        {displayElm}
         <AddEventForm visible={addEvent} onCancel={this.closeAddForm} />
       </div>
     );

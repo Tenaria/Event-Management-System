@@ -39,7 +39,7 @@ class EventViewer extends React.Component {
         const data = await res.json();
         resolve(data);
       } else {
-        resolve([]);
+        resolve({events: []});
       }
     });
 
@@ -63,7 +63,7 @@ class EventViewer extends React.Component {
   changeMenu = e => this.setState({currentMenu: e.key})
 
   render() {
-    const { currentMenu, upcomingEvents, upcomingInvitedEvents, loaded } = this.state;
+    const { currentMenu, upcomingEvents, pastInvitedEvents, upcomingInvitedEvents, loaded } = this.state;
     const cardStyle = {
       margin: '1%',
       width: '30%'
@@ -142,7 +142,7 @@ class EventViewer extends React.Component {
     } else if (loaded && currentMenu === 'invited') {
       displayElm = updateDisplay(null, upcomingInvitedEvents);
     } else if (loaded && currentMenu === 'invitedPast') {
-      displayElm = updateDisplay(null, upcomingInvitedEvents);
+      displayElm = updateDisplay(null, pastInvitedEvents);
     }
 
     return (
