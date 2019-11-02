@@ -1824,7 +1824,7 @@ class eventAjaxController extends Controller
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
 		}
 
-		if (!isset($session_id) || empty($sessions_id)) {
+		if (!isset($session_id) || empty($session_id)) {
 			return Response::json(['error' => 'session id is either not set or null'], 400);
 		}
 
