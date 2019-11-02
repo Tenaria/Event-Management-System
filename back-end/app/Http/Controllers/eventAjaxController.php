@@ -1027,7 +1027,7 @@ class eventAjaxController extends Controller
 									["a.access_archived", 0],
 									["e.events_createdby", '!=', $token_data['user_id']]
 								])
-								->havingRaw('dates_earliest > '.time())
+								->havingRaw('dates_earliest < '.time())
 								->get();
 
 				if(!is_null($event_data)){
@@ -1366,9 +1366,8 @@ class eventAjaxController extends Controller
 									['e.events_active', 1],
 									['e.events_createdby', $token_data['user_id']]
 									//['e.events_status', 0]
-									
 								])
-								->havingRaw('dates_earliest > '.time())
+								->havingRaw('dates_earliest < '.time())
 								->get();
 
 				if(!is_null($event_data)) {
