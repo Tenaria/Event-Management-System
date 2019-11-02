@@ -40,18 +40,25 @@ class EventDetails extends React.Component {
         })
       });
 
-      const data = await res.json();
-
-      this.setState({
-        id: eventID,
-        name: data.events_name,
-        desc: data.events_desc,
-        created: data.events_createdat,
-        event_public: data.events_public,
-        location: data.attributes.location,
-        loaded: true,
-        valid: true
-      });
+      if (res.status === 200) {
+        const data = await res.json();
+  
+        this.setState({
+          id: eventID,
+          name: data.events_name,
+          desc: data.events_desc,
+          created: data.events_createdat,
+          event_public: data.events_public,
+          location: data.attributes.location,
+          loaded: true,
+          valid: true
+        });
+      } else {
+        this.setState({
+          loaded: true,
+          valid: false
+        });
+      }
     } else {
       this.setState({
         loaded: true,
@@ -61,46 +68,38 @@ class EventDetails extends React.Component {
   }
 
   render() {
-    const { upcomingEvents, loaded } = this.state;
+    const { id,
+      name,
+      desc,
+      created,
+      event_public,
+      location,
+      valid,
+      loaded
+    } = this.state;
     const spinStyle = {
       padding: '2em',
       textAlign: 'center',
       width: '100%'
     };
-    let eventElms = <div style={spinStyle}><Spin indicator={spinIcon}/></div>;
+    let displayElm = <div style={spinStyle}><Spin indicator={spinIcon}/></div>;
 
-    if (loaded && upcomingEvents.length > 0) {
-      eventElms = [];
-      for (let i = 0; i < upcomingEvents.length; ++i) {
-        const upcomingEvent = upcomingEvents[i];
-        eventElms.push(
-          <Card
-            className="my-event-card"
-            key={i}
-            style={cardStyle}
-            size="small"
-            title={upcomingEvent.events_name}
-          >
-            <p>{upcomingEvent.events_desc ? upcomingEvent.events_desc : 'No description'}</p>
-            <Row style={{
-              position: 'absolute',
-              right: '1em',
-              bottom: '1em'
-            }}>
-              <Button type="primary">Book Event</Button>
-            </Row>
-          </Card>
-        );
-      }
+    if (loaded && valid) {
+      displayElm = (
+        <div>
+          {name}
+        </div>
+      );
     } else if (loaded) {
-      eventElms = <Empty description="Could not find any events ..." style={{margin: 'auto'}} />;
-    }
+      displayElm = <Empty description={<span>No event found with the ID</span>}/>;
+    } 
 
     return (
       <React.Fragment>
         <Title level={2}>Event Details</Title>
-        <p>View a list of upcoming events made by other users. You can also search for events here</p>
+        <p>View details about a single event.</p>
         <Divider></Divider>
+        {displayElm}
       </React.Fragment>
     );
   }

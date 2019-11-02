@@ -2,7 +2,7 @@
   This is a component that is responsible for managing your event. So you are able to view a list
   of events you host.
  */
-import { Button, Card, Divider, Empty, Icon, Menu, Row, Spin, Tooltip, Typography } from 'antd';
+import { Button, Card, Empty, Icon, Menu, Row, Spin, Tooltip, Typography } from 'antd';
 import React from 'react';
 import { Redirect } from "react-router-dom";
 

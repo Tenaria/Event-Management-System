@@ -13,6 +13,7 @@ import EventManager from '../EventManager';
 import Dashboard from '../Dashboard';
 import Event from '../Event';
 import EventViewer from '../EventViewer';
+import EventDetails from '../EventDetails';
 import Test from '../Test';
 
 const {  Content, Sider } = Layout;
@@ -60,6 +61,9 @@ class RouterComponent extends React.PureComponent {
                   </Route>
                   <Route path='/event'>
                     <Event />
+                  </Route>
+                  <Route path='/event_details'>
+                    <EventDetails />
                   </Route>
                   <Route path='/events_viewer'>
                     <EventViewer />

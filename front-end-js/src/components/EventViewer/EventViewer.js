@@ -2,6 +2,7 @@
   This allows you to view the events that are available for the user
  */
 import { Button, Card, Empty, Icon, Input, Menu, Row, Spin, Typography } from 'antd';
+import { Redirect } from "react-router-dom";
 import React from 'react';
 
 import TokenContext from '../../context/TokenContext';
@@ -16,6 +17,7 @@ class EventViewer extends React.Component {
     upcomingEvents: null,
     upcomingInvitedEvents: null,
     pastInvitedEvents: null,
+    viewingEvent: false,
     loaded: false
   };
 
@@ -62,8 +64,20 @@ class EventViewer extends React.Component {
 
   changeMenu = e => this.setState({currentMenu: e.key})
 
+  selectEvent = id => {
+    sessionStorage.setItem('event_id', id);
+    this.setState({ viewingEvent: true });
+  }
+
   render() {
-    const { currentMenu, upcomingEvents, pastInvitedEvents, upcomingInvitedEvents, loaded } = this.state;
+    const {
+      currentMenu,
+      upcomingEvents,
+      pastInvitedEvents,
+      upcomingInvitedEvents,
+      viewingEvent,
+      loaded
+    } = this.state;
     const cardStyle = {
       margin: '1%',
       width: '30%'
@@ -99,7 +113,10 @@ class EventViewer extends React.Component {
               bottom: '1em'
             }}>
               <Button type="primary" style={{marginRight: '1em'}}>Confirm Going</Button>
-              <Button type="primary">View Event Detail</Button>
+              <Button
+                type="primary"
+                onClick={() => this.selectEvent(upcomingEvent.id)}
+              >View Event Detail</Button>
             </Row>
           </Card>
         );
@@ -121,7 +138,7 @@ class EventViewer extends React.Component {
             </Menu.Item>
           </Menu>
           {includedElm}
-          <Row type="flex" style={{marginTop: '1em'}}>
+          <Row type="flex">
             {eventElms}
           </Row>
         </React.Fragment>
@@ -129,7 +146,9 @@ class EventViewer extends React.Component {
     };
     let displayElm = <div style={spinStyle}><Spin indicator={spinIcon}/></div>;
 
-    if (loaded && currentMenu === 'public') {
+    if (viewingEvent) {
+      displayElm = <Redirect to="/event_details" />;
+    } else if (loaded && currentMenu === 'public') {
       displayElm = updateDisplay(
         <Row style={{marginTop: '1em'}}>
           <Search
