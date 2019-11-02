@@ -964,7 +964,7 @@ class eventAjaxController extends Controller
 								->where([
 									["a.access_user_id", $token_data['user_id']],
 									["a.access_active", 1], 
-									["a.access_accepted", 0],
+									//["a.access_accepted", 0],
 									["e.events_createdby", '!=', $token_data['user_id']],
 									["a.access_archived", 0]
 								])
@@ -1306,7 +1306,7 @@ class eventAjaxController extends Controller
 								->where([
 									["a.access_user_id", $token_data['user_id']],
 									["a.access_active", 1], 
-									["a.access_accepted", 0],
+									//["a.access_accepted", 0],
 									["e.events_createdby", '!=', $token_data['user_id']],
 									["a.access_archived", 0]
 								])
