@@ -187,7 +187,9 @@ class EventManager extends React.Component {
     };
     let displayElm = <div style={spinStyle}><Spin indicator={spinIcon}/></div>;
 
-    if (loaded && currentMenu === 'current') {
+    if (editingEvent) {
+      displayElm = <Redirect to="/event" />
+    } else if (loaded && currentMenu === 'current') {
       displayElm = updateDisplay(
         <Card key={-1} className="add-event-card" style={cardStyle} onClick={this.toggleAddForm}>
           <Icon type="plus" style={{fontSize: 48}} />
@@ -196,9 +198,7 @@ class EventManager extends React.Component {
       );
     } else if (loaded && currentMenu === 'past') {
       displayElm = updateDisplay(null, pastEvents)
-    } else if (editingEvent) {
-      displayElm = <Redirect to="/event" />
-    }
+    } 
 
     return (
       <div>
