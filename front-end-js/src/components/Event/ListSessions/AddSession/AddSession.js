@@ -104,7 +104,8 @@ class AddSession extends React.Component {
               >
                 <Select.Option value="daily">Daily</Select.Option>
                 <Select.Option value="weekly">Weekly</Select.Option>
-                <Select.Option value="month">Montly</Select.Option>
+                <Select.Option value="fortnightly">Fortnightly</Select.Option>
+                <Select.Option value="monthly">Monthly</Select.Option>
                 <Select.Option value="yearly">Yearly</Select.Option>
               </Select>
             </Form.Item>
