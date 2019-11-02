@@ -39,7 +39,7 @@ class EventManager extends React.Component {
         const data = await res.json();
         resolve(data);
       } else {
-        resolve([]);
+        resolve({events: []});
       }
     });
 
@@ -50,7 +50,7 @@ class EventManager extends React.Component {
       console.log(values);
       this.setState({
         upcomingEvents: values[0].events,
-        pastEvents: values[1],
+        pastEvents: values[1].events,
         loaded: true
       });
     })
