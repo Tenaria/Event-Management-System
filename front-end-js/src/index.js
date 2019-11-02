@@ -24,12 +24,14 @@ class Index extends React.Component {
     // TODO: Validate token is still valid.
 
     // Change this to get the token from the session storage
-    this.setState({ token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHBpcmF0aW9uIjoxNTc0NjUzNzI2LCJlbWFpbCI6ImxvbEBsb2wuY29tIiwibmFtZSI6InRlc3QgbG9sIn0.doXgGo6dPZCtmk7tbvYprkqW44X_9lGHiDmGvENyHjc' });
+    // this.setState({ token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHBpcmF0aW9uIjoxNTc0NjUzNzI2LCJlbWFpbCI6ImxvbEBsb2wuY29tIiwibmFtZSI6InRlc3QgbG9sIn0.doXgGo6dPZCtmk7tbvYprkqW44X_9lGHiDmGvENyHjc' });
+    
+    this.setState({token});
   }
 
   toggleRegister = () => this.setState({ register: !this.state.register });
   onLogin = (token) => {
-    console.log(token);
+    sessionStorage.setItem('token', token);
     this.setState({ token });
   }
 

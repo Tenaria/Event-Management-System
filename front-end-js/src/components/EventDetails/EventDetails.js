@@ -103,6 +103,7 @@ class EventDetails extends React.Component {
       displayElm = (
         <React.Fragment>
           <Title level={3}>{name}</Title>
+          <p><Icon type="environment" /> {location}</p>
           <p>{desc}</p>
           <Title level={3}>Event Attendees</Title>
           <div>{attendeeElm}</div>
