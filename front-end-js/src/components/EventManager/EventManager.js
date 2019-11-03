@@ -26,7 +26,7 @@ class EventManager extends React.Component {
   componentDidMount = () => { this.loadData(); }
 
   loadData = async () => {
-    const token = this.context;
+    const { token } = this.context;
     const loadData = url => new Promise(async (resolve, reject) => {
       const res = await fetch(url, {
         method: 'POST',
@@ -72,7 +72,7 @@ class EventManager extends React.Component {
   
   cancelEvent = async id => {
     // Sets an event to be cancelled
-    const token = this.context;
+    const { token } = this.context;
 
     const res = await fetch('http://localhost:8000/cancel_event', {
       method: 'POST',
