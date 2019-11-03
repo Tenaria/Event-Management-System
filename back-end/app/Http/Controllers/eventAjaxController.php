@@ -439,7 +439,27 @@ class eventAjaxController extends Controller
 		return Response::json([], 400);
 		}	
 	}
-	
+	public function get_event_clash(Request $request){
+		$token = $request->input('token');
+		$events_id = $request->input('events_id');
+		$start_timestamp = $request->input('start_timestamp');
+		$end_timestamp = $request->input('end_timestamp');
+		if(isset($token) && !empty($token)&& isset($start_timestamp)
+			&& !empty($end_timestamp) && isset($end_timestamp)&&!empty($end_timestamp)){
+			$token_data = validate_jwt($token);
+			if($token_data == true){
+				$user_id = $token_data["user_id"];
+				if(DB::table('events')->where([['events_id', $events_id], ['events_createdby', $user_id]])->exists()){
+					$attendees = DB::table('events_sessions_attendance as eas')
+						->where([[]])	
+				}
+									
+			}
+
+		}
+		return Response::json([], 400);
+
+	}
 	public function mark_as_going(Request $request) {
 		$token = $request->input('token');
 		$event_id = $request->input('event_id');
@@ -531,7 +551,7 @@ class eventAjaxController extends Controller
 								->updateOrInsert([
 									'sessions_attendance_id' => $event_id,
 									'sessions_attendance_sessions_id' => $session_id,
-									'sessions_attendance_access_id' => $session_data->access_id
+									'sessions_attendance_activeccess_id' => $session_data->access_id
 									],
 									['sessions_attendance_active' => 1,
 									 'sessions_attendance_going' => 1
