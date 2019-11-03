@@ -552,8 +552,33 @@ class eventAjaxController extends Controller
 			if($token_data == true){
 				$user_id = $token_data["user_id"];
 				if(DB::table('events')->where([['events_id', $events_id], ['events_createdby', $user_id]])->exists()){
-					$attendees = DB::table('events_sessions_attendance as eas')
-						->where([[]])	
+					$attendees = DB::table('events_sessions as es')
+						->where([['es.sessions_events_id', $events_id],['es.sessions_status', 0]])
+						->joins('events_sessions_attendance as esa', 'esa.sessions_attendance_sessions_id', '=', 'es.sessions_id')
+						->where([['esa.sessions_attendance_going', 1], ['esa.sessions_attendance_active', 0]])
+						->joins('events_access as ea', 'esa.sessions_attendance_access_id', '=', 'ea.access_id')
+						->where([['ea.access_active', 0], ['ea.access_archived', 0]])
+						->select('ea.access_user_id')						
+						->get();
+					if(isset($attendees) && !empty($attendees)){
+						$clashlist = [];
+						foreach($attendees as $attendee){
+							$clash = DB::tables('events_access as ea')
+								->where([['ea.access_user_id', $attendee->access_user_id],['ea.access_active', 0], ['ea.access_archived', 0]])
+								->joins('events_sessions_attendance as esa', 'ea.access_id', 'es.sessions_attendance_access_id')
+								->where([['esa.sessions_attendance_going', 1], ['esa.sessions_attendance_active', 0]])
+								->joins('events_sessions as es', 'esa.sessions_attendance_sessions_id', '=', 'es.sessions_id')
+								->where([['es.sessions_start_time', '<=', $start_timestamp],['es.sessions_end_time', '>=', $end_timestamp], ['es.sessions_active', 1], ['es.sessions_status', 0]])
+								->select('es.session_id')
+								->get()
+							if(isset($clash) && !empty($clash)){
+								$clashlist[] = ['sessions_id' => $clash->sessions_id];
+							}
+						}
+						return Response::json(['clashes'=> $clashlist], 200);
+
+					}
+
 				}
 									
 			}
