@@ -42,7 +42,7 @@ class EditAttendees extends React.Component {
       Once an user has entered more than 2 characters in the search bar, we will perform an ajax
       request for a list of users that has an email that contains the character specified.
     */
-    const token = this.context;
+    const { token } = this.context;
 
     if (value.length <= 2) return;
 

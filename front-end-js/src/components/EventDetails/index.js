@@ -3,4 +3,4 @@
  * index file in the directory, you do not need to import the top most js file but just the
  * directory itself.
  */
-export { default } from './EditSessions';
+export { default } from './EventDetails';
