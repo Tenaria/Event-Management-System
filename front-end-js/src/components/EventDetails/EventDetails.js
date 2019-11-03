@@ -111,7 +111,7 @@ class EventDetails extends React.Component {
 
   render() {
     const {
-      id, name, desc, created, event_public, location, attendees, sessions, valid, loaded
+      id, userId, name, desc, created, event_public, location, attendees, sessions, valid, loaded
     } = this.state;
     const attendeeElm = attendees.map(a =>
       <Tooltip key={a.id} title={a.email}>
@@ -148,6 +148,8 @@ class EventDetails extends React.Component {
                 renderItem={item => (
                   <BookSession
                     id={item.id}
+                    event_id={id}
+                    user_id={userId}
                     start_timestamp={item.start_timestamp}
                     end_timestamp={item.end_timestamp}
                     attendees={item.attendees}

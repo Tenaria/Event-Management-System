@@ -12,7 +12,27 @@ const { RangePicker } = DatePicker;
 class BookSession extends React.Component {
   state = {
     startDateTime: this.props.start_timestamp,
-    endDateTime: this.props.end_timestamp
+    endDateTime: this.props.end_timestamp,
+    confirmedGoing: false
+  }
+
+  confirmSession = async () => {
+    const { token } = this.context;
+    const { id, event_id } = this.props;
+
+    const res = await fetch('http://localhost:8000/mark_as_going', {
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        event_id: event_id,
+        session_id: id,
+        token
+      })
+    });
   }
 
   render() {
@@ -20,6 +40,12 @@ class BookSession extends React.Component {
 
     return (
       <List.Item style={{display: 'flex'}}>
+        {/* <div style={{paddingRight: '0.5em'}}>
+          <Button
+            icon="down"
+            shape="circle"
+          />
+        </div> */}
         <div style={{flexGrow: 1}}>
           <RangePicker
             defaultValue={[
@@ -43,7 +69,7 @@ class BookSession extends React.Component {
                 border: 'none',
                 color: 'white',
               }}
-              onClick={this.toggleSession}
+              onClick={this.confirmSession}
             />
           </Tooltip>
         </div>
