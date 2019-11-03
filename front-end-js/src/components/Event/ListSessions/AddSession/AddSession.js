@@ -15,7 +15,7 @@ class AddSession extends React.Component {
     startDateTime: null,
     endDateTime: null,
     freq: 1,
-    freqType: 'daily'
+    freqType: 'null'
   }
 
   changeFreq = value => this.setState({ freq: value });
@@ -48,7 +48,7 @@ class AddSession extends React.Component {
         start_timestamp: startDateTime,
         end_timestamp: endDateTime,
         recurring: freq,
-        recurring_descriptor: freqType,
+        recurring_descriptor: (freqType === 'null' ? null : freqType),
         token
       })
     });
@@ -64,6 +64,7 @@ class AddSession extends React.Component {
   }
 
   render() {
+    const { freqType } = this.state;
     const { onCancel, visible } = this.props;
 
     return (
@@ -92,16 +93,18 @@ class AddSession extends React.Component {
                 min={1}
                 style={{width: '100%'}}
                 onChange={this.changeFreq}
+                disabled={freqType === 'null' ? true : false}
               />
             </Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item label="Type" style={{margin: 0}}>
               <Select
-                defaultValue="daily"
+                defaultValue={freqType}
                 style={{width: '100%'}}
                 onChange={this.changeFreqType}
               >
+                <Select.Option value="null">No Repeats</Select.Option>
                 <Select.Option value="daily">Daily</Select.Option>
                 <Select.Option value="weekly">Weekly</Select.Option>
                 <Select.Option value="fortnightly">Fortnightly</Select.Option>

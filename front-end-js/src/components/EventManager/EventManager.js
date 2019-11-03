@@ -120,10 +120,10 @@ class EventManager extends React.Component {
             size="small"
             title={[
               (upcomingEvent.events_cancelled ? 
-                <Tooltip title="Your event is cancelled">
+                <Tooltip key={i} title="Your event is cancelled">
                   <Icon type="stop" style={{color: "white", marginRight: '0.5em'}} />
                 </Tooltip> :
-                <Tooltip title={upcomingEvent.events_public ?
+                <Tooltip key={i} title={upcomingEvent.events_public ?
                   "Your event is publicly visible!" :
                   "Your event is not publicly visible"
                   }
