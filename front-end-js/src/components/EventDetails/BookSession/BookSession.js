@@ -1,7 +1,7 @@
 /*
   Edit the sessions of an event
  */
-import { Button, DatePicker, List, message } from 'antd';
+import { Button, DatePicker, List, Tooltip } from 'antd';
 import React from 'react';
 import moment from 'moment';
 
@@ -35,15 +35,17 @@ class BookSession extends React.Component {
           />
         </div>
         <div style={{paddingLeft: '0.5em', textAlign: 'right'}}>
-          <Button
-            icon="check"
-            style={{
-              background: '#48BB78',
-              border: 'none',
-              color: 'white',
-            }}
-            onClick={this.toggleSession}
-          />
+          <Tooltip title="Confirm you are going for this session!">
+            <Button
+              icon="check"
+              style={{
+                background: '#48BB78',
+                border: 'none',
+                color: 'white',
+              }}
+              onClick={this.toggleSession}
+            />
+          </Tooltip>
         </div>
       </List.Item>
     );

@@ -2,7 +2,7 @@
   This allows you to view the events that are available for the user
  */
 import {
-  Avatar, Button, Card, Divider, Empty, Icon, List, Row, Spin, Tooltip, Typography
+  Avatar, Button, Card, Divider, Empty, Icon, List, Row, Col, Spin, Tooltip, Typography
 } from 'antd';
 import React from 'react';
 
@@ -130,25 +130,32 @@ class EventDetails extends React.Component {
     if (loaded && valid) {
       displayElm = (
         <React.Fragment>
-          <Title level={3}>{name}</Title>
-          <p><Icon type="environment" /> {location}</p>
-          <p>{desc}</p>
-          <Title level={3}>Event Attendees</Title>
-          <div>{attendeeElm}</div>
-          <List
-            bordered
-            dataSource={sessions}
-            header="Sessions"
-            style={{marginTop: '1em'}}
-            renderItem={item => (
-              <BookSession
-                id={item.id}
-                start_timestamp={item.start_timestamp}
-                end_timestamp={item.end_timestamp}
-              />
-            )}
-          >
-          </List>
+          <Row gutter={32} type="flex">
+            <Col sm={{span: 24, order: 1}} md={{span: 12, order: 2}}>
+              <Title level={3}>{name}</Title>
+              <p><Icon type="environment" /> {location}</p>
+              <p>{desc}</p>
+              <Title level={3}>Event Attendees</Title>
+              <div>{attendeeElm}</div>
+            </Col>
+            <Col sm={{span: 24, order: 2}} md={{span: 12, order: 1}}>
+              <List
+                bordered
+                className="custom-sessions"
+                dataSource={sessions}
+                header="Sessions"
+                style={{marginTop: '1em'}}
+                renderItem={item => (
+                  <BookSession
+                    id={item.id}
+                    start_timestamp={item.start_timestamp}
+                    end_timestamp={item.end_timestamp}
+                  />
+                )}
+              >
+              </List>
+            </Col>
+          </Row>
         </React.Fragment>
       );
     } else if (loaded) {
