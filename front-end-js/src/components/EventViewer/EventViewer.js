@@ -26,7 +26,7 @@ class EventViewer extends React.Component {
   }
 
   loadEvents = term => {
-    const token = this.context;
+    const { token } = this.context;
 
     const loadData = url => new Promise(async (resolve, reject) => {
       const res = await fetch(url, {
@@ -112,11 +112,10 @@ class EventViewer extends React.Component {
               right: '1em',
               bottom: '1em'
             }}>
-              <Button type="primary" style={{marginRight: '1em'}}>Confirm Going</Button>
               <Button
                 type="primary"
                 onClick={() => this.selectEvent(upcomingEvent.id)}
-              >View Event Detail</Button>
+              >View Event Details</Button>
             </Row>
           </Card>
         );

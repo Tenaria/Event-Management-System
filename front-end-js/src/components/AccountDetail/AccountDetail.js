@@ -20,7 +20,7 @@ class AccountDetail extends React.Component {
   }
 
   loadInfo = async () => {
-    const token = this.context;
+    const { token } = this.context;
 
     const res = await fetch('http://localhost:8000/get_account_details', {
       method: 'POST',

@@ -26,7 +26,7 @@ class EventManager extends React.Component {
   componentDidMount = () => { this.loadData(); }
 
   loadData = async () => {
-    const token = this.context;
+    const { token } = this.context;
     const loadData = url => new Promise(async (resolve, reject) => {
       const res = await fetch(url, {
         method: 'POST',
@@ -72,9 +72,25 @@ class EventManager extends React.Component {
   
   cancelEvent = async id => {
     // Sets an event to be cancelled
-    const token = this.context;
+    const { token } = this.context;
 
     const res = await fetch('http://localhost:8000/cancel_event', {
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ token, event_id: id })
+    });
+    this.loadData();
+  }
+
+  uncancelEvent = async id => {
+    // Sets an event to be cancelled
+    const { token } = this.context;
+
+    const res = await fetch('http://localhost:8000/uncancel_event', {
       method: 'POST',
       mode: 'cors',
       cache: 'no-cache',
@@ -120,10 +136,10 @@ class EventManager extends React.Component {
             size="small"
             title={[
               (upcomingEvent.events_cancelled ? 
-                <Tooltip title="Your event is cancelled">
+                <Tooltip key={i} title="Your event is cancelled">
                   <Icon type="stop" style={{color: "white", marginRight: '0.5em'}} />
                 </Tooltip> :
-                <Tooltip title={upcomingEvent.events_public ?
+                <Tooltip key={i} title={upcomingEvent.events_public ?
                   "Your event is publicly visible!" :
                   "Your event is not publicly visible"
                   }
@@ -151,12 +167,16 @@ class EventManager extends React.Component {
                   background: '#38B2AC',
                   border: 'none',
                   color: 'white',
-                  marginRight: (upcomingEvent.events_cancelled ? '' : '0.5em')
+                  marginRight: (upcomingEvent.events_cancelled ? '0.5em' : '0.5em')
                 }}
                 onClick={() => this.selectEvent(upcomingEvent.events_id)}
               />
               {upcomingEvent.events_cancelled ?
-                '' :
+                <Button
+                  type="danger"
+                  icon="meh"
+                  onClick={() => this.uncancelEvent(upcomingEvent.events_id)}
+                /> :
                 <Button
                   type="danger"
                   icon="stop"

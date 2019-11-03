@@ -1,8 +1,12 @@
 /*
   This allows you to view the events that are available for the user
  */
-import { Button, Card, Divider, Empty, Icon, Row, Spin, Typography } from 'antd';
+import {
+  Avatar, Button, Card, Divider, Empty, Icon, List, Row, Col, Spin, Tooltip, Typography
+} from 'antd';
 import React from 'react';
+
+import BookSession from './BookSession';
 
 import TokenContext from '../../context/TokenContext';
 
@@ -17,48 +21,90 @@ class EventDetails extends React.Component {
     created: null,
     event_public: false,
     location: '',
+    attendees: [],
+    sessions: [],
     loaded: false,
     valid: false
   };
 
+  updateSessions = new Promise(async (resolve, reject) => {
+    const eventID = sessionStorage.getItem('event_id');
+    const { token } = this.context;
+    const res = await fetch('http://localhost:8000/load_event_sessions', {
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        event_id: eventID,
+        token
+      })
+    });
+
+    if (res.status === 200) {
+      const data = await res.json();
+      resolve(data);
+    } else {
+      resolve([]);
+    }
+  })
+
   componentDidMount = async () => {
     // The instant the element is added to the DOM, load the information
     const eventID = sessionStorage.getItem('event_id');
-    const token = this.context;
+    const { token } = this.context;
 
     if (eventID) {
-      const res = await fetch('http://localhost:8000/get_event_details', {
-        method: 'POST',
-        mode: 'cors',
-        cache: 'no-cache',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          event_id: eventID,
-          token
-        })
-      });
+      Promise.all([
+        new Promise(async (resolve, reject) => {
+          const res = await fetch('http://localhost:8000/get_attendees_of_event', {
+            method: 'POST',
+            mode: 'cors',
+            cache: 'no-cache',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({event_id: eventID, token})
+          });
 
-      if (res.status === 200) {
-        const data = await res.json();
-  
+          if (res.status === 200) {
+            const data = await res.json();
+            resolve(data.attendees);
+          } else {
+            resolve([]);
+          }
+        }),
+        new Promise(async (resolve, reject) => {
+          const res = await fetch('http://localhost:8000/get_event_details', {
+            method: 'POST',
+            mode: 'cors',
+            cache: 'no-cache',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({event_id: eventID, token})
+          });
+
+          if (res.status === 200) {
+            const data = await res.json();
+            resolve(data);
+          } else {
+            resolve([]);
+          }
+        }),
+        this.updateSessions
+      ]).then(values => {
         this.setState({
           id: eventID,
-          name: data.events_name,
-          desc: data.events_desc,
-          created: data.events_createdat,
-          event_public: data.events_public,
-          location: data.attributes.location,
+          name: values[1].events_name,
+          desc: values[1].events_desc,
+          created: values[1].events_createdat,
+          event_public: values[1].events_public,
+          location: values[1].attributes.location,
+          attendees: values[0],
+          sessions: values[2].sessions,
           loaded: true,
           valid: true
         });
-      } else {
-        this.setState({
-          loaded: true,
-          valid: false
-        });
-      }
+      });
     } else {
       this.setState({
         loaded: true,
@@ -67,16 +113,20 @@ class EventDetails extends React.Component {
     }
   }
 
+  updateSessionCB = async () => {
+    let data = await this.updateSessionCB();
+    this.setState({sessions: data.sessions});
+  }
+
   render() {
-    const { id,
-      name,
-      desc,
-      created,
-      event_public,
-      location,
-      valid,
-      loaded
+    const {
+      id, userId, name, desc, created, event_public, location, attendees, sessions, valid, loaded
     } = this.state;
+    const attendeeElm = attendees.map(a =>
+      <Tooltip key={a.id} title={a.email}>
+        <Avatar icon="user" />
+      </Tooltip>
+    );
     const spinStyle = {
       padding: '2em',
       textAlign: 'center',
@@ -84,11 +134,42 @@ class EventDetails extends React.Component {
     };
     let displayElm = <div style={spinStyle}><Spin indicator={spinIcon}/></div>;
 
+    console.log(sessions);
+
     if (loaded && valid) {
       displayElm = (
-        <div>
-          {name}
-        </div>
+        <React.Fragment>
+          <Row gutter={32} type="flex">
+            <Col sm={{span: 24, order: 1}} md={{span: 12, order: 2}}>
+              <Title level={3}>{name}</Title>
+              <p><Icon type="environment" /> {location}</p>
+              <p>{desc}</p>
+              <Title level={3}>Event Attendees</Title>
+              <div>{attendeeElm}</div>
+            </Col>
+            <Col sm={{span: 24, order: 2}} md={{span: 12, order: 1}}>
+              <List
+                bordered
+                className="custom-sessions"
+                dataSource={sessions}
+                header="Sessions"
+                style={{marginTop: '1em'}}
+                renderItem={item => (
+                  <BookSession
+                    id={item.id}
+                    event_id={id}
+                    user_id={userId}
+                    start_timestamp={item.start_timestamp}
+                    end_timestamp={item.end_timestamp}
+                    attendees={item.attendees_going}
+                    cb={this.updateSessionCB}
+                  />
+                )}
+              >
+              </List>
+            </Col>
+          </Row>
+        </React.Fragment>
       );
     } else if (loaded) {
       displayElm = <Empty description={<span>No event found with the ID</span>}/>;
