@@ -86,6 +86,22 @@ class EventManager extends React.Component {
     this.loadData();
   }
 
+  uncancelEvent = async id => {
+    // Sets an event to be cancelled
+    const { token } = this.context;
+
+    const res = await fetch('http://localhost:8000/uncancel_event', {
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ token, event_id: id })
+    });
+    this.loadData();
+  }
+
   changeMenu = e => this.setState({currentMenu: e.key})
 
   render() {
@@ -151,12 +167,16 @@ class EventManager extends React.Component {
                   background: '#38B2AC',
                   border: 'none',
                   color: 'white',
-                  marginRight: (upcomingEvent.events_cancelled ? '' : '0.5em')
+                  marginRight: (upcomingEvent.events_cancelled ? '0.5em' : '0.5em')
                 }}
                 onClick={() => this.selectEvent(upcomingEvent.events_id)}
               />
               {upcomingEvent.events_cancelled ?
-                '' :
+                <Button
+                  type="danger"
+                  icon="meh"
+                  onClick={() => this.uncancelEvent(upcomingEvent.events_id)}
+                /> :
                 <Button
                   type="danger"
                   icon="stop"
