@@ -150,6 +150,7 @@ class EventDetails extends React.Component {
                     id={item.id}
                     start_timestamp={item.start_timestamp}
                     end_timestamp={item.end_timestamp}
+                    attendees={item.attendees}
                   />
                 )}
               >

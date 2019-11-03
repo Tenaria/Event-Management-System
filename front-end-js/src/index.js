@@ -15,6 +15,7 @@ import TokenContext from './context/TokenContext';
 class Index extends React.Component {
   state = {
     token: null,
+    userEmail: null,
     register: false
   }
 
@@ -22,6 +23,13 @@ class Index extends React.Component {
     const token = sessionStorage.getItem('token');
 
     // TODO: Validate token is still valid.
+    if (token) {
+      const data = token.split('.');
+      if (data.length > 1) {
+        const jsonData = JSON.parse(atob(data[1]));
+        console.log(jsonData);
+      }
+    }
 
     // Change this to get the token from the session storage
     // this.setState({ token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHBpcmF0aW9uIjoxNTc0NjUzNzI2LCJlbWFpbCI6ImxvbEBsb2wuY29tIiwibmFtZSI6InRlc3QgbG9sIn0.doXgGo6dPZCtmk7tbvYprkqW44X_9lGHiDmGvENyHjc' });
