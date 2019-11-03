@@ -112,11 +112,10 @@ class EventViewer extends React.Component {
               right: '1em',
               bottom: '1em'
             }}>
-              <Button type="primary" style={{marginRight: '1em'}}>Confirm Going</Button>
               <Button
                 type="primary"
                 onClick={() => this.selectEvent(upcomingEvent.id)}
-              >View Event Detail</Button>
+              >View Event Details</Button>
             </Row>
           </Card>
         );
