@@ -160,8 +160,8 @@ class eventAjaxController extends Controller
 	public function edit_account(Request $request) {
 		$fnameInput = $request->input('fname'); // STRING; NOT EMPTY;
 		$lnameInput = $request->input('lname'); // STRING; NOT EMPTY;
-		$password = $request->input('password'); // STRING; NOT EMPTY;
-		$password_confirm= $request->input('password_confirm'); // STRING; NOT EMPTY;
+		$password = $request->input('password'); // STRING;;
+		$password_confirm= $request->input('password_confirm'); // STRING;
 		$token = $request->input('token'); // STRING; NOT EMPTY
 
 		// check valus are set
@@ -175,14 +175,6 @@ class eventAjaxController extends Controller
 
 		if (!isset($lnameInput) || empty($lnameInput)) {
 			return Response::json(['error' => 'last name is either not set or null'], 400);
-		}
-
-		if (!isset($password) || empty($password)) {
-			return Response::json(['error' => 'password is either not set or null'], 400);
-		}
-
-		if (!isset($password_confirm) || empty($password_confirm)) {
-			return Response::json(['error' => 'password confirmation is either not set or null'], 400);
 		}
 
 		if(isset($token) && !empty($token)) {
@@ -548,10 +540,54 @@ class eventAjaxController extends Controller
 			return Response::json([], 400);
 		}	
 	}
-	
-	/*
-		function to mark the logged in user as going to an event's session
-	*/
+
+	public function get_event_clash(Request $request){
+		$token = $request->input('token');
+		$events_id = $request->input('events_id');
+		$start_timestamp = $request->input('start_timestamp');
+		$end_timestamp = $request->input('end_timestamp');
+		if(isset($token) && !empty($token)&& isset($start_timestamp)
+			&& !empty($end_timestamp) && isset($end_timestamp)&&!empty($end_timestamp)){
+			$token_data = validate_jwt($token);
+			if($token_data == true){
+				$user_id = $token_data["user_id"];
+				if(DB::table('events')->where([['events_id', $events_id], ['events_createdby', $user_id]])->exists()){
+					$attendees = DB::table('events_sessions as es')
+						->where([['es.sessions_events_id', $events_id],['es.sessions_status', 0]])
+						->joins('events_sessions_attendance as esa', 'esa.sessions_attendance_sessions_id', '=', 'es.sessions_id')
+						->where([['esa.sessions_attendance_going', 1], ['esa.sessions_attendance_active', 0]])
+						->joins('events_access as ea', 'esa.sessions_attendance_access_id', '=', 'ea.access_id')
+						->where([['ea.access_active', 0], ['ea.access_archived', 0]])
+						->select('ea.access_user_id')						
+						->get();
+					if(isset($attendees) && !empty($attendees)){
+						$clashlist = [];
+						foreach($attendees as $attendee){
+							$clash = DB::tables('events_access as ea')
+								->where([['ea.access_user_id', $attendee->access_user_id],['ea.access_active', 0], ['ea.access_archived', 0]])
+								->joins('events_sessions_attendance as esa', 'ea.access_id', 'es.sessions_attendance_access_id')
+								->where([['esa.sessions_attendance_going', 1], ['esa.sessions_attendance_active', 0]])
+								->joins('events_sessions as es', 'esa.sessions_attendance_sessions_id', '=', 'es.sessions_id')
+								->where([['es.sessions_start_time', '<=', $start_timestamp],['es.sessions_end_time', '>=', $end_timestamp], ['es.sessions_active', 1], ['es.sessions_status', 0]])
+								->select('es.session_id')
+								->get();
+							if(isset($clash) && !empty($clash)) {
+								$clashlist[] = ['sessions_id' => $clash->sessions_id];
+							}
+						}
+						return Response::json(['clashes'=> $clashlist], 200);
+
+					}
+
+				}
+									
+			}
+
+		}
+		return Response::json([], 400);
+
+	}
+
 	public function mark_as_going(Request $request) {
 		$token = $request->input('token'); // STRING; NOT EMPTY
 		$event_id = $request->input('event_id'); // INTEGER; NOT EMPTY
@@ -600,7 +636,8 @@ class eventAjaxController extends Controller
 							$curr_event_access = DB::table('events_access')
 												->where([
 													['access_events_id', $event_id],
-													['access_active', 1]
+													['access_active', 1],
+													['access_user_id', $token_data['user_id']]
 												])
 												->first();
 
@@ -622,7 +659,6 @@ class eventAjaxController extends Controller
 							if($access_id != 0) {
 								DB::table('events_sessions_attendance')
 									->updateOrInsert([
-										'sessions_attendance_id' => $event_id,
 										'sessions_attendance_sessions_id' => $session_id,
 										'sessions_attendance_access_id' => $access_id
 										],
@@ -659,9 +695,8 @@ class eventAjaxController extends Controller
 							//update or insert attendance in database as necessary
 							DB::table('events_sessions_attendance')
 								->updateOrInsert([
-									'sessions_attendance_id' => $event_id,
 									'sessions_attendance_sessions_id' => $session_id,
-									'sessions_attendance_access_id' => $session_data->access_id
+									'sessions_attendance_activeccess_id' => $session_data->access_id
 									],
 									['sessions_attendance_active' => 1,
 									 'sessions_attendance_going' => 1
@@ -679,6 +714,70 @@ class eventAjaxController extends Controller
 			}					
 		}						
 		return Response::json([], 400);
+	}
+
+	public function unmark_as_going(Request $request) {
+		$token = $request->input('token'); // STRING; NOT EMPTY
+		$event_id = $request->input('event_id'); //INTEGER; NOT EMPTY
+		$session_id = $request->input('session_id'); // INTEGER; NOT EMPTY
+
+		// check all values exist as necessary
+		if (!isset($event_id) || empty($event_id)) {
+			return Response::json(['error' => 'event id is either not set or null'], 400);
+		}
+
+		if (!isset($session_id) || empty($session_id)) {
+			return Response::json(['error' => 'session id is either not set or null'], 400);
+		}
+		
+		if(isset($token) && !empty($token)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				//make sure event, session and access exist
+				$access = DB::table('events AS e')
+								->join('events_access AS a', function($join) {
+									$join->on('a.access_events_id', '=', 'e.events_id')
+										->where('a.access_active', 1);
+								})
+								->join('events_sessions AS s', function($join) use($session_id) {
+									$join->on('s.sessions_events_id', '=', 'a.access_events_id')
+										->where([
+											['s.sessions_id', $session_id],
+											['s.sessions_active', 1],
+											['s.sessions_status', 0]
+										]);
+								})
+								->join('events_sessions_attendance AS sa', function($join) use ($session_id) {
+									$join->on('a.access_id', '=', 'sa.sessions_attendance_access_id')
+										->where([
+											['sa.sessions_attendance_going', 1],
+											['sa.sessions_attendance_active', 1]
+										]);
+								})
+								->where([
+									['e.events_id', $event_id],
+									['e.events_active', 1],
+									['e.events_status', 0]
+								])
+								->first();
+
+				if(!is_null($access)) {
+					$sessions_attendance_id = $access->sessions_attendance_id;
+
+					DB::table('events_sessions_attendance')
+						->where([
+							['sessions_attendance_id', $sessions_attendance_id]
+						])
+						->delete();
+
+					return Response::json([], 200);
+				}
+
+				return Response::json(['error' => 'event, session or access does not exist in the database'], 400);
+			}
+		}
+		
+		return Response::json(['error' => 'JWT is either not set or null'], 400);
 	}
 
 	/*
@@ -701,14 +800,29 @@ class eventAjaxController extends Controller
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
 				// check event exists
-				$event_data = DB::table('events')
+				$event_data = DB::table('events AS e')
+								->select('e.*', 'a.access_id')
+								->leftJoin('events_access AS a', function($join) use($token_data) {
+									$join->on('a.access_events_id', '=', 'e.events_id')
+										->where([
+											['a.access_active', 1],
+											['a.access_user_id', $token_data['user_id']]
+										]);
+								})
 								->where ([
-									['events_active', 1],
-									['events_id', $event_id]
+									['e.events_active', 1],
+									['e.events_id', $event_id]
 								])
 								->first();
 
 				if(!is_null($event_data)) {
+					//if the event is private, we need to do some extra checking to see if the user is allowed to see it
+					if($event_data->events_public == 0) {
+						if(!isset($event_data->access_id) || empty($event_data->access_id) || is_null($event_data->access_id)) {
+							return Response::json(['error' => 'unauthorised access to private event'], 400);
+						}
+					}
+
 					// grab string to primary key mapping of attributes
 					$attributes_name_to_id = get_event_attributes_pk();
 
@@ -894,7 +1008,7 @@ class eventAjaxController extends Controller
 									['e.events_createdby',$token_data['user_id']]
 									
 								])
-								->havingRaw('dates_latest=0 OR dates_latest > '.time())
+								->havingRaw('dates_latest=0 OR dates_latest > '.round(microtime(true) * 1000))
 								->get();
 
 				if(!is_null($event_data)) {
@@ -959,7 +1073,7 @@ class eventAjaxController extends Controller
 				//query for events that a user has not created but has been invited to 
 				// and is in the future under the definitions specified in the function explanation
 				$event_data = DB::table('events_access AS a')
-								->select('e.events_id', 'e.events_name', 'e.events_public', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"))
+								->select('e.events_id', 'e.events_name', 'e.events_public', 'e.events_status', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"))
 								->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
 								->where([
 									["a.access_user_id", $token_data['user_id']],
@@ -968,7 +1082,7 @@ class eventAjaxController extends Controller
 									["e.events_createdby", '!=', $token_data['user_id']],
 									["a.access_archived", 0]
 								])
-								->havingRaw('dates_latest=0 OR dates_latest > '.time())
+								->havingRaw('dates_latest=0 OR dates_latest > '.round(microtime(true) * 1000))
 								->get();
 
 				if(!is_null($event_data)){
@@ -1027,7 +1141,7 @@ class eventAjaxController extends Controller
 				$events_array = [];
 				//query the database for these events
 				$event_data = DB::table('events_access AS a')
-								->select('e.events_id', 'e.events_name', 'e.events_public', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start_time ASC LIMIT 1), 2147483647) as 'dates_earliest'"))
+								->select('e.events_id', 'e.events_name', 'e.events_public', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start_time ASC LIMIT 1), 2147483647000) as 'dates_earliest'"))
 								->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
 								->where([
 									["a.access_user_id", $token_data['user_id']],
@@ -1035,7 +1149,7 @@ class eventAjaxController extends Controller
 									["a.access_archived", 0],
 									["e.events_createdby", '!=', $token_data['user_id']]
 								])
-								->havingRaw('dates_earliest > '.time())
+								->havingRaw('dates_earliest < '.round(microtime(true) * 1000))
 								->get();
 
 				if(!is_null($event_data)){
@@ -1215,10 +1329,12 @@ class eventAjaxController extends Controller
 		if($token_data == true) {
 			//array to store all user info for users that are attending an event
 			$return = [];
+			
+			
 
 			//get all the attendees of an evnet where the event is active and the user has been invited to the event
 			$attendees = DB::table('events_access AS a')
-							->select('u.users_email', 'u.users_id')
+							->select('u.users_email', 'u.users_id', 'e.events_public', 'a.access_user_id')
 							->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
 							->join('users AS u', 'a.access_user_id', '=', 'u.users_id')
 							->where([
@@ -1229,13 +1345,28 @@ class eventAjaxController extends Controller
 							->get();
 
 			if(!is_null($attendees)) {
+				$return_error = true;
+				
+
 				foreach($attendees AS $attendee) {
+					//if the event is private, we need to do some extra checking to see if the user is allowed to see it
+					if($attendee->events_public == 0) {
+						if($attendee->access_user_id == $token_data['user_id']) {
+							$return_error = false;
+						}
+					} else if($attendee->events_public == 1) {
+						$return_error = false;
+					}
 					// build array of user details
 					$return[] = [
 						'email' => $attendee->users_email,
 						'id' => $attendee->users_id
 					];
 				}
+			}
+
+			if($return_error == true) {
+				return Response::json(['error' => 'unauthorised access to private event'], 400);
 			}
 
 			// return user details if applicable
@@ -1263,16 +1394,25 @@ class eventAjaxController extends Controller
 				$thisWk_event_number = 0;
 				
 				//getting last week events
+<<<<<<< HEAD
 				$last_public_event_data = DB::table('events AS e')
 								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'dates_earliest'"))
+=======
+				$past_public_event_data = DB::table('events AS e')
+								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start_time ASC LIMIT 1), 2147483647000) as 'dates_earliest'"))
+>>>>>>> 25fe8714cd6bcd848a4200a7450e9eb42f25fa5f
 								->where ([
 									['e.events_active', 1],
 									['e.events_createdby', $token_data['user_id']]
 									//['e.events_status', 0]
 									
 								])
+<<<<<<< HEAD
 								 // 7 * 24 * 60 * 60 is the unix timp stamp calculated in second for one week time
 								->havingRaw('dates_earliest > '.time() - 7 * 24 * 60 * 60)
+=======
+								->havingRaw('dates_earliest < '.round(microtime(true) * 1000))
+>>>>>>> 25fe8714cd6bcd848a4200a7450e9eb42f25fa5f
 								->get();
 				
 				if(!is_null($last_public_event_data)) {
@@ -1282,8 +1422,13 @@ class eventAjaxController extends Controller
 				}
 				
 				
+<<<<<<< HEAD
 				$last_private_event_data = DB::table('events_access AS a')
 								->select('e.events_id', 'e.events_name', 'e.events_public', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'dates_earliest'"))
+=======
+				$past_private_event_data = DB::table('events_access AS a')
+								->select('e.events_id', 'e.events_name', 'e.events_public', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start_time ASC LIMIT 1), 2147483647000) as 'dates_earliest'"))
+>>>>>>> 25fe8714cd6bcd848a4200a7450e9eb42f25fa5f
 								->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
 								->where([
 									["a.access_user_id", $token_data['user_id']],
@@ -1291,11 +1436,19 @@ class eventAjaxController extends Controller
 									["a.access_archived", 0],
 									["e.events_createdby", '!=', $token_data['user_id']]
 								])
+<<<<<<< HEAD
 								// 7 * 24 * 60 * 60 is the unix timp stamp calculated in second for one week time
 								->havingRaw('dates_earliest > '.time() - 7 * 24 * 60 * 60)
 								->get();
 				if(!is_null($last_private_event_data)) {
 					foreach($last_private_event_data as $events) {
+=======
+								->havingRaw('dates_earliest < '.round(microtime(true) * 1000))
+								->get();
+
+				if(!is_null($past_private_event_data)) {
+					foreach($past_private_event_data as $events) {
+>>>>>>> 25fe8714cd6bcd848a4200a7450e9eb42f25fa5f
 						$lastWk_event_number++;
 					}
 				}				
@@ -1312,8 +1465,12 @@ class eventAjaxController extends Controller
 									["e.events_createdby", '!=', $token_data['user_id']],
 									["a.access_archived", 0]
 								])
+<<<<<<< HEAD
 								// 7 * 24 * 60 * 60 is the unix timp stamp calculated in second for one week time
 								->havingRaw('dates_latest=0 OR dates_latest > '.time() +  7 * 24 * 60 * 60)
+=======
+								->havingRaw('dates_latest=0 OR dates_latest > '.round(microtime(true) * 1000))
+>>>>>>> 25fe8714cd6bcd848a4200a7450e9eb42f25fa5f
 								->get();
 				if(!is_null($next_private_event_data)) {
 					foreach($next_private_event_data as $private_events) {
@@ -1336,8 +1493,12 @@ class eventAjaxController extends Controller
 									['e.events_createdby','!=',$token_data['user_id']],
 									['e.events_public', 1]
 								])
+<<<<<<< HEAD
 								// 7 * 24 * 60 * 60 is the unix timp stamp calculated in second for one week time
 								->havingRaw('dates_latest=0 OR dates_latest > '.time() +  7 * 24 * 60 * 60)
+=======
+								->havingRaw('dates_latest=0 OR dates_latest > '.round(microtime(true) * 1000))
+>>>>>>> 25fe8714cd6bcd848a4200a7450e9eb42f25fa5f
 								->get();
 								
 				if(!is_null($next_public_event_data)) {
@@ -1376,14 +1537,13 @@ class eventAjaxController extends Controller
 				$events_array = [];
 				// query for events that were created by the user, not deleted/removed and have had atleast one session in the past
 				$event_data = DB::table('events AS e')
-								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start_time ASC LIMIT 1), 2147483647) as 'dates_earliest'"))
+								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start_time ASC LIMIT 1), 2147483647000) as 'dates_earliest'"))
 								->where ([
 									['e.events_active', 1],
 									['e.events_createdby', $token_data['user_id']]
 									//['e.events_status', 0]
-									
 								])
-								->havingRaw('dates_earliest > '.time())
+								->havingRaw('dates_earliest < '.round(microtime(true) * 1000))
 								->get();
 
 				if(!is_null($event_data)) {
@@ -1610,15 +1770,27 @@ class eventAjaxController extends Controller
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
 				// check that event exists and is valid
-				$event_data = DB::table('events')
+				$event_data = DB::table('events AS e')
+								->leftJoin('events_access AS a', function($join) use($token_data) {
+									$join->on('a.access_events_id', '=', 'e.events_id')
+										->where([
+											['a.access_active', 1],
+											['a.access_user_id', $token_data['user_id']]
+										]);
+								})
 								->where ([
-									['events_active', 1],
-									['events_id', $event_id],
-									['events_status', 0]
+									['e.events_active', 1],
+									['e.events_id', $event_id],
+									['e.events_status', 0]
 								])
 								->first();
 
 				if(!is_null($event_data)) {
+					if($event_data->events_public == 0) {
+						if(!isset($event_data->access_id) || empty($event_data->access_id) || is_null($event_data->access_id)) {
+							return Response::json(['error' => 'unauthorised access to private event'], 400);
+						}
+					}
 					// build array of session details for eeents
 					$sessions = [];
 					// query database for active sessions for an event
@@ -1717,7 +1889,7 @@ class eventAjaxController extends Controller
 
 		// check the the descriptor given is valid for the date range
 		// e.g you can set it to weekly for a date spanning over a week
-		$valid_recurring_descriptor = check_valid_time_descriptor($start_timestamp, $end_timestamp, $recurring_descriptor);
+		$valid_recurring_descriptor = check_valid_time_descriptor($start_timestamp, $end_timestamp, $recurring_descriptor, $recurring);
 
 		// return error if descriptor isn't valid
 		if($valid_recurring_descriptor == false) {
@@ -1737,16 +1909,63 @@ class eventAjaxController extends Controller
 							->first();
 
 			if(!is_null($event_data)) {
+				$insert = [];
+				// insert first timestamp instance
+				$insert[] = [
+							'sessions_start_time' => $start_timestamp,
+							'sessions_end_time' => $end_timestamp,
+							'sessions_active' => 1,
+							'sessions_events_id' => $event_id
+						];
+
+				$recurring--; // decrement recurring number
+
+				// if recurring is set to greater than one we need additional insertions
+				if(!is_null($recurring_descriptor) && $recurring >= 1) {
+					while($recurring > 0) {
+						// check if recurrence is daily
+						if($recurring_descriptor == "daily") {
+							$addition = 24*60*60*1000;
+							$start_timestamp += $addition;
+							$end_timestamp += $addition;
+						// or check if recurrence is weekly
+						} else if($recurring_descriptor == "weekly") {
+							$addition = 7*24*60*60*1000;
+							$start_timestamp += $addition;
+							$end_timestamp += $addition;
+						// or check if recurrence is fortnightly
+						} else if($recurring_descriptor == "fortnightly") {
+							$addition = 2*7*24*60*60*1000;
+							$start_timestamp += $addition;
+							$end_timestamp += $addition;
+						// or check if recurrence is monthly
+						} else if($recurring_descriptor == "monthly") {
+							$start_timestamp = strtotime('+1 month', $start_timestamp); 
+							$end_timestamp = strtotime('+1 month', $end_timestamp);
+						// or check if recurrence is yearly
+						} else if($recurring_descriptor == "yearly") {
+							$addition = 365*24*60*60*1000;
+							$start_timestamp += $addition;
+							$end_timestamp += $addition;
+						}
+
+						// create new insertion with incremented timestamps
+						$insert[] = [
+							'sessions_start_time' => $start_timestamp,
+							'sessions_end_time' => $end_timestamp,
+							'sessions_active' => 1,
+							'sessions_events_id' => $event_id
+						];
+
+						$recurring--; //decrement recurring number
+					}
+				}
+
 				// create the session in the database
 				$new_session_id = DB::table('events_sessions')
-										->insertGetId([
-											'sessions_start_time' => $start_timestamp,
-											'sessions_end_time' => $end_timestamp,
-											'sessions_active' => 1,
-											'sessions_events_id' => $event_id
-										]);
+										->insert($insert);
 
-				return Response::json(['id' => $new_session_id], 200);
+				return Response::json([], 200);
 			}
 
 			return Response::json(['error' => 'Event does not exist'], 400);
