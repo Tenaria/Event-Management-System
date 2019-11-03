@@ -10,15 +10,35 @@ import TokenContext from '../../../context/TokenContext';
 const { RangePicker } = DatePicker;
 
 class BookSession extends React.Component {
-  state = {
-    startDateTime: this.props.start_timestamp,
-    endDateTime: this.props.end_timestamp,
-    confirmedGoing: false
+  
+  constructor(props, context) {
+    super(props);
+    
+    const { attendees } = this.props;
+    const { userEmail } = context;
+    let confirmedGoing = false;
+
+    if (attendees) {
+      for(const user of attendees) {
+        console.log(`user.email: ${user.email}, userEmail: ${userEmail}`)
+        if (user.email === userEmail) {
+          confirmedGoing = true;
+        }
+      }
+    }
+
+    this.state = {
+      startDateTime: this.props.start_timestamp,
+      endDateTime: this.props.end_timestamp,
+      confirmedGoing
+    }
   }
 
   confirmSession = async () => {
     const { token } = this.context;
     const { id, event_id } = this.props;
+
+    console.log(`Information passed token: ${token}, session_id: ${id}, event_id: ${event_id}`);
 
     const res = await fetch('http://localhost:8000/mark_as_going', {
       method: 'POST',
@@ -33,10 +53,12 @@ class BookSession extends React.Component {
         token
       })
     });
+
+    this.props.cb();
   }
 
   render() {
-    const { startDateTime, endDateTime } = this.state;
+    const { confirmedGoing, startDateTime, endDateTime } = this.state;
 
     return (
       <List.Item style={{display: 'flex'}}>
@@ -61,17 +83,26 @@ class BookSession extends React.Component {
           />
         </div>
         <div style={{paddingLeft: '0.5em', textAlign: 'right'}}>
-          <Tooltip title="Confirm you are going for this session!">
-            <Button
-              icon="check"
-              style={{
-                background: '#48BB78',
-                border: 'none',
-                color: 'white',
-              }}
-              onClick={this.confirmSession}
-            />
-          </Tooltip>
+          {confirmedGoing ? 
+            <Tooltip title="Confirm you are going for this session!">
+              <Button
+                icon="close"
+                type="danger"
+                onClick={this.confirmSession}
+              />
+            </Tooltip> :
+            <Tooltip title="Confirm you are going for this session!">
+              <Button
+                icon="check"
+                style={{
+                  background: '#48BB78',
+                  border: 'none',
+                  color: 'white',
+                }}
+                onClick={this.confirmSession}
+              />
+            </Tooltip>
+          }
         </div>
       </List.Item>
     );

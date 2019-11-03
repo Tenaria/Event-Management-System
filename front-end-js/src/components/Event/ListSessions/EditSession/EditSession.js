@@ -11,9 +11,40 @@ const { RangePicker } = DatePicker;
 
 class EditSession extends React.Component {
   state = {
+    cancelled: this.props.cancelled,
     editing: false,
     startDateTime: this.props.start_timestamp,
     endDateTime: this.props.end_timestamp
+  }
+
+  cancelSession = async () => {
+    const { id, token } = this.context;
+    const sessionId = this.props.id;
+
+    const res = await fetch('http://localhost:8000/cancel_event_sessions', {
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        event_id: id,
+        session_id: sessionId,
+        token
+      })
+    })
+
+    if (res.status === 200) {
+      message.success('You have successfully cancelled a session!');
+      this.props.refresh();
+    } else {
+      message.error('The system has encountered an error. Contact your admin!');
+    }
+  }
+
+  uncancelSession = async () => {
+    // TODO: Uncancel session
   }
 
   deleteSession = async () => {
@@ -85,10 +116,10 @@ class EditSession extends React.Component {
   toggleSession = () => this.setState({editing: !this.state.editing});
 
   render() {
-    const { editing, startDateTime, endDateTime } = this.state;
+    const { cancelled, editing, startDateTime, endDateTime } = this.state;
 
     return (
-      <List.Item style={{display: 'flex'}}>
+      <List.Item className={cancelled ? 'cancelled-session' : ''} style={{display: 'flex'}}>
         <div style={{flexGrow: 1}}>
           <RangePicker
             defaultValue={[
@@ -104,15 +135,8 @@ class EditSession extends React.Component {
           />
         </div>
         <div style={{paddingLeft: '0.5em', textAlign: 'right'}}>
-          {editing ?
-            <Button
-              type="danger"
-              icon="stop"
-              style={{
-                marginRight: '0.5em'
-              }}
-              onClick={this.toggleSession}
-            /> :
+        {cancelled ?
+          <React.Fragment>
             <Button
               type="danger"
               icon="delete"
@@ -121,27 +145,57 @@ class EditSession extends React.Component {
               }}
               onClick={this.deleteSession}
             />
-          }
-          {editing ?
             <Button
-              icon="check"
-              style={{
-                background: '#48BB78',
-                border: 'none',
-                color: 'white',
-              }}
-              onClick={this.editSession}
-            /> :
-            <Button
-              icon="edit"
+              icon="undo"
               style={{
                 background: '#38B2AC',
                 border: 'none',
                 color: 'white',
               }}
-              onClick={this.toggleSession}
+              onClick={this.uncancelSession}
             />
-          }
+          </React.Fragment>
+          : (editing ?
+              <React.Fragment>
+                <Button
+                  type="danger"
+                  icon="stop"
+                  style={{
+                    marginRight: '0.5em'
+                  }}
+                  onClick={this.toggleSession}
+                />
+                <Button
+                  icon="check"
+                  style={{
+                    background: '#48BB78',
+                    border: 'none',
+                    color: 'white',
+                  }}
+                  onClick={this.editSession}
+                />
+              </React.Fragment> :
+              <React.Fragment>
+                <Button
+                  type="danger"
+                  icon="stop"
+                  style={{
+                    marginRight: '0.5em'
+                  }}
+                  onClick={this.cancelSession}
+                />
+                <Button
+                  icon="edit"
+                  style={{
+                    background: '#38B2AC',
+                    border: 'none',
+                    color: 'white',
+                  }}
+                  onClick={this.toggleSession}
+                />
+              </React.Fragment>
+            )
+        }
         </div>
       </List.Item>
     );

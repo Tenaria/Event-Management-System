@@ -39,6 +39,7 @@ class ListSessions extends React.Component {
     })
 
     const data = await res.json();
+    this.setState({data: []});
     this.setState({data: data.sessions, loaded: true});
   }
 
@@ -57,6 +58,8 @@ class ListSessions extends React.Component {
     };
     const loader = <div style={spinStyle}><Spin indicator={spinIcon}/></div>;
 
+    console.log(data);
+
     return (
       <React.Fragment>
         <div className="custom-sessions" style={{position: 'relative'}}>
@@ -67,6 +70,7 @@ class ListSessions extends React.Component {
             renderItem = {item => (
               <EditSession
                 id={item.id}
+                cancelled={item.cancelled}
                 start_timestamp={item.start_timestamp}
                 end_timestamp={item.end_timestamp}
                 refresh={this.loadSessions}
