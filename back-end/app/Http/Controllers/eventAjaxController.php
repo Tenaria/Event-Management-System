@@ -886,7 +886,7 @@ class eventAjaxController extends Controller
 									['e.events_createdby',$token_data['user_id']]
 									
 								])
-								->havingRaw('dates_latest=0 OR dates_latest > '.time())
+								->havingRaw('dates_latest=0 OR dates_latest > '.round(microtime(true) * 1000))
 								->get();
 
 				if(!is_null($event_data)) {
@@ -960,7 +960,7 @@ class eventAjaxController extends Controller
 									["e.events_createdby", '!=', $token_data['user_id']],
 									["a.access_archived", 0]
 								])
-								->havingRaw('dates_latest=0 OR dates_latest > '.time())
+								->havingRaw('dates_latest=0 OR dates_latest > '.round(microtime(true) * 1000))
 								->get();
 
 				if(!is_null($event_data)){
@@ -1019,7 +1019,7 @@ class eventAjaxController extends Controller
 				$events_array = [];
 				//query the database for these events
 				$event_data = DB::table('events_access AS a')
-								->select('e.events_id', 'e.events_name', 'e.events_public', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start_time ASC LIMIT 1), 2147483647) as 'dates_earliest'"))
+								->select('e.events_id', 'e.events_name', 'e.events_public', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start_time ASC LIMIT 1), 2147483647000) as 'dates_earliest'"))
 								->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
 								->where([
 									["a.access_user_id", $token_data['user_id']],
@@ -1027,7 +1027,7 @@ class eventAjaxController extends Controller
 									["a.access_archived", 0],
 									["e.events_createdby", '!=', $token_data['user_id']]
 								])
-								->havingRaw('dates_earliest < '.time())
+								->havingRaw('dates_earliest < '.round(microtime(true) * 1000))
 								->get();
 
 				if(!is_null($event_data)){
@@ -1256,14 +1256,14 @@ class eventAjaxController extends Controller
 				
 				//getting last week events
 				$past_public_event_data = DB::table('events AS e')
-								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'dates_earliest'"))
+								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start_time ASC LIMIT 1), 2147483647000) as 'dates_earliest'"))
 								->where ([
 									['e.events_active', 1],
 									['e.events_createdby', $token_data['user_id']]
 									//['e.events_status', 0]
 									
 								])
-								->havingRaw('dates_earliest > '.time())
+								->havingRaw('dates_earliest < '.round(microtime(true) * 1000))
 								->get();
 				
 				if(!is_null($past_public_event_data)) {
@@ -1274,7 +1274,7 @@ class eventAjaxController extends Controller
 				
 				
 				$past_private_event_data = DB::table('events_access AS a')
-								->select('e.events_id', 'e.events_name', 'e.events_public', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'dates_earliest'"))
+								->select('e.events_id', 'e.events_name', 'e.events_public', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start_time ASC LIMIT 1), 2147483647000) as 'dates_earliest'"))
 								->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
 								->where([
 									["a.access_user_id", $token_data['user_id']],
@@ -1282,8 +1282,9 @@ class eventAjaxController extends Controller
 									["a.access_archived", 0],
 									["e.events_createdby", '!=', $token_data['user_id']]
 								])
-								->havingRaw('dates_earliest > '.time())
+								->havingRaw('dates_earliest < '.round(microtime(true) * 1000))
 								->get();
+
 				if(!is_null($past_private_event_data)) {
 					foreach($past_private_event_data as $events) {
 						$lastWk_event_number++;
@@ -1302,7 +1303,7 @@ class eventAjaxController extends Controller
 									["e.events_createdby", '!=', $token_data['user_id']],
 									["a.access_archived", 0]
 								])
-								->havingRaw('dates_latest=0 OR dates_latest > '.time())
+								->havingRaw('dates_latest=0 OR dates_latest > '.round(microtime(true) * 1000))
 								->get();
 				if(!is_null($next_private_event_data)) {
 					foreach($next_private_event_data as $private_events) {
@@ -1325,7 +1326,7 @@ class eventAjaxController extends Controller
 									['e.events_createdby','!=',$token_data['user_id']],
 									['e.events_public', 1]
 								])
-								->havingRaw('dates_latest=0 OR dates_latest > '.time())
+								->havingRaw('dates_latest=0 OR dates_latest > '.round(microtime(true) * 1000))
 								->get();
 								
 				if(!is_null($next_public_event_data)) {
@@ -1361,13 +1362,13 @@ class eventAjaxController extends Controller
 				$events_array = [];
 				// query for events that were created by the user, not deleted/removed and have had atleast one session in the past
 				$event_data = DB::table('events AS e')
-								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start_time ASC LIMIT 1), 2147483647) as 'dates_earliest'"))
+								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start_time ASC LIMIT 1), 2147483647000) as 'dates_earliest'"))
 								->where ([
 									['e.events_active', 1],
 									['e.events_createdby', $token_data['user_id']]
 									//['e.events_status', 0]
 								])
-								->havingRaw('dates_earliest < '.time())
+								->havingRaw('dates_earliest < '.round(microtime(true) * 1000))
 								->get();
 
 				if(!is_null($event_data)) {
