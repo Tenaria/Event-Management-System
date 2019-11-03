@@ -30,8 +30,8 @@ class Index extends React.Component {
       const data = token.split('.');
       if (data.length > 1) {
         const jsonData = JSON.parse(atob(data[1]));
-        userEmail = jsonData.user_id;
-        userId = jsonData.email;
+        userEmail = jsonData.email;
+        userId = jsonData.user_id;
       }
     }
 

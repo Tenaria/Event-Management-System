@@ -27,6 +27,30 @@ class EventDetails extends React.Component {
     valid: false
   };
 
+  updateSessions = new Promise(async (resolve, reject) => {
+    const eventID = sessionStorage.getItem('event_id');
+    const { token } = this.context;
+    const res = await fetch('http://localhost:8000/load_event_sessions', {
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        event_id: eventID,
+        token
+      })
+    });
+
+    if (res.status === 200) {
+      const data = await res.json();
+      resolve(data);
+    } else {
+      resolve([]);
+    }
+  })
+
   componentDidMount = async () => {
     // The instant the element is added to the DOM, load the information
     const eventID = sessionStorage.getItem('event_id');
@@ -66,27 +90,7 @@ class EventDetails extends React.Component {
             resolve([]);
           }
         }),
-        new Promise(async (resolve, reject) => {
-          const res = await fetch('http://localhost:8000/load_event_sessions', {
-            method: 'POST',
-            mode: 'cors',
-            cache: 'no-cache',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              event_id: eventID,
-              token
-            })
-          });
-
-          if (res.status === 200) {
-            const data = await res.json();
-            resolve(data);
-          } else {
-            resolve([]);
-          }
-        })
+        this.updateSessions
       ]).then(values => {
         this.setState({
           id: eventID,
@@ -107,6 +111,11 @@ class EventDetails extends React.Component {
         valid: false
       });
     }
+  }
+
+  updateSessionCB = async () => {
+    let data = await this.updateSessionCB();
+    this.setState({sessions: data.sessions});
   }
 
   render() {
@@ -152,7 +161,8 @@ class EventDetails extends React.Component {
                     user_id={userId}
                     start_timestamp={item.start_timestamp}
                     end_timestamp={item.end_timestamp}
-                    attendees={item.attendees}
+                    attendees={item.attendees_going}
+                    cb={this.updateSessionCB}
                   />
                 )}
               >
