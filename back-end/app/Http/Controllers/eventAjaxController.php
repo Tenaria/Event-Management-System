@@ -592,7 +592,8 @@ class eventAjaxController extends Controller
 							$curr_event_access = DB::table('events_access')
 												->where([
 													['access_events_id', $event_id],
-													['access_active', 1]
+													['access_active', 1],
+													['access_user_id', $token_data['user_id']]
 												])
 												->first();
 
