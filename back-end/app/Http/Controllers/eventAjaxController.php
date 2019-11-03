@@ -1284,10 +1284,12 @@ class eventAjaxController extends Controller
 		if($token_data == true) {
 			//array to store all user info for users that are attending an event
 			$return = [];
+			
+			
 
 			//get all the attendees of an evnet where the event is active and the user has been invited to the event
 			$attendees = DB::table('events_access AS a')
-							->select('u.users_email', 'u.users_id')
+							->select('u.users_email', 'u.users_id', 'e.events_public', 'a.access_user_id')
 							->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
 							->join('users AS u', 'a.access_user_id', '=', 'u.users_id')
 							->where([
@@ -1298,19 +1300,28 @@ class eventAjaxController extends Controller
 							->get();
 
 			if(!is_null($attendees)) {
+				$return_error = true;
+				
+
 				foreach($attendees AS $attendee) {
 					//if the event is private, we need to do some extra checking to see if the user is allowed to see it
-					// if($attendee->events_public == 0) {
-					// 	if(!isset($attendee->access_id) || empty($attendee->access_id) || is_null($attendee->access_id)) {
-					// 		return Response::json(['error' => 'unauthorised access to private event'], 400);
-					// 	}
-					// }
+					if($attendee->events_public == 0) {
+						if($attendee->access_user_id == $token_data['user_id']) {
+							$return_error = false;
+						}
+					} else if($attendee->events_public == 1) {
+						$return_error = false;
+					}
 					// build array of user details
 					$return[] = [
 						'email' => $attendee->users_email,
 						'id' => $attendee->users_id
 					];
 				}
+			}
+
+			if($return_error == true) {
+				return Response::json(['error' => 'unauthorised access to private event'], 400);
 			}
 
 			// return user details if applicable
@@ -1678,15 +1689,27 @@ class eventAjaxController extends Controller
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
 				// check that event exists and is valid
-				$event_data = DB::table('events')
+				$event_data = DB::table('events AS e')
+								->leftJoin('events_access AS a', function($join) use($token_data) {
+									$join->on('a.access_events_id', '=', 'e.events_id')
+										->where([
+											['a.access_active', 1],
+											['a.access_user_id', $token_data['user_id']]
+										]);
+								})
 								->where ([
-									['events_active', 1],
-									['events_id', $event_id],
-									['events_status', 0]
+									['e.events_active', 1],
+									['e.events_id', $event_id],
+									['e.events_status', 0]
 								])
 								->first();
 
 				if(!is_null($event_data)) {
+					if($event_data->events_public == 0) {
+						if(!isset($event_data->access_id) || empty($event_data->access_id) || is_null($event_data->access_id)) {
+							return Response::json(['error' => 'unauthorised access to private event'], 400);
+						}
+					}
 					// build array of session details for eeents
 					$sessions = [];
 					// query database for active sessions for an event
