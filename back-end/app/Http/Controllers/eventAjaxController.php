@@ -757,7 +757,7 @@ class eventAjaxController extends Controller
 				// check event exists
 				$event_data = DB::table('events AS e')
 								->select('e.*', 'a.access_id')
-								->join('events_access AS a', function($join) use($token_data) {
+								->lefJoin('events_access AS a', function($join) use($token_data) {
 									$join->on('a.access_events_id', '=', 'e.events_id')
 										->where([
 											['a.access_active', 1],
