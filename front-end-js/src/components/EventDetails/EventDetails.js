@@ -30,7 +30,7 @@ class EventDetails extends React.Component {
   componentDidMount = async () => {
     // The instant the element is added to the DOM, load the information
     const eventID = sessionStorage.getItem('event_id');
-    const token = this.context;
+    const { token } = this.context;
 
     if (eventID) {
       Promise.all([
