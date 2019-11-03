@@ -1062,7 +1062,7 @@ class eventAjaxController extends Controller
 							'events_id' => $event->events_id,
 							'events_name' => $event->events_name,
 							'events_desc' => $event->events_desc,
-							'events_status' => $event_status,
+							'events_status' => $event->event_status,
 							'events_public' => $public,
 							'events_cancelled' => $cancelled
 						];
