@@ -44,6 +44,7 @@ Route::post('/get_tags', 'eventAjaxController@get_tags');
 Route::post('/', 'eventAjaxController@uncancel_event');
 Route::post('/get_summary_dashboard', 'eventAjaxController@get_summary_dashboard');
 Route::post('/cancel_event_sessions', 'eventAjaxController@cancel_event_sessions');
+Route::post('/unmark_as_going', 'eventAjaxController@unmark_as_going');
 
 // SPRINT 4 (ROUTES)
 // US-6 (Notify Attendees), US-16 (Mark as Going), US-4 (Cancel Session from Event)

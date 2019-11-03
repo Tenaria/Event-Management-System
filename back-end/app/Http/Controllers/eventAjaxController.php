@@ -671,6 +671,70 @@ class eventAjaxController extends Controller
 		return Response::json([], 400);
 	}
 
+	public function unmark_as_going(Request $request) {
+		$token = $request->input('token'); // STRING; NOT EMPTY
+		$event_id = $request->input('event_id'); //INTEGER; NOT EMPTY
+		$session_id = $request->input('session_id'); // INTEGER; NOT EMPTY
+
+		// check all values exist as necessary
+		if (!isset($event_id) || empty($event_id)) {
+			return Response::json(['error' => 'event id is either not set or null'], 400);
+		}
+
+		if (!isset($session_id) || empty($session_id)) {
+			return Response::json(['error' => 'session id is either not set or null'], 400);
+		}
+		
+		if(isset($token) && !empty($token)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				//make sure event, session and access exist
+				$access = DB::table('events AS e')
+								->join('events_access AS a', function($join) {
+									$join->on('a.access_events_id', '=', 'e.events_id')
+										->where('a.access_active', 1);
+								})
+								->join('events_sessions AS s', function($join) use($session_id) {
+									$join->on('s.sessions_events_id', '=', 'a.access_events_id')
+										->where([
+											['s.sessions_id', $session_id],
+											['s.sessions_active', 1],
+											['s.sessions_status', 0]
+										]);
+								})
+								->join('events_sessions_attendance AS sa', function($join) use ($session_id) {
+									$join->on('a.access_id', '=', 'sa.sessions_attendance_access_id')
+										->where([
+											['sa.sessions_attendance_going', 1],
+											['sa.sessions_attendance_active', 1]
+										]);
+								})
+								->where([
+									['e.events_id', $event_id],
+									['e.events_active', 1],
+									['e.events_status', 0]
+								])
+								->first();
+
+				if(!is_null($access)) {
+					$sessions_attendance_id = $access->sessions_attendance_id;
+
+					DB::table('events_sessions_attendance')
+						->where([
+							['sessions_attendance_id', $sessions_attendance_id]
+						])
+						->delete();
+
+					return Response::json([], 200);
+				}
+
+				return Response::json(['error' => 'event, session or access does not exist in the database'], 400);
+			}
+		}
+		
+		return Response::json(['error' => 'JWT is either not set or null'], 400);
+	}
+
 	/*
 		grab the details of an event such as locatoin, name, description, etc.
 	*/
