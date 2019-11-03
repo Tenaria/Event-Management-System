@@ -39,6 +39,7 @@ class ListSessions extends React.Component {
     })
 
     const data = await res.json();
+    this.setState({data: []});
     this.setState({data: data.sessions, loaded: true});
   }
 
