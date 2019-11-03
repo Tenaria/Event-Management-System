@@ -1029,7 +1029,7 @@ class eventAjaxController extends Controller
 				//query for events that a user has not created but has been invited to 
 				// and is in the future under the definitions specified in the function explanation
 				$event_data = DB::table('events_access AS a')
-								->select('e.events_id', 'e.events_name', 'e.events_public', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"))
+								->select('e.events_id', 'e.events_name', 'e.events_public', 'e.events_status', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"))
 								->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
 								->where([
 									["a.access_user_id", $token_data['user_id']],
@@ -1062,7 +1062,7 @@ class eventAjaxController extends Controller
 							'events_id' => $event->events_id,
 							'events_name' => $event->events_name,
 							'events_desc' => $event->events_desc,
-							'events_status' => $event->event_status,
+							'events_status' => $event_status,
 							'events_public' => $public,
 							'events_cancelled' => $cancelled
 						];
