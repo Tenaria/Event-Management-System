@@ -28,7 +28,7 @@ Route::post('/get_upcoming_events', 'eventAjaxController@get_upcoming_events');
 Route::post('/get_invited_events_past', 'eventAjaxController@get_invited_events_past');
 Route::post('/get_invited_events_upcoming', 'eventAjaxController@get_invited_events_upcoming');
 Route::post('/get_emails_exclude_user', 'eventAjaxController@get_emails_exclude_user');
-Route::get('/mark_as_going','eventAjaxController@mark_as_going');
+Route::post('/mark_as_going','eventAjaxController@mark_as_going');
 
 // SPRINT 3 (ROUTES)
 Route::post('/get_attendees_of_event', 'eventAjaxController@get_attendees_of_event');

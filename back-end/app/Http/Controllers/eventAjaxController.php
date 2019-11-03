@@ -614,7 +614,6 @@ class eventAjaxController extends Controller
 							if($access_id != 0) {
 								DB::table('events_sessions_attendance')
 									->updateOrInsert([
-										'sessions_attendance_id' => $event_id,
 										'sessions_attendance_sessions_id' => $session_id,
 										'sessions_attendance_access_id' => $access_id
 										],
@@ -651,7 +650,6 @@ class eventAjaxController extends Controller
 							//update or insert attendance in database as necessary
 							DB::table('events_sessions_attendance')
 								->updateOrInsert([
-									'sessions_attendance_id' => $event_id,
 									'sessions_attendance_sessions_id' => $session_id,
 									'sessions_attendance_access_id' => $session_data->access_id
 									],
