@@ -755,14 +755,29 @@ class eventAjaxController extends Controller
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
 				// check event exists
-				$event_data = DB::table('events')
+				$event_data = DB::table('events AS e')
+								->select('e.*', 'a.access_id')
+								->join('events_access AS a', function($join) use($token_data) {
+									$join->on('a.access_events_id', '=', 'e.events_id')
+										->where([
+											['a.access_active', 1],
+											['a.access_user_id', $token_data['user_id']]
+										]);
+								})
 								->where ([
-									['events_active', 1],
-									['events_id', $event_id]
+									['e.events_active', 1],
+									['e.events_id', $event_id]
 								])
 								->first();
 
 				if(!is_null($event_data)) {
+					//if the event is private, we need to do some extra checking to see if the user is allowed to see it
+					if($event_data->events_public == 0) {
+						if(!isset($event_data->access_id) || empty($event_data->access_id) || is_null($event_data->access_id)) {
+							return Response::json(['error' => 'unauthorised access to private event'], 400);
+						}
+					}
+
 					// grab string to primary key mapping of attributes
 					$attributes_name_to_id = get_event_attributes_pk();
 
