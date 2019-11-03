@@ -8,7 +8,7 @@ const { TextArea } = Input;
 
 class AddEventForm extends React.Component {
   handleCreate = () => {
-    const token = this.context;
+    const { token } = this.context;
 
     this.props.form.validateFieldsAndScroll( async (err, values) => {
       if (!err) {

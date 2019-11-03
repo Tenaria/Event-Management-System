@@ -32,7 +32,7 @@ class Event extends React.Component {
   componentDidMount = async () => {
     // The instant the element is added to the DOM, load the information
     const eventID = sessionStorage.getItem('event_id');
-    const token = this.context;
+    const { token } = this.context;
 
     if (eventID) {
       const res = await fetch('http://localhost:8000/get_event_details', {
@@ -70,7 +70,7 @@ class Event extends React.Component {
 
   render() {
     const { id, name, desc, created, event_public, loaded, location, valid } = this.state;
-    const token = this.context;
+    const { token } = this.context;
     const spinStyle = {
       padding: '2em',
       textAlign: 'center',
