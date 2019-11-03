@@ -13,7 +13,7 @@ class AccountEdit extends React.Component {
   handleSubmit = e => {
     e.preventDefault();
 
-    const token = this.context;
+    const { token } = this.context;
 
     this.props.form.validateFieldsAndScroll( async (err, values) => {
       if (!err) {

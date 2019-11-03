@@ -26,7 +26,7 @@ class EventViewer extends React.Component {
   }
 
   loadEvents = term => {
-    const token = this.context;
+    const { token } = this.context;
 
     const loadData = url => new Promise(async (resolve, reject) => {
       const res = await fetch(url, {

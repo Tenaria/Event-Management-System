@@ -5,7 +5,7 @@ import { Button, DatePicker, List, Tooltip } from 'antd';
 import React from 'react';
 import moment from 'moment';
 
-import EventContext from '../../../context/EventContext';
+import TokenContext from '../../../context/TokenContext';
 
 const { RangePicker } = DatePicker;
 
@@ -52,6 +52,6 @@ class BookSession extends React.Component {
   }
 }
 
-BookSession.contextType = EventContext;
+BookSession.contextType = TokenContext;
 
 export default BookSession;

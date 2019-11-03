@@ -14,7 +14,7 @@ class Dashboard extends React.Component {
   }
 
   componentDidMount = async () => {
-    const token = this.context;
+    const { token } = this.context;
 
     const res = await fetch('http://localhost:8000/get_upcoming_events', {
       method: 'POST',

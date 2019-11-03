@@ -30,7 +30,7 @@ class EventDetails extends React.Component {
   componentDidMount = async () => {
     // The instant the element is added to the DOM, load the information
     const eventID = sessionStorage.getItem('event_id');
-    const token = this.context;
+    const { token } = this.context;
 
     if (eventID) {
       Promise.all([
@@ -150,6 +150,7 @@ class EventDetails extends React.Component {
                     id={item.id}
                     start_timestamp={item.start_timestamp}
                     end_timestamp={item.end_timestamp}
+                    attendees={item.attendees}
                   />
                 )}
               >
