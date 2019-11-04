@@ -509,7 +509,7 @@ class eventAjaxController extends Controller
 						}
 
 						// figure out what tags have been newly added in this update
-						$new_tag_arr = array_diff($new_tag_arr, $current_tags);
+						$new_taggerino = array_diff($new_tag_arr, $current_tags);
 						// figure out what tags have been removed in this update
 						$old_tags = array_diff($current_tags, $new_tag_arr);
 
@@ -524,8 +524,8 @@ class eventAjaxController extends Controller
 
 						// ADD NEW TAGS
 						$insert_tags = [];
-						if(!empty($new_tag_arr)) {
-							foreach($new_tag_arr as $new_tag) {
+						if(!empty($new_taggerino)) {
+							foreach($new_taggerino as $new_tag) {
 								$insert_tags[] = [
 									'tags_linking_active' => 1,
 									'tags_linking_value' => $new_tag,
