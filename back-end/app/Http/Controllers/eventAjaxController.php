@@ -425,60 +425,62 @@ class eventAjaxController extends Controller
 							}
 						}
 
-						// UPDATE THE ATTENDEES
-						if(!isset($new_event_attendees) || empty($new_event_attendees)) {
-							$new_event_attendees = [$token_data['user_id']];
-						} else if (!in_array($token_data['user_id'], $new_event_attendees)) {
-						    $new_event_attendees[] = $token_data['user_id'];
-						}
+						if(!is_null($new_event_attendees)) {
+							// UPDATE THE ATTENDEES
+							if(!isset($new_event_attendees) || empty($new_event_attendees)) {
+								$new_event_attendees = [$token_data['user_id']];
+							} else if (!in_array($token_data['user_id'], $new_event_attendees)) {
+							    $new_event_attendees[] = $token_data['user_id'];
+							}
 
-						// grab all the attendees currently in the database for calculations
-						$attendees = DB::table('events_access')
-										->where([
-											//['access_active', 1],
-											['access_events_id', $event_id]
-										])
-										->get();
+							// grab all the attendees currently in the database for calculations
+							$attendees = DB::table('events_access')
+											->where([
+												//['access_active', 1],
+												['access_events_id', $event_id]
+											])
+											->get();
 
-						$current_attendees = [];
-						$inactive_attendees = [];
-						if(!is_null($attendees)) {
-							foreach($attendees as $attendee) {
-								if($attendee->access_active == 1) {
-									$current_attendees[] = $attendee->access_user_id;
-								} else {
-									$inactive_attendees[] = $attendee->access_user_id;
+							$current_attendees = [];
+							$inactive_attendees = [];
+							if(!is_null($attendees)) {
+								foreach($attendees as $attendee) {
+									if($attendee->access_active == 1) {
+										$current_attendees[] = $attendee->access_user_id;
+									} else {
+										$inactive_attendees[] = $attendee->access_user_id;
+									}
 								}
 							}
-						}
 
-						// figure out what attendees have been newly added in this edit transaction
-						$new_attendees = array_diff($new_event_attendees, $current_attendees);
-						// figure out what attendees have been removed in this edit transaction
-						$old_attendees = array_diff($current_attendees, $new_event_attendees);
+							// figure out what attendees have been newly added in this edit transaction
+							$new_attendees = array_diff($new_event_attendees, $current_attendees);
+							// figure out what attendees have been removed in this edit transaction
+							$old_attendees = array_diff($current_attendees, $new_event_attendees);
 
-						// REMOVE OLD ATTENDEES
-						$attendees = DB::table('events_access')
-										->where([
-											['access_active', 1],
-											['access_events_id', $event_id]
-										])
-										->whereIn('access_user_id', $old_attendees)
-										->update(['access_active' => 0]);
+							// REMOVE OLD ATTENDEES
+							$attendees = DB::table('events_access')
+											->where([
+												['access_active', 1],
+												['access_events_id', $event_id]
+											])
+											->whereIn('access_user_id', $old_attendees)
+											->update(['access_active' => 0]);
 
-						// ADD IN NEW ATTENDEES
-						$insert = [];
-						if(!empty($new_attendees)) {
-							foreach($new_attendees as $new_attendee) {
-								$insert[] = [
-									'access_user_id' => $new_attendee,
-									'access_active' => 1,
-									'access_events_id' => $event_id
-								];
+							// ADD IN NEW ATTENDEES
+							$insert = [];
+							if(!empty($new_attendees)) {
+								foreach($new_attendees as $new_attendee) {
+									$insert[] = [
+										'access_user_id' => $new_attendee,
+										'access_active' => 1,
+										'access_events_id' => $event_id
+									];
+								}
+
+								DB::table('events_access')
+									->insert($insert);
 							}
-
-							DB::table('events_access')
-								->insert($insert);
 						}
 						
 						// UPDATE THE TAGS
