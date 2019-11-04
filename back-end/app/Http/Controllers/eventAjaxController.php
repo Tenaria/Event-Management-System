@@ -729,17 +729,17 @@ class eventAjaxController extends Controller
 		if (!isset($session_id) || empty($session_id)) {
 			return Response::json(['error' => 'session id is either not set or null'], 400);
 		}
-		
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
 				//make sure event, session and access exist
 				$access = DB::table('events AS e')
-								->join('events_access AS a', function($join) use ($token_data) {
+								->join('events_access AS a', function($join) use ($token_data, $event_id) {
 									$join->on('a.access_events_id', '=', 'e.events_id')
 										->where([
 											['a.access_active', 1],
-											['a.access_user_id', $token_data['user_id']]
+											['a.access_user_id', $token_data['user_id']],
+											['a.access_events_id', $event_id]
 										]);
 								})
 								->join('events_sessions AS s', function($join) use($session_id) {
