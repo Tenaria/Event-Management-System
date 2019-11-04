@@ -737,7 +737,10 @@ class eventAjaxController extends Controller
 				$access = DB::table('events AS e')
 								->join('events_access AS a', function($join) {
 									$join->on('a.access_events_id', '=', 'e.events_id')
-										->where('a.access_active', 1);
+										->where([
+											['a.access_active', 1],
+											['a.access_user_id', $token_data['user_id']]
+										]);
 								})
 								->join('events_sessions AS s', function($join) use($session_id) {
 									$join->on('s.sessions_events_id', '=', 'a.access_events_id')
