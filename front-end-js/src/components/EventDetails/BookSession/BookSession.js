@@ -32,7 +32,7 @@ class BookSession extends React.Component {
       message.success('You have successfully confirmed that you are going to a session!');
     } else {
       const data = await res.json();
-      message.success(data.error);
+      message.error(data.error);
     }
 
     this.props.cb();
@@ -60,7 +60,7 @@ class BookSession extends React.Component {
       message.success('You have successfully confirmed that you are no longer going to a session!');
     } else {
       const data = await res.json();
-      message.success(data.error);
+      message.error(data.error);
     }
 
     this.props.cb();
