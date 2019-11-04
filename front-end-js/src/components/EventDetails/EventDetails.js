@@ -145,7 +145,7 @@ class EventDetails extends React.Component {
     const { userEmail } = this.context;
     const attendeeElm = attendees.map(a =>
       <Tooltip key={a.id} title={a.email}>
-        <Avatar icon="user" />
+        <Avatar icon="user" style={{marginRight: '0.5em'}} />
       </Tooltip>
     );
     const spinStyle = {
