@@ -1733,7 +1733,7 @@ class eventAjaxController extends Controller
 
 						// build array containing details of event before returning it
 						$results[] = [
-							'id' => $data->events_id,
+							'events_id' => $data->events_id,
 							'events_name' => $data->events_name,
 							'events_desc' => $data->events_desc,
 							'events_attendees_count' => $num_attendees

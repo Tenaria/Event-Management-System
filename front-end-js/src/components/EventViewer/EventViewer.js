@@ -39,6 +39,7 @@ class EventViewer extends React.Component {
 
       if (res.status === 200) {
         const data = await res.json();
+        console.log(url, data);
         resolve(data);
       } else {
         resolve({events: []});
@@ -114,7 +115,7 @@ class EventViewer extends React.Component {
             }}>
               <Button
                 type="primary"
-                onClick={() => this.selectEvent(upcomingEvent.id)}
+                onClick={() => this.selectEvent(upcomingEvent.events_id)}
               >View Event Details</Button>
             </Row>
           </Card>
