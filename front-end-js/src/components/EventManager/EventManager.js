@@ -173,7 +173,7 @@ class EventManager extends React.Component {
               />
               {upcomingEvent.events_cancelled ?
                 <Button
-                  type="danger"
+                  type="dashed"
                   icon="meh"
                   onClick={() => this.uncancelEvent(upcomingEvent.events_id)}
                 /> :
