@@ -483,60 +483,62 @@ class eventAjaxController extends Controller
 							}
 						}
 						
-						// UPDATE THE TAGS
-						if(!isset($new_tags) || empty($new_tags)) {
-							$new_tags = [];
-						}
-
-						// grab a list of tags alreayd existing in the database for calculation
-						$tags = DB::table('events_tags_linking')
-									->where([
-										['tags_linking_events_id', $event_id],
-										['tags_linking_active', 1]
-									])
-									->get();
-
-						$current_tags = [];
-						if(!is_null($tags)) {
-							foreach($tags as $tag) {
-								$current_tags[] = strtolower($tag->tags_linking_value);
-							}
-						}
-
-						$new_tag_arr = [];
 						if(!is_null($new_tags)) {
-							foreach($new_tags AS $new_tag) {
-								$new_tag_arr[] = strtolower($new_tag);
-							}
-						}
-
-						// figure out what tags have been newly added in this update
-						$new_taggerino = array_diff($new_tag_arr, $current_tags);
-						// figure out what tags have been removed in this update
-						$old_tags = array_diff($current_tags, $new_tag_arr);
-
-						// REMOVE TAGS
-						DB::table('events_tags_linking')
-							->where([
-								['tags_linking_events_id', $event_id],
-								['tags_linking_active', 1]
-							])
-							->whereIn('tags_linking_value', $old_tags)
-							->update(['tags_linking_active' => 0]);
-
-						// ADD NEW TAGS
-						$insert_tags = [];
-						if(!empty($new_taggerino)) {
-							foreach($new_taggerino as $new_tag) {
-								$insert_tags[] = [
-									'tags_linking_active' => 1,
-									'tags_linking_value' => $new_tag,
-									'tags_linking_events_id' => $event_id
-								];
+							// UPDATE THE TAGS
+							if(!isset($new_tags) || empty($new_tags)) {
+								$new_tags = [];
 							}
 
+							// grab a list of tags alreayd existing in the database for calculation
+							$tags = DB::table('events_tags_linking')
+										->where([
+											['tags_linking_events_id', $event_id],
+											['tags_linking_active', 1]
+										])
+										->get();
+
+							$current_tags = [];
+							if(!is_null($tags)) {
+								foreach($tags as $tag) {
+									$current_tags[] = strtolower($tag->tags_linking_value);
+								}
+							}
+
+							$new_tag_arr = [];
+							if(!is_null($new_tags)) {
+								foreach($new_tags AS $new_tag) {
+									$new_tag_arr[] = strtolower($new_tag);
+								}
+							}
+
+							// figure out what tags have been newly added in this update
+							$new_taggerino = array_diff($new_tag_arr, $current_tags);
+							// figure out what tags have been removed in this update
+							$old_tags = array_diff($current_tags, $new_tag_arr);
+
+							// REMOVE TAGS
 							DB::table('events_tags_linking')
-								->insert($insert_tags);
+								->where([
+									['tags_linking_events_id', $event_id],
+									['tags_linking_active', 1]
+								])
+								->whereIn('tags_linking_value', $old_tags)
+								->update(['tags_linking_active' => 0]);
+
+							// ADD NEW TAGS
+							$insert_tags = [];
+							if(!empty($new_taggerino)) {
+								foreach($new_taggerino as $new_tag) {
+									$insert_tags[] = [
+										'tags_linking_active' => 1,
+										'tags_linking_value' => $new_tag,
+										'tags_linking_events_id' => $event_id
+									];
+								}
+
+								DB::table('events_tags_linking')
+									->insert($insert_tags);
+							}
 						}
 
 						return Response::json([], 200);
