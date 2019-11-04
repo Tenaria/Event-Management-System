@@ -300,7 +300,7 @@ class eventAjaxController extends Controller
 						foreach($tags as $tag) {
 							$tags_insert = [
 								'tags_linking_events_id' => $new_event_id,
-								'tags_linking_value' => $tag,
+								'tags_linking_value' => strtolower($tag),
 								'tags_linking_active' => 1
 							];	
 						}
@@ -812,7 +812,7 @@ class eventAjaxController extends Controller
 			if($token_data == true) {
 				// check event exists
 				$event_data = DB::table('events AS e')
-								->select('e.*', 'a.access_id', DB::raw("(SELECT CONCAT(t.tags_id, '~', t.tags_name) FROM events_tags_linking AS tl JOIN tags AS t ON t.tags_id=tl.tags_linking_tags_id WHERE tl.tags_linking_active=1 AND tl.tags_linking_events_id=e.events_id) as `tags`"))
+								->select('e.*', 'a.access_id', DB::raw("(SELECT tl.tags_linking_value FROM events_tags_linking AS tl WHERE tl.tags_linking_active=1 AND tl.tags_linking_events_id=e.events_id) as `tags`"))
 								->leftJoin('events_access AS a', function($join) use($token_data) {
 									$join->on('a.access_events_id', '=', 'e.events_id')
 										->where([
@@ -842,10 +842,7 @@ class eventAjaxController extends Controller
 					if(!is_null($event_data->tags)) {
 						$tags_data = explode('~', $event_data->tags);
 						foreach($tags_data AS $tag_data) {
-							$tags[] = [
-								'id' => $tag_data[0],
-								'tag_name' => $tag_data[1]
-							];
+							$tags[] = $tag_data;
 						}
 					}
 
