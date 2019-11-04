@@ -1419,9 +1419,8 @@ class eventAjaxController extends Controller
 									
  								])
  								 // 7 * 24 * 60 * 60 is the unix timp stamp calculated in second for one week time
- 								->havingRaw('dates_earliest > '.(round(microtime(true) * 1000) - (7 * 24 * 60 * 60 * 1000)))
+ 								->havingRaw('dates_earliest > '.(round(microtime(true) * 1000)) - (7 * 24 * 60 * 60 * 1000))
  								->havingRaw('dates_earliest < '.round(microtime(true) * 1000))
-
 								->get();
 				
  				if(!is_null($last_public_event_data)) {
@@ -1443,10 +1442,10 @@ class eventAjaxController extends Controller
  								])
 
  								// 7 * 24 * 60 * 60 is the unix timp stamp calculated in second for one week time
-								->havingRaw('dates_earliest > '.(round(microtime(true) * 1000) - (7 * 24 * 60 * 60 * 1000)))
+								->havingRaw('dates_earliest > '.(round(microtime(true) * 1000)) - (7 * 24 * 60 * 60 * 1000))
 								->havingRaw('dates_earliest < '.round(microtime(true) * 1000))
-								
  								->get();
+
  				if(!is_null($last_private_event_data)) {
 					foreach($last_private_event_data as $events) {
 						$lastWk_event_number++;
@@ -1467,11 +1466,11 @@ class eventAjaxController extends Controller
  								])
 
  								// 7 * 24 * 60 * 60 is the unix timp stamp calculated in second for one week time
- 								->havingRaw('dates_latest=0 OR dates_latest > '.(round(microtime(true) * 1000) +  (7 * 24 * 60 * 60 * 1000)))
+ 								->havingRaw('dates_latest=0 OR dates_latest > '.(round(microtime(true) * 1000)) +  (7 * 24 * 60 * 60 * 1000))
 
  								->havingRaw('dates_latest=0 OR dates_latest > '.round(microtime(true) * 1000))
-
  								->get();
+
  				if(!is_null($next_private_event_data)) {
  					foreach($next_private_event_data as $private_events) {
  						$next_private_events++;
@@ -1495,7 +1494,7 @@ class eventAjaxController extends Controller
  								])
 
  								// 7 * 24 * 60 * 60 is the unix timp stamp calculated in second for one week time
- 								->havingRaw('dates_latest=0 OR dates_latest > '.(round(microtime(true) * 1000) +  (7 * 24 * 60 * 60 * 1000)))
+ 								->havingRaw('dates_latest=0 OR dates_latest > '.(round(microtime(true) * 1000)) +  (7 * 24 * 60 * 60 * 1000))
 
  								->havingRaw('dates_latest=0 OR dates_latest > '.round(microtime(true) * 1000))
 
