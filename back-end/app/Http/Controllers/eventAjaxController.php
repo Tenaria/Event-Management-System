@@ -1792,7 +1792,7 @@ class eventAjaxController extends Controller
 					$sessions = [];
 					// query database for active sessions for an event
 					$session_data = DB::table('events_sessions AS s')
-										->select('s.sessions_id', 's.sessions_start_time', 's.sessions_end_time', 's.sessions_status', DB::raw("(SELECT GROUP_CONCAT(DISTINCT CONCAT(u.users_fname, '~', u.users_lname, '~', IFNULL(sa.sessions_attendance_going, 0), '~', a.access_id, '~', u.users_email) SEPARATOR '`') FROM events_access a JOIN events_sessions_attendance sa ON sa.sessions_attendance_access_id=a.access_id INNER JOIN users u on u.users_id=a.access_user_id WHERE a.access_events_id=s.sessions_events_id AND a.access_active=1 AND u.users_active=1) as 'attendees'"))
+										->select('s.sessions_id', 's.sessions_start_time', 's.sessions_end_time', 's.sessions_status', DB::raw("(SELECT GROUP_CONCAT(DISTINCT CONCAT(u.users_fname, '~', u.users_lname, '~', IFNULL(sa.sessions_attendance_going, 0), '~', a.access_id, '~', u.users_email) SEPARATOR '`') FROM events_access a INNER JOIN events_sessions_attendance sa ON sa.sessions_attendance_access_id=a.access_id INNER JOIN users u on u.users_id=a.access_user_id WHERE a.access_events_id=s.sessions_events_id AND a.access_active=1 AND u.users_active=1 AND sa.sessions_attendance_sessions_id=s.sessions_id) as 'attendees'"))
 										->where([
 											['s.sessions_active', 1],
 											['s.sessions_events_id', $event_id]
@@ -1812,9 +1812,9 @@ class eventAjaxController extends Controller
 									//1 is last name
 									//2 is attendance going
 									//3 is access id
-									$going = false;
-									if(isset($attendee[2]) && !empty($attendee[2])) {
-										$going = true;
+									$going = true;
+									if(!isset($attendee[2]) || empty($attendee[2])) {
+										$going = false;
 									}
 
 									$attendess_arr[] = [
