@@ -1419,7 +1419,7 @@ class eventAjaxController extends Controller
 									
  								])
  								 // 7 * 24 * 60 * 60 is the unix timp stamp calculated in second for one week time
- 								->havingRaw('dates_earliest > '.time() - 7 * 24 * 60 * 60)
+ 								->havingRaw('dates_earliest > '.(round(microtime(true) * 1000) - (7 * 24 * 60 * 60 * 1000))
  								->havingRaw('dates_earliest < '.round(microtime(true) * 1000))
 
 								->get();
@@ -1443,7 +1443,7 @@ class eventAjaxController extends Controller
  								])
 
  								// 7 * 24 * 60 * 60 is the unix timp stamp calculated in second for one week time
-								->havingRaw('dates_earliest > '.time() - 7 * 24 * 60 * 60)
+								->havingRaw('dates_earliest > '.(round(microtime(true) * 1000) - (7 * 24 * 60 * 60 * 1000))
 								->havingRaw('dates_earliest < '.round(microtime(true) * 1000))
 								
  								->get();
@@ -1467,7 +1467,7 @@ class eventAjaxController extends Controller
  								])
 
  								// 7 * 24 * 60 * 60 is the unix timp stamp calculated in second for one week time
- 								->havingRaw('dates_latest=0 OR dates_latest > '.time() +  7 * 24 * 60 * 60)
+ 								->havingRaw('dates_latest=0 OR dates_latest > '.(round(microtime(true) * 1000) +  (7 * 24 * 60 * 60 * 1000))
 
  								->havingRaw('dates_latest=0 OR dates_latest > '.round(microtime(true) * 1000))
 
@@ -1495,7 +1495,7 @@ class eventAjaxController extends Controller
  								])
 
  								// 7 * 24 * 60 * 60 is the unix timp stamp calculated in second for one week time
- 								->havingRaw('dates_latest=0 OR dates_latest > '.time() +  7 * 24 * 60 * 60)
+ 								->havingRaw('dates_latest=0 OR dates_latest > '.(round(microtime(true) * 1000) +  (7 * 24 * 60 * 60 * 1000))
 
  								->havingRaw('dates_latest=0 OR dates_latest > '.round(microtime(true) * 1000))
 
