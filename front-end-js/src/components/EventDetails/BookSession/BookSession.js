@@ -1,7 +1,7 @@
 /*
   Edit the sessions of an event
  */
-import { Button, DatePicker, List, Tooltip } from 'antd';
+import { Button, DatePicker, List, message, Tooltip } from 'antd';
 import React from 'react';
 import moment from 'moment';
 
@@ -10,35 +10,9 @@ import TokenContext from '../../../context/TokenContext';
 const { RangePicker } = DatePicker;
 
 class BookSession extends React.Component {
-  
-  constructor(props, context) {
-    super(props);
-    
-    const { attendees } = this.props;
-    const { userEmail } = context;
-    let confirmedGoing = false;
-
-    if (attendees) {
-      for(const user of attendees) {
-        console.log(`user.email: ${user.email}, userEmail: ${userEmail}`)
-        if (user.email === userEmail) {
-          confirmedGoing = true;
-        }
-      }
-    }
-
-    this.state = {
-      startDateTime: this.props.start_timestamp,
-      endDateTime: this.props.end_timestamp,
-      confirmedGoing
-    }
-  }
-
   confirmSession = async () => {
     const { token } = this.context;
     const { id, event_id } = this.props;
-
-    console.log(`Information passed token: ${token}, session_id: ${id}, event_id: ${event_id}`);
 
     const res = await fetch('http://localhost:8000/mark_as_going', {
       method: 'POST',
@@ -54,11 +28,46 @@ class BookSession extends React.Component {
       })
     });
 
+    if (res.status === 200) {
+      message.success('You have successfully confirmed that you are going to a session!');
+    } else {
+      const data = await res.json();
+      message.success(data.error);
+    }
+
+    this.props.cb();
+  }
+
+  unconfirmSession = async () => {
+    const { token } = this.context;
+    const { id, event_id } = this.props;
+
+    const res = await fetch('http://localhost:8000/unmark_as_going', {
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        event_id: event_id,
+        session_id: id,
+        token
+      })
+    });
+
+    if (res.status === 200) {
+      message.success('You have successfully confirmed that you are no longer going to a session!');
+    } else {
+      const data = await res.json();
+      message.success(data.error);
+    }
+
     this.props.cb();
   }
 
   render() {
-    const { confirmedGoing, startDateTime, endDateTime } = this.state;
+    const { confirmed_going, start_timestamp, end_timestamp } = this.props;
 
     return (
       <List.Item style={{display: 'flex'}}>
@@ -71,8 +80,8 @@ class BookSession extends React.Component {
         <div style={{flexGrow: 1}}>
           <RangePicker
             defaultValue={[
-              moment(startDateTime),
-              moment(endDateTime)
+              moment(start_timestamp),
+              moment(end_timestamp)
             ]}
             placeholder={['Start Time', 'End Time']}
             format="YYYY-MM-DD HH:mm"
@@ -83,12 +92,12 @@ class BookSession extends React.Component {
           />
         </div>
         <div style={{paddingLeft: '0.5em', textAlign: 'right'}}>
-          {confirmedGoing ? 
-            <Tooltip title="Confirm you are going for this session!">
+          {confirmed_going ? 
+            <Tooltip title="State that you are no longer going to go for this session!">
               <Button
                 icon="close"
                 type="danger"
-                onClick={this.confirmSession}
+                onClick={this.unconfirmSession}
               />
             </Tooltip> :
             <Tooltip title="Confirm you are going for this session!">
