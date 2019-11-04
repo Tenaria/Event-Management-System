@@ -812,7 +812,7 @@ class eventAjaxController extends Controller
 			if($token_data == true) {
 				// check event exists
 				$event_data = DB::table('events AS e')
-								->select('e.*', 'a.access_id', DB::raw("(SELECT tl.tags_linking_value FROM events_tags_linking AS tl WHERE tl.tags_linking_active=1 AND tl.tags_linking_events_id=e.events_id) as `tags`"))
+								->select('e.*', 'a.access_id')
 								->leftJoin('events_access AS a', function($join) use($token_data) {
 									$join->on('a.access_events_id', '=', 'e.events_id')
 										->where([
@@ -829,7 +829,7 @@ class eventAjaxController extends Controller
 								/*
 									DB::raw("(SELECT GROUP_CONCAT(DISTINCT CONCAT(u.users_fname, '~', u.users_lname, '~', IFNULL(sa.sessions_attendance_going, 0), '~', a.access_id, '~', u.users_email) SEPARATOR '`') FROM events_access a INNER JOIN events_sessions_attendance sa ON sa.sessions_attendance_access_id=a.access_id INNER JOIN users u on u.users_id=a.access_user_id WHERE a.access_events_id=s.sessions_events_id AND a.access_active=1 AND u.users_active=1 AND sa.sessions_attendance_sessions_id=s.sessions_id) as 'attendees'")
 								*/
-
+die(var_dump($event_data));
 				if(!is_null($event_data)) {
 					//if the event is private, we need to do some extra checking to see if the user is allowed to see it
 					if($event_data->events_public == 0) {
