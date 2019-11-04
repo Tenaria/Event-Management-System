@@ -1379,141 +1379,128 @@ class eventAjaxController extends Controller
 	/*
 		function to get simple details including a count of how many events the user has attended in the past week and how many events the user will attend in the next week
 	*/
-// 	public function get_summary_dashboard(Request $request) {
-// 		$token = $request->input('token');
+ 	public function get_summary_dashboard(Request $request) {
+ 		$token = $request->input('token');
 
-// 		if (!isset($token) || empty($token)) {
-// 			return Response::json(['error' => 'JWT is either not set or null'], 400);
-// 		}
+ 		if (!isset($token) || empty($token)) {
+ 			return Response::json(['error' => 'JWT is either not set or null'], 400);
+ 		}
 		
-// 		if (isset($token) && !empty($token)) {
-// 			$token_data = validate_jwt($token);
-// 			if($token_data == true) {
-// 				$lastWk_event_number = 0;
-// 				$nextWk_event_number = 0;
-// 				$thisWk_event_number = 0;
+ 		if (isset($token) && !empty($token)) {
+ 			$token_data = validate_jwt($token);
+ 			if($token_data == true) {
+ 				$lastWk_event_number = 0;
+ 				$nextWk_event_number = 0;
+ 				$thisWk_event_number = 0;
 				
-// 				//getting last week events
-// <<<<<<< HEAD
-// 				$last_public_event_data = DB::table('events AS e')
-// 								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'dates_earliest'"))
-// =======
-// 				$past_public_event_data = DB::table('events AS e')
-// 								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start_time ASC LIMIT 1), 2147483647000) as 'dates_earliest'"))
-// 								->where ([
-// 									['e.events_active', 1],
-// 									['e.events_createdby', $token_data['user_id']]
-// 									//['e.events_status', 0]
+ 				//getting last week events
+ 				$last_public_event_data = DB::table('events AS e')
+ 								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'dates_earliest'"))
+ 								->where ([
+ 									['e.events_active', 1],
+ 									['e.events_createdby', $token_data['user_id']]
+ 									//['e.events_status', 0]
 									
-// 								])
-// 								 // 7 * 24 * 60 * 60 is the unix timp stamp calculated in second for one week time
-// 								->havingRaw('dates_earliest > '.time() - 7 * 24 * 60 * 60)
-// 								->havingRaw('dates_earliest < '.round(microtime(true) * 1000))
+ 								])
+ 								 // 7 * 24 * 60 * 60 is the unix timp stamp calculated in second for one week time
+ 								->havingRaw('dates_earliest > '.time() - 7 * 24 * 60 * 60)
+ 								->havingRaw('dates_earliest < '.round(microtime(true) * 1000))
 
-// 								->get();
+								->get();
 				
-// 				if(!is_null($last_public_event_data)) {
-// 					foreach($last_public_event_data as $events) {
-// 						$lastWk_event_number++;
-// 					}
-// 				}
+ 				if(!is_null($last_public_event_data)) {
+ 					foreach($last_public_event_data as $events) {
+ 						$lastWk_event_number++;
+ 					}
+ 				}
 				
 				
-// <<<<<<< HEAD
-// 				$last_private_event_data = DB::table('events_access AS a')
-// 								->select('e.events_id', 'e.events_name', 'e.events_public', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'dates_earliest'"))
-// =======
-// 				$past_private_event_data = DB::table('events_access AS a')
-// 								->select('e.events_id', 'e.events_name', 'e.events_public', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start_time ASC LIMIT 1), 2147483647000) as 'dates_earliest'"))
-// >>>>>>> 25fe8714cd6bcd848a4200a7450e9eb42f25fa5f
-// 								->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
-// 								->where([
-// 									["a.access_user_id", $token_data['user_id']],
-// 									["a.access_active", 1], 
-// 									["a.access_archived", 0],
-// 									["e.events_createdby", '!=', $token_data['user_id']]
-// 								])
-// <<<<<<< HEAD
-// 								// 7 * 24 * 60 * 60 is the unix timp stamp calculated in second for one week time
-// 								->havingRaw('dates_earliest > '.time() - 7 * 24 * 60 * 60)
-// 								->get();
-// 				if(!is_null($last_private_event_data)) {
-// 					foreach($last_private_event_data as $events) {
-// =======
-// 								->havingRaw('dates_earliest < '.round(microtime(true) * 1000))
-// 								->get();
 
-// 				if(!is_null($past_private_event_data)) {
-// 					foreach($past_private_event_data as $events) {
-// >>>>>>> 25fe8714cd6bcd848a4200a7450e9eb42f25fa5f
-// 						$lastWk_event_number++;
-// 					}
-// 				}				
-				
-// 				//getting future private event
-// 				$next_private_events = 0;
-// 				$next_private_event_data = DB::table('events_access AS a')
-// 								->select('e.events_id', 'e.events_name', 'e.events_public', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"))
-// 								->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
-// 								->where([
-// 									["a.access_user_id", $token_data['user_id']],
-// 									["a.access_active", 1], 
-// 									//["a.access_accepted", 0],
-// 									["e.events_createdby", '!=', $token_data['user_id']],
-// 									["a.access_archived", 0]
-// 								])
-// <<<<<<< HEAD
-// 								// 7 * 24 * 60 * 60 is the unix timp stamp calculated in second for one week time
-// 								->havingRaw('dates_latest=0 OR dates_latest > '.time() +  7 * 24 * 60 * 60)
-// =======
-// 								->havingRaw('dates_latest=0 OR dates_latest > '.round(microtime(true) * 1000))
-// >>>>>>> 25fe8714cd6bcd848a4200a7450e9eb42f25fa5f
-// 								->get();
-// 				if(!is_null($next_private_event_data)) {
-// 					foreach($next_private_event_data as $private_events) {
-// 						$next_private_events++;
-// 					}
-// 				}
-// 				//getting future public event
-// 				$next_public_events = 0;
-// 				$next_public_event_data = DB::table('events AS e')
-// 								->select('e.*', 'a.access_id', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"))
-// 								->leftJoin('events_access AS a', function($join) use ($token_data) {
-// 									$join->on('a.access_events_id', '=', 'e.events_id')
-// 										->where([
-// 											["a.access_user_id", $token_data['user_id']],
-// 											["a.access_active", 1]
-// 										]);
-// 								})
-// 								->where ([
-// 									['e.events_active', 1],
-// 									['e.events_createdby','!=',$token_data['user_id']],
-// 									['e.events_public', 1]
-// 								])
-// <<<<<<< HEAD
-// 								// 7 * 24 * 60 * 60 is the unix timp stamp calculated in second for one week time
-// 								->havingRaw('dates_latest=0 OR dates_latest > '.time() +  7 * 24 * 60 * 60)
-// =======
-// 								->havingRaw('dates_latest=0 OR dates_latest > '.round(microtime(true) * 1000))
-// >>>>>>> 25fe8714cd6bcd848a4200a7450e9eb42f25fa5f
-// 								->get();
+				$last_private_event_data = DB::table('events_access AS a')
+ 								->select('e.events_id', 'e.events_name', 'e.events_public', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'dates_earliest'"))
+ 								->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
+ 								->where([
+ 									["a.access_user_id", $token_data['user_id']],
+ 									["a.access_active", 1], 
+									["a.access_archived", 0],
+ 									["e.events_createdby", '!=', $token_data['user_id']]
+ 								])
+
+ 								// 7 * 24 * 60 * 60 is the unix timp stamp calculated in second for one week time
+								->havingRaw('dates_earliest > '.time() - 7 * 24 * 60 * 60)
+								->havingRaw('dates_earliest < '.round(microtime(true) * 1000))
 								
-// 				if(!is_null($next_public_event_data)) {
-// 					foreach($next_public_event_data as $public_events) {
-// 						$next_public_events++;
-// 					}
-// 				}
-// 				$nextWk_event_number = $next_private_events + $next_public_events;
+ 								->get();
+ 				if(!is_null($last_private_event_data)) {
+					foreach($last_private_event_data as $events) {
+						$lastWk_event_number++;
+					}
+				}				
 				
-// 				//getting number of this week public events
+ 				//getting future private event
+ 				$next_private_events = 0;
+ 				$next_private_event_data = DB::table('events_access AS a')
+ 								->select('e.events_id', 'e.events_name', 'e.events_public', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"))
+ 								->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
+ 								->where([
+ 									["a.access_user_id", $token_data['user_id']],
+ 									["a.access_active", 1], 
+ 									//["a.access_accepted", 0],
+									["e.events_createdby", '!=', $token_data['user_id']],
+ 									["a.access_archived", 0]
+ 								])
+
+ 								// 7 * 24 * 60 * 60 is the unix timp stamp calculated in second for one week time
+ 								->havingRaw('dates_latest=0 OR dates_latest > '.time() +  7 * 24 * 60 * 60)
+
+ 								->havingRaw('dates_latest=0 OR dates_latest > '.round(microtime(true) * 1000))
+
+ 								->get();
+ 				if(!is_null($next_private_event_data)) {
+ 					foreach($next_private_event_data as $private_events) {
+ 						$next_private_events++;
+ 					}
+ 				}
+ 				//getting future public event
+ 				$next_public_events = 0;
+ 				$next_public_event_data = DB::table('events AS e')
+ 								->select('e.*', 'a.access_id', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"))
+ 								->leftJoin('events_access AS a', function($join) use ($token_data) {
+ 									$join->on('a.access_events_id', '=', 'e.events_id')
+ 										->where([
+ 											["a.access_user_id", $token_data['user_id']],
+ 											["a.access_active", 1]
+ 										]);
+ 								})
+ 								->where ([
+ 									['e.events_active', 1],
+ 									['e.events_createdby','!=',$token_data['user_id']],
+ 									['e.events_public', 1]
+ 								])
+
+ 								// 7 * 24 * 60 * 60 is the unix timp stamp calculated in second for one week time
+ 								->havingRaw('dates_latest=0 OR dates_latest > '.time() +  7 * 24 * 60 * 60)
+
+ 								->havingRaw('dates_latest=0 OR dates_latest > '.round(microtime(true) * 1000))
+
+ 								->get();
+								
+ 				if(!is_null($next_public_event_data)) {
+ 					foreach($next_public_event_data as $public_events) {
+ 						$next_public_events++;
+ 					}
+ 				}
+ 				$nextWk_event_number = $next_private_events + $next_public_events;
+				
+ 				//getting number of this week public events
 				
 				
-// 				//getting number of this week private events
+				//getting number of this week private events
 				
 				
-// 			}
-// 		}
-// 	}
+			}
+ 		}
+ 	}
 
 	/*
 		function to get past events created by the logged in user
