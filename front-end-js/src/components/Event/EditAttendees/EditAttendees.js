@@ -34,7 +34,12 @@ class EditAttendees extends React.Component {
     });
 
     const data = await res.json();
-    this.setState({attendees: data.attendees, loaded: true});
+    if (res.status === 200) {
+      this.setState({attendees: data.attendees, loaded: true});
+    } else {
+      this.setState({attendees: [], loaded: true});
+      message.error(data.error);
+    }
   }
 
   handleSearch = value => {

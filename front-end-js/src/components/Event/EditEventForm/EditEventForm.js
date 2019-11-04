@@ -1,4 +1,4 @@
-import { Button, Form, Checkbox, Icon, Input, message, Row } from 'antd';
+import { Button, Form, Checkbox, Icon, Input, message, Row, Select } from 'antd';
 import React from 'react';
 
 import EventContext from '../../../context/EventContext';
@@ -44,6 +44,10 @@ class EditEventForm extends React.Component {
     })
   }
 
+  testToken = value => {
+    console.log(value);
+  }
+
   render() {
     const { name, desc, event_public, location } = this.context;
     const { getFieldDecorator } = this.props.form;
@@ -60,7 +64,7 @@ class EditEventForm extends React.Component {
               }],
             })(<Input
               placeholder="Event Name"
-              prefix={<Icon type="tag" style={{ color: 'rgba(0,0,0,.25)' }} />}
+              prefix={<Icon type="edit" style={{ color: 'rgba(0,0,0,.25)' }} />}
             />)}
           </Form.Item>
         </Row>
@@ -76,6 +80,21 @@ class EditEventForm extends React.Component {
               placeholder="Event Location"
               prefix={<Icon type="search" style={{ color: 'rgba(0,0,0,.25)' }} />}
             />)}
+          </Form.Item>
+        </Row>
+        <Row>
+          <Form.Item label="Event Tags">
+            {getFieldDecorator('event_tags', {
+            })(
+              <Select
+                mode="tags"
+                style={{ width: '100%' }}
+                onChange={this.testToken}
+                tokenSeparators={[',']}
+                dropdownRender={() => (<div></div>)}
+              >
+              </Select>
+            )}
           </Form.Item>
         </Row>
         <Row>
