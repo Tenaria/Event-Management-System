@@ -1368,7 +1368,7 @@ class eventAjaxController extends Controller
 							])
 							->get();
 
-			if(!is_null($attendees)) {
+			if(!is_null($attendees) && count($attendees) > 0) {
 				$return_error = true;
 
 				foreach($attendees AS $attendee) {
