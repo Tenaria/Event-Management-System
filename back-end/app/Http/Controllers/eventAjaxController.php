@@ -519,7 +519,7 @@ class eventAjaxController extends Controller
 								['tags_linking_events_id', $event_id],
 								['tags_linking_active', 1]
 							])
-							->whereIn('tags_linking_tags_id', $old_tags)
+							->whereIn('tags_linking_value', $old_tags)
 							->update(['tags_linking_active' => 0]);
 
 						// ADD NEW TAGS
@@ -528,7 +528,7 @@ class eventAjaxController extends Controller
 							foreach($new_tag_arr as $new_tag) {
 								$insert_tags[] = [
 									'tags_linking_active' => 1,
-									'tags_linking_tags_id' => $new_tag,
+									'tags_linking_value' => $new_tag,
 									'tags_linking_events_id' => $event_id
 								];
 							}
