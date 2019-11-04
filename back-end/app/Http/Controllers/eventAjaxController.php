@@ -233,7 +233,7 @@ class eventAjaxController extends Controller
 		$event_location = $request->input('event_location'); // STRING; NOT EMPTY
 		$event_attendees = $request->input('event_attendees'); // ARRAY OF INTEGERS
 		$event_public = $request->input('event_public'); // INTEGER 1 OR 0; NOT NULL
-		$tags = $request->input('event_tags'); // ARRAY OF INTEGERS
+		$tags = $request->input('event_tags'); // ARRAY OF STRINGS
 
 		// check all fields are set as necessary
 		if (!isset($token) || empty($token)) {
@@ -300,7 +300,7 @@ class eventAjaxController extends Controller
 						foreach($tags as $tag) {
 							$tags_insert = [
 								'tags_linking_events_id' => $new_event_id,
-								'tags_linking_tags_id' => $tag,
+								'tags_linking_value' => $tag,
 								'tags_linking_active' => 1
 							];	
 						}
@@ -330,7 +330,7 @@ class eventAjaxController extends Controller
 		$new_event_location = $request->input('event_location'); // STRING; NOT EMPTY
 		$new_event_attendees = $request->input('event_attendees'); // ARRAY OF INTEGERS
 		$new_event_public = $request->input('event_public'); // INTEGER 0 OR 1; NOT NULL
-		$new_tags = $request->input('event_tags'); // ARRAY OF INTEGERS
+		$new_tags = $request->input('event_tags'); // ARRAY OF STRINGS
 
 		// check all fields are set as necessary
 		if (!isset($token) || empty($token)) {
@@ -497,14 +497,21 @@ class eventAjaxController extends Controller
 						$current_tags = [];
 						if(!is_null($tags)) {
 							foreach($tags as $tag) {
-								$current_tags[] = $tag->tags_linking_tags_id;
+								$current_tags[] = strtolower($tag->tags_linking_value);
+							}
+						}
+
+						$new_tag_arr = [];
+						if(!is_null($new_tags)) {
+							foreach($new_tags AS $new_tag) {
+								$new_tag_arr[] = strtolower($new_tag);
 							}
 						}
 
 						// figure out what tags have been newly added in this update
-						$new_tags = array_diff($new_tags, $current_tags);
+						$new_tag_arr = array_diff($new_tag_arr, $current_tags);
 						// figure out what tags have been removed in this update
-						$old_tags = array_diff($current_tags, $new_tags);
+						$old_tags = array_diff($current_tags, $new_tag_arr);
 
 						// REMOVE TAGS
 						DB::table('events_tags_linking')
@@ -517,8 +524,8 @@ class eventAjaxController extends Controller
 
 						// ADD NEW TAGS
 						$insert_tags = [];
-						if(!empty($new_tags)) {
-							foreach($new_tags as $new_tag) {
+						if(!empty($new_tag_arr)) {
+							foreach($new_tag_arr as $new_tag) {
 								$insert_tags[] = [
 									'tags_linking_active' => 1,
 									'tags_linking_tags_id' => $new_tag,
