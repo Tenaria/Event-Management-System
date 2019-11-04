@@ -1362,7 +1362,6 @@ class eventAjaxController extends Controller
 
 			if(!is_null($attendees)) {
 				$return_error = true;
-				
 
 				foreach($attendees AS $attendee) {
 					//if the event is private, we need to do some extra checking to see if the user is allowed to see it
@@ -1379,10 +1378,10 @@ class eventAjaxController extends Controller
 						'id' => $attendee->users_id
 					];
 				}
-			}
 
-			if($return_error == true) {
-				return Response::json(['error' => 'unauthorised access to private event'], 400);
+				if($return_error == true) {
+					return Response::json(['error' => 'unauthorised access to private event'], 400);
+				}
 			}
 
 			// return user details if applicable
