@@ -427,7 +427,7 @@ class eventAjaxController extends Controller
 
 						// UPDATE THE ATTENDEES
 						if(!isset($new_event_attendees) || empty($new_event_attendees)) {
-							$new_event_attendees = [];
+							$new_event_attendees = [$token_data['user_id']];
 						} else if (!in_array($token_data['user_id'], $new_event_attendees)) {
 						    $new_event_attendees[] = $token_data['user_id'];
 						}
