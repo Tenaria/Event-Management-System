@@ -2,7 +2,7 @@
   This allows you to view the events that are available for the user
  */
 import {
-  Avatar, Button, Card, Divider, Empty, Icon, List, Row, Col, Spin, Tooltip, Typography
+  Avatar, Divider, Empty, Icon, List, message, Row, Col, Spin, Tooltip, Typography
 } from 'antd';
 import React from 'react';
 
@@ -27,7 +27,7 @@ class EventDetails extends React.Component {
     valid: false
   };
 
-  updateSessions = new Promise(async (resolve, reject) => {
+  updateSessions = async () => {
     const eventID = sessionStorage.getItem('event_id');
     const { token } = this.context;
     const res = await fetch('http://localhost:8000/load_event_sessions', {
@@ -43,13 +43,14 @@ class EventDetails extends React.Component {
       })
     });
 
+    const data = await res.json();
     if (res.status === 200) {
-      const data = await res.json();
-      resolve(data);
+      this.setState({sessions: []});
+      this.setState({sessions: data.sessions});
     } else {
-      resolve([]);
+      message.error(data.error);
     }
-  })
+  }
 
   componentDidMount = async () => {
     // The instant the element is added to the DOM, load the information
@@ -90,7 +91,29 @@ class EventDetails extends React.Component {
             resolve([]);
           }
         }),
-        this.updateSessions
+        new Promise(async (resolve, reject) => {
+          const eventID = sessionStorage.getItem('event_id');
+          const { token } = this.context;
+          const res = await fetch('http://localhost:8000/load_event_sessions', {
+            method: 'POST',
+            mode: 'cors',
+            cache: 'no-cache',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              event_id: eventID,
+              token
+            })
+          });
+      
+          if (res.status === 200) {
+            const data = await res.json();
+            resolve(data);
+          } else {
+            resolve([]);
+          }
+        })
       ]).then(values => {
         this.setState({
           id: eventID,
@@ -113,15 +136,13 @@ class EventDetails extends React.Component {
     }
   }
 
-  updateSessionCB = async () => {
-    let data = await this.updateSessionCB();
-    this.setState({sessions: data.sessions});
-  }
+  updateSessionCB = () => this.updateSessions();
 
   render() {
     const {
-      id, userId, name, desc, created, event_public, location, attendees, sessions, valid, loaded
+      id, name, desc, created, event_public, location, attendees, sessions, valid, loaded
     } = this.state;
+    const { userEmail } = this.context;
     const attendeeElm = attendees.map(a =>
       <Tooltip key={a.id} title={a.email}>
         <Avatar icon="user" />
@@ -133,8 +154,6 @@ class EventDetails extends React.Component {
       width: '100%'
     };
     let displayElm = <div style={spinStyle}><Spin indicator={spinIcon}/></div>;
-
-    console.log(sessions);
 
     if (loaded && valid) {
       displayElm = (
@@ -154,17 +173,28 @@ class EventDetails extends React.Component {
                 dataSource={sessions}
                 header="Sessions"
                 style={{marginTop: '1em'}}
-                renderItem={item => (
-                  <BookSession
-                    id={item.id}
-                    event_id={id}
-                    user_id={userId}
-                    start_timestamp={item.start_timestamp}
-                    end_timestamp={item.end_timestamp}
-                    attendees={item.attendees_going}
-                    cb={this.updateSessionCB}
-                  />
-                )}
+                renderItem={item => {
+                  let confirmedGoing = false;
+                  if (item.attendees_going) {
+                    for(const attendee of item.attendees_going) {
+                      if (attendee.email === userEmail) {
+                        confirmedGoing = true;
+                      }
+                    }
+                  }
+
+                  return (
+                    <BookSession
+                      id={item.id}
+                      event_id={id}
+                      start_timestamp={item.start_timestamp}
+                      end_timestamp={item.end_timestamp}
+                      confirmed_going={confirmedGoing}
+                      attendees={item.attendees_going}
+                      cb={this.updateSessionCB}
+                    />
+                  );
+                }}
               >
               </List>
             </Col>
