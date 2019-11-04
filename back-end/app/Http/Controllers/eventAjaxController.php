@@ -754,7 +754,8 @@ class eventAjaxController extends Controller
 									$join->on('a.access_id', '=', 'sa.sessions_attendance_access_id')
 										->where([
 											['sa.sessions_attendance_going', 1],
-											['sa.sessions_attendance_active', 1]
+											['sa.sessions_attendance_active', 1],
+											['sa.sessions_attendance_sessions_id', $session_id]
 										]);
 								})
 								->where([
