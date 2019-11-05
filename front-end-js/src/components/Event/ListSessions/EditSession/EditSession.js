@@ -142,6 +142,9 @@ class EditSession extends React.Component {
 
     return (
       <List.Item className={cancelled ? 'cancelled-session' : ''} style={{display: 'flex'}}>
+        <div style={{paddingRight: '0.5em'}}>
+          
+        </div>
         <div style={{flexGrow: 1}}>
           <RangePicker
             defaultValue={[
@@ -190,6 +193,8 @@ class EditSession extends React.Component {
                 type="danger"
                 icon="stop"
                 style={{
+                  backgroundColor: '#742A2A',
+                  border: 'none',
                   marginRight: '0.5em'
                 }}
                 onClick={this.cancelSession}
