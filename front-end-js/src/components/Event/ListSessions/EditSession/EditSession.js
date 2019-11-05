@@ -44,7 +44,29 @@ class EditSession extends React.Component {
   }
 
   uncancelSession = async () => {
-    // TODO: Uncancel session
+    const { id, token } = this.context;
+    const sessionId = this.props.id;
+
+    const res = await fetch('http://localhost:8000/uncancel_event_sessions', {
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        event_id: id,
+        session_id: sessionId,
+        token
+      })
+    })
+
+    if (res.status === 200) {
+      message.success('You have successfully uncancelled a session!');
+      this.props.refresh();
+    } else {
+      message.error('The system has encountered an error. Contact your admin!');
+    }
   }
 
   deleteSession = async () => {
@@ -135,67 +157,70 @@ class EditSession extends React.Component {
           />
         </div>
         <div style={{paddingLeft: '0.5em', textAlign: 'right'}}>
-        {cancelled ?
-          <React.Fragment>
-            <Button
-              type="danger"
-              icon="delete"
-              style={{
-                marginRight: '0.5em'
-              }}
-              onClick={this.deleteSession}
-            />
-            <Button
-              icon="undo"
-              style={{
-                background: '#38B2AC',
-                border: 'none',
-                color: 'white',
-              }}
-              onClick={this.uncancelSession}
-            />
-          </React.Fragment>
-          : (editing ?
-              <React.Fragment>
-                <Button
-                  type="danger"
-                  icon="stop"
-                  style={{
-                    marginRight: '0.5em'
-                  }}
-                  onClick={this.toggleSession}
-                />
-                <Button
-                  icon="check"
-                  style={{
-                    background: '#48BB78',
-                    border: 'none',
-                    color: 'white',
-                  }}
-                  onClick={this.editSession}
-                />
-              </React.Fragment> :
-              <React.Fragment>
-                <Button
-                  type="danger"
-                  icon="stop"
-                  style={{
-                    marginRight: '0.5em'
-                  }}
-                  onClick={this.cancelSession}
-                />
-                <Button
-                  icon="edit"
-                  style={{
-                    background: '#38B2AC',
-                    border: 'none',
-                    color: 'white',
-                  }}
-                  onClick={this.toggleSession}
-                />
-              </React.Fragment>
-            )
-        }
+          {editing ?
+            <React.Fragment>
+              <Button
+                type="danger"
+                icon="cross"
+                style={{
+                  marginRight: '0.5em'
+                }}
+                onClick={this.toggleSession}
+              />
+              <Button
+                icon="check"
+                style={{
+                  background: '#48BB78',
+                  border: 'none',
+                  color: 'white',
+                }}
+                onClick={this.editSession}
+              />
+            </React.Fragment> :
+            <React.Fragment>
+              <Button
+                type="danger"
+                icon="delete"
+                style={{
+                  marginRight: '0.5em'
+                }}
+                onClick={this.deleteSession}
+              />
+              <Button
+                type="danger"
+                icon="stop"
+                style={{
+                  marginRight: '0.5em'
+                }}
+                onClick={this.cancelSession}
+                disabled={cancelled}
+              />
+              {cancelled ?
+                <React.Fragment>
+                  <Button
+                    icon="undo"
+                    style={{
+                      background: '#38B2AC',
+                      border: 'none',
+                      color: 'white',
+                    }}
+                    onClick={this.uncancelSession}
+                  />
+                </React.Fragment> :
+                <React.Fragment>
+                  <Button
+                    icon="edit"
+                    style={{
+                      background: '#38B2AC',
+                      border: 'none',
+                      color: 'white',
+                    }}
+                    onClick={this.toggleSession}
+                  />
+                </React.Fragment>
+              }
+            </React.Fragment>
+          }
         </div>
       </List.Item>
     );
