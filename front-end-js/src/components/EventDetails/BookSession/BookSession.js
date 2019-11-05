@@ -83,7 +83,7 @@ class BookSession extends React.Component {
       <List.Item style={{flexDirection: 'column'}}>
         <Row type="flex" style={{width: '100%'}}>
           <Col span={3}>
-            <div>
+            <div style={{paddingRight: '1em', textAlign: 'right'}}>
               <Button
                 icon={showAttendees ? 'down' : 'right'}
                 shape="circle"
@@ -108,7 +108,7 @@ class BookSession extends React.Component {
             </div>
           </Col>
           <Col span={3}>
-            <div style={{paddingLeft: '0.5em', textAlign: 'center'}}>
+            <div style={{paddingLeft: '1em', textAlign: 'left'}}>
               {confirmed_going ? 
                 <Tooltip title="State that you are no longer going to go for this session!">
                   <Button
