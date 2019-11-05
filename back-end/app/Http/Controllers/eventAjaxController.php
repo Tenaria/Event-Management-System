@@ -2164,6 +2164,70 @@ class eventAjaxController extends Controller
 		return Response::json([], 400);
 	}
 
+	/*
+		cancel an event session; is different from remove as the session will still show in the event but in a cancelled status.
+	*/
+	public function uncancel_event_sessions(Request $request){
+		$token = $request->input('token'); // STRING; NOT EMPTY
+		$session_id = $request->input('session_id'); // INTEGER; NOT EMPTY
+		$events_id = $request->input('event_id'); // INTEGER; NOT EMPTY
+
+		// check all fields are set as necessary
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+
+		if (!isset($session_id) || empty($session_id)) {
+			return Response::json(['error' => 'session id is either not set or null'], 400);
+		}
+
+		if (!isset($events_id) || empty($events_id)) {
+			return Response::json(['error' => 'event id is either not set or null'], 400);
+		}
+			
+		if(isset($token) && !empty($token) && isset($session_id) && !empty($session_id)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				// grab event and check it belongs to the user, is not cancelled and is still active
+				$event = DB::table('events')
+							->select('events_createdby', 'events_status')
+							->where([
+								['events_active', 1],
+								['events_id', $events_id],
+								['events_createdby', $token_data['user_id']],
+								['events_status', 0]
+							])
+							->get();
+
+				if(!is_null($event)){
+					// check session exists, has not been cancelled and belongs to event before removing it
+					$session_exists = DB::table('events_sessions')
+										->where([
+											['sessions_events_id', $events_id],
+											['sessions_id', $session_id],
+											['sessions_status', 1]
+										])
+										->first();
+
+					if(!is_null($session_exists)) {
+						// set session as cancelled in the database
+						DB::table('events_sessions')
+							->where([
+								['sessions_id', $session_id]
+							])
+							->update(['sessions_status' => 0]);
+
+						return Response::json([],200);
+					}
+				}
+			} else {
+				return Response::json(['error' => 'event does not exist or belong to user'], 400);
+			}
+		}
+			
+		return Response::json([], 400);
+	}
+
 	public function get_timetable_details(Request $request) {
 		$token = $request->input('token');
 
