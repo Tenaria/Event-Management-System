@@ -59,7 +59,7 @@ class Event extends React.Component {
         created: data.events_createdat,
         event_public: data.events_public,
         location: data.attributes.location,
-        tags: data.attributes.tags,
+        tags: (data.tags ? data.tags : []),
         loaded: true,
         valid: true
       });

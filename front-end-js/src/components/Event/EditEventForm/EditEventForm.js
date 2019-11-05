@@ -44,13 +44,11 @@ class EditEventForm extends React.Component {
     })
   }
 
-  testToken = value => {
-    console.log(value);
-  }
-
   render() {
-    const { name, desc, event_public, location } = this.context;
+    const { name, desc, event_public, location, tags } = this.context;
     const { getFieldDecorator } = this.props.form;
+
+    console.log('EditEventForm: ', tags);
 
     return (
       <Form onSubmit={this.handleSubmit}>
@@ -85,11 +83,11 @@ class EditEventForm extends React.Component {
         <Row>
           <Form.Item label="Event Tags">
             {getFieldDecorator('event_tags', {
+              initialValue: tags
             })(
               <Select
                 mode="tags"
                 style={{ width: '100%' }}
-                onChange={this.testToken}
                 tokenSeparators={[',']}
                 dropdownRender={() => (<div></div>)}
               >

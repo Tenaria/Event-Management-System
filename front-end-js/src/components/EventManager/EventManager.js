@@ -2,7 +2,7 @@
   This is a component that is responsible for managing your event. So you are able to view a list
   of events you host.
  */
-import { Button, Card, Empty, Icon, Menu, Row, Spin, Tooltip, Typography } from 'antd';
+import { Button, Card, Empty, Icon, Menu, Row, Spin, Tags, Tooltip, Typography } from 'antd';
 import React from 'react';
 import { Redirect } from "react-router-dom";
 
@@ -47,7 +47,6 @@ class EventManager extends React.Component {
       loadData('http://localhost:8000/get_upcoming_events'),
       loadData('http://localhost:8000/get_past_events')
     ]).then(values => {
-      console.log(values);
       this.setState({
         upcomingEvents: values[0].events,
         pastEvents: values[1].events,
