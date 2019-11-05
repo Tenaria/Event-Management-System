@@ -44,6 +44,7 @@ Route::post('/get_tags', 'eventAjaxController@get_tags');
 Route::post('/uncancel_event', 'eventAjaxController@uncancel_event');
 Route::get('/', 'eventAjaxController@get_summary_dashboard');
 Route::post('/cancel_event_sessions', 'eventAjaxController@cancel_event_sessions');
+Route::post('/uncancel_event_sessions', 'eventAjaxController@uncancel_event_sessions');
 Route::post('/unmark_as_going', 'eventAjaxController@unmark_as_going');
 
 // SPRINT 4 (ROUTES)
