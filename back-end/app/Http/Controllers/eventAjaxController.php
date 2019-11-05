@@ -1030,7 +1030,7 @@ class eventAjaxController extends Controller
 				$events_array = [];
 				// figure out which events are upcoming under the definition written above
 				$event_data = DB::table('events AS e')
-								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"), DB::raw("(SELECT count(a.access_user_id) FROM events_access AS a WHERE a.access_events_id=e.events_id) as 'num_attendees'"))
+								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"), DB::raw("(SELECT count(a.access_user_id) FROM events_access AS a WHERE a.access_events_id=e.events_id) as 'num_attendees'"), DB::raw("(SELECT GROUP_CONCAT(DISTINCT CONCAT(t.tags_linking_value) SEPARATOR '~') FROM events_tags_linking AS t WHERE t.tags_linking_events_id=e.events_id AND t.tags_linking_active=1) as 'tags'"))
 								->where ([
 									['e.events_active', 1],
 									['e.events_createdby',$token_data['user_id']]
@@ -1042,6 +1042,14 @@ class eventAjaxController extends Controller
 				if(!is_null($event_data)) {
 					foreach($event_data as $event) {
 						$event_status = "ONGOING";
+
+						$tags = [];
+						if(isset($event->tags) && !is_null($event->tags)) {
+							$tag_data = explode('~', $event->tags);
+							foreach($tag_data AS $tag) {
+								$tags[] = $tag;
+							}
+						}
 
 						// check if event has been cancelled
 						$cancelled = false;
@@ -1069,7 +1077,8 @@ class eventAjaxController extends Controller
 							'events_status' => $event_status,
 							'events_public' => $public,
 							'events_cancelled' => $cancelled,
-							'events_attendees_count' => $num_attendees
+							'events_attendees_count' => $num_attendees,
+							'events_tags' => $tags
 						];
 					}
 				}
