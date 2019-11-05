@@ -2201,4 +2201,56 @@ class eventAjaxController extends Controller
 		
 		return Response::json([], 400);
 	}
+
+	public function timetable_privacy(Request $request){
+		$token = $request->input('token');
+		$user_ids = $request->input('user_ids');
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+		
+		if(isset($token) && !empty($token)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				$viewer = DB::table('timetable_show')
+					->where([['timetable_show_owner', $token_data['user_id']],['timetable_show_active', 1]])
+					->pluck('timetable_show_viewer')->toArray();	
+					//remove id from show
+				foreach($remove in array_diff($viewer, $user_ids)){
+
+						DB::table('timetable_show')
+						->where([['timetable_show_owner', $token_data['user_data']],
+							['timetable_show_viewer', $remove]])
+						->update(['timetable_show_active', 0]);
+
+				}
+				//add id to show
+				foreach($add in array_diff($user_ids, $viewer)){
+					if(is_int($add)){
+						$update = DB::table('timetable_show')
+						->where([['timetable_show_owner', $token_data['user_data']],
+								['timetable_show_viewer', $add]])
+						->first();
+						if(isset($update) && !empty($update)){
+							DB::table('timetable_show')
+							->where([['timetable_show_owner', $token_data['user_data']],
+								['timetable_show_viewer', $add]])
+							->update(['timetable_show_active', 1]);
+						}else{
+							DB::table('timetable_show')
+							->insert(['timetable_show_owner' => $token_data['user_id'],
+								'timetable_show_viewer' => $add,
+								'timetable_show_active' => 1
+								]);
+						}
+					}
+				}
+
+			}
+			return Response::json([], 200);
+		}
+		
+		return Response::json([], 400);
+
+	}
 }
