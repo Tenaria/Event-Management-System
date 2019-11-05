@@ -2,7 +2,7 @@
   This is a component that is responsible for managing your event. So you are able to view a list
   of events you host.
  */
-import { Button, Card, Empty, Icon, Menu, Row, Spin, Tooltip, Typography } from 'antd';
+import { Button, Card, Empty, Icon, Menu, Row, Spin, Tags, Tooltip, Typography } from 'antd';
 import React from 'react';
 import { Redirect } from "react-router-dom";
 
@@ -47,7 +47,6 @@ class EventManager extends React.Component {
       loadData('http://localhost:8000/get_upcoming_events'),
       loadData('http://localhost:8000/get_past_events')
     ]).then(values => {
-      console.log(values);
       this.setState({
         upcomingEvents: values[0].events,
         pastEvents: values[1].events,
@@ -75,6 +74,22 @@ class EventManager extends React.Component {
     const { token } = this.context;
 
     const res = await fetch('http://localhost:8000/cancel_event', {
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ token, event_id: id })
+    });
+    this.loadData();
+  }
+
+  uncancelEvent = async id => {
+    // Sets an event to be cancelled
+    const { token } = this.context;
+
+    const res = await fetch('http://localhost:8000/uncancel_event', {
       method: 'POST',
       mode: 'cors',
       cache: 'no-cache',
@@ -151,12 +166,16 @@ class EventManager extends React.Component {
                   background: '#38B2AC',
                   border: 'none',
                   color: 'white',
-                  marginRight: (upcomingEvent.events_cancelled ? '' : '0.5em')
+                  marginRight: (upcomingEvent.events_cancelled ? '0.5em' : '0.5em')
                 }}
                 onClick={() => this.selectEvent(upcomingEvent.events_id)}
               />
               {upcomingEvent.events_cancelled ?
-                '' :
+                <Button
+                  type="dashed"
+                  icon="undo"
+                  onClick={() => this.uncancelEvent(upcomingEvent.events_id)}
+                /> :
                 <Button
                   type="danger"
                   icon="stop"

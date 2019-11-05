@@ -24,19 +24,18 @@ class Index extends React.Component {
     const token = sessionStorage.getItem('token');
     let userEmail, userId;
 
-    // TODO: Validate token is still valid.
+    // Split the token and check the main body of the token to retrieve information relating to
+    // the user's id and email.
     if (token) {
       const data = token.split('.');
       if (data.length > 1) {
         const jsonData = JSON.parse(atob(data[1]));
-        userEmail = jsonData.user_id;
-        userId = jsonData.email;
+        userEmail = jsonData.email;
+        userId = jsonData.user_id;
       }
     }
 
     // Change this to get the token from the session storage
-    // this.setState({ token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHBpcmF0aW9uIjoxNTc0NjUzNzI2LCJlbWFpbCI6ImxvbEBsb2wuY29tIiwibmFtZSI6InRlc3QgbG9sIn0.doXgGo6dPZCtmk7tbvYprkqW44X_9lGHiDmGvENyHjc' });
-    
     this.setState({token, userEmail, userId});
   }
 

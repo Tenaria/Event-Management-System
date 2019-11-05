@@ -50,6 +50,8 @@ class Event extends React.Component {
 
       const data = await res.json();
 
+      console.log(data);
+
       this.setState({
         id: eventID,
         name: data.events_name,
@@ -57,6 +59,7 @@ class Event extends React.Component {
         created: data.events_createdat,
         event_public: data.events_public,
         location: data.attributes.location,
+        tags: (data.tags ? data.tags : []),
         loaded: true,
         valid: true
       });
@@ -69,7 +72,7 @@ class Event extends React.Component {
   }
 
   render() {
-    const { id, name, desc, created, event_public, loaded, location, valid } = this.state;
+    const { id, name, desc, created, event_public, loaded, location, valid, tags } = this.state;
     const { token } = this.context;
     const spinStyle = {
       padding: '2em',
@@ -81,7 +84,9 @@ class Event extends React.Component {
     if (loaded) {
       if (valid) {
         eventElm =  (
-          <EventContext.Provider value={{ id, name, desc, event_public, location, token }}>
+          <EventContext.Provider value={{
+            id, name, desc, event_public, location, tags, token
+          }}>
             <Collapse defaultActiveKey={['2', '3']}>
               <Panel header="General Information" key="1">
                 <EditEventForm />

@@ -28,7 +28,7 @@ Route::post('/get_upcoming_events', 'eventAjaxController@get_upcoming_events');
 Route::post('/get_invited_events_past', 'eventAjaxController@get_invited_events_past');
 Route::post('/get_invited_events_upcoming', 'eventAjaxController@get_invited_events_upcoming');
 Route::post('/get_emails_exclude_user', 'eventAjaxController@get_emails_exclude_user');
-Route::get('/mark_as_going','eventAjaxController@mark_as_going');
+Route::post('/mark_as_going','eventAjaxController@mark_as_going');
 
 // SPRINT 3 (ROUTES)
 Route::post('/get_attendees_of_event', 'eventAjaxController@get_attendees_of_event');
@@ -41,9 +41,11 @@ Route::post('/edit_event_sessions', 'eventAjaxController@edit_event_sessions');
 Route::post('/remove_event_sessions', 'eventAjaxController@remove_event_sessions');
 Route::post('/search_public_event', 'eventAjaxController@search_public_event');
 Route::post('/get_tags', 'eventAjaxController@get_tags');
-Route::post('/', 'eventAjaxController@uncancel_event');
-Route::post('/get_summary_dashboard', 'eventAjaxController@get_summary_dashboard');
+Route::post('/uncancel_event', 'eventAjaxController@uncancel_event');
+Route::get('/', 'eventAjaxController@get_summary_dashboard');
 Route::post('/cancel_event_sessions', 'eventAjaxController@cancel_event_sessions');
+Route::post('/uncancel_event_sessions', 'eventAjaxController@uncancel_event_sessions');
+Route::post('/unmark_as_going', 'eventAjaxController@unmark_as_going');
 
 // SPRINT 4 (ROUTES)
 // US-6 (Notify Attendees), US-16 (Mark as Going), US-4 (Cancel Session from Event)

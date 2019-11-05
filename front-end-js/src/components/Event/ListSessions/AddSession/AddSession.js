@@ -81,7 +81,7 @@ class AddSession extends React.Component {
               format="YYYY-MM-DD HH:mm"
               placeholder={['Start Time', 'End Time']}
               style={{width: '100%'}}
-              onOk={this.onOk}
+              onChange={this.onOk}
             />
           </Form.Item>
         </Row>

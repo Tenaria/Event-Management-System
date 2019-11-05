@@ -19,13 +19,36 @@ import Test from '../Test';
 const {  Content, Sider } = Layout;
 
 class RouterComponent extends React.PureComponent {
+  handleClick = e => {
+    console.log('click ', e);
+    if (e.key === 'logout') {
+      sessionStorage.removeItem('token');
+      window.location.reload();
+    }
+  };
+
   render() {
     return (
       <Router>
         <Layout>
-          <Sider breakpoint="lg" collapsedWidth="0" style={{minHeight: '100vh'}}>
+          <Sider
+            breakpoint="lg"
+            collapsedWidth="0"
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              minHeight: '100vh'
+            }}
+          >
             <div className="logo" />
-            <Menu theme="dark" mode="inline">
+            <Menu
+              theme="dark"
+              mode="inline"
+              onClick={this.handleClick}
+              style={{
+                flexGrow: 1
+              }}
+            >
               <Menu.Item key="1">
                 <Link to="/">
                   <Icon type="home" />
@@ -49,6 +72,19 @@ class RouterComponent extends React.PureComponent {
                   <Icon type="user" />
                   <span className="nav-text">Account Detail</span>
                 </Link>
+              </Menu.Item>
+              <Menu.Item
+                key="logout"
+                style={{
+                  backgroundColor: '#E53E3E',
+                  color: '#FFFFFF',
+                  position: 'absolute',
+                  left: 0,
+                  bottom: 0,
+                  margin: 0
+                }}>
+                <Icon type="logout" />
+                <span className="nav-text">Log Out</span>
               </Menu.Item>
             </Menu>
           </Sider>

@@ -1,4 +1,4 @@
-import { Button, Form, Checkbox, Icon, Input, message, Row } from 'antd';
+import { Button, Form, Checkbox, Icon, Input, message, Row, Select } from 'antd';
 import React from 'react';
 
 import EventContext from '../../../context/EventContext';
@@ -45,8 +45,10 @@ class EditEventForm extends React.Component {
   }
 
   render() {
-    const { name, desc, event_public, location } = this.context;
+    const { name, desc, event_public, location, tags } = this.context;
     const { getFieldDecorator } = this.props.form;
+
+    console.log('EditEventForm: ', tags);
 
     return (
       <Form onSubmit={this.handleSubmit}>
@@ -60,7 +62,7 @@ class EditEventForm extends React.Component {
               }],
             })(<Input
               placeholder="Event Name"
-              prefix={<Icon type="tag" style={{ color: 'rgba(0,0,0,.25)' }} />}
+              prefix={<Icon type="edit" style={{ color: 'rgba(0,0,0,.25)' }} />}
             />)}
           </Form.Item>
         </Row>
@@ -76,6 +78,21 @@ class EditEventForm extends React.Component {
               placeholder="Event Location"
               prefix={<Icon type="search" style={{ color: 'rgba(0,0,0,.25)' }} />}
             />)}
+          </Form.Item>
+        </Row>
+        <Row>
+          <Form.Item label="Event Tags">
+            {getFieldDecorator('event_tags', {
+              initialValue: tags
+            })(
+              <Select
+                mode="tags"
+                style={{ width: '100%' }}
+                tokenSeparators={[',']}
+                dropdownRender={() => (<div></div>)}
+              >
+              </Select>
+            )}
           </Form.Item>
         </Row>
         <Row>
