@@ -82,8 +82,8 @@ class BookSession extends React.Component {
     return (
       <List.Item style={{flexDirection: 'column'}}>
         <Row type="flex" style={{width: '100%'}}>
-          <Col span={2}>
-            <div style={{paddingRight: '0.5em'}}>
+          <Col span={3}>
+            <div>
               <Button
                 icon={showAttendees ? 'down' : 'right'}
                 shape="circle"
@@ -91,7 +91,7 @@ class BookSession extends React.Component {
               />
             </div>
           </Col>
-          <Col span={20}>
+          <Col span={18}>
             <div style={{flexGrow: 1}}>
               <RangePicker
                 defaultValue={[
@@ -107,8 +107,8 @@ class BookSession extends React.Component {
               />
             </div>
           </Col>
-          <Col span={2}>
-            <div style={{paddingLeft: '0.5em', textAlign: 'right'}}>
+          <Col span={3}>
+            <div style={{paddingLeft: '0.5em', textAlign: 'center'}}>
               {confirmed_going ? 
                 <Tooltip title="State that you are no longer going to go for this session!">
                   <Button
