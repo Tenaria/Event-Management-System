@@ -1,7 +1,7 @@
 /*
   Edit the sessions of an event
  */
-import { Avatar, Button, DatePicker, List, message, Row, Tooltip, Typography } from 'antd';
+import { Avatar, Button, DatePicker, List, message, Col, Row, Tooltip, Typography } from 'antd';
 import React from 'react';
 import moment from 'moment';
 
@@ -82,49 +82,55 @@ class BookSession extends React.Component {
     return (
       <List.Item style={{flexDirection: 'column'}}>
         <Row type="flex" style={{width: '100%'}}>
-          <div style={{paddingRight: '0.5em'}}>
-            <Button
-              icon={showAttendees ? 'down' : 'right'}
-              shape="circle"
-              onClick={this.toggleShowAttendees}
-            />
-          </div>
-          <div style={{flexGrow: 1}}>
-            <RangePicker
-              defaultValue={[
-                moment(start_timestamp),
-                moment(end_timestamp)
-              ]}
-              placeholder={['Start Time', 'End Time']}
-              format="YYYY-MM-DD HH:mm"
-              showTime={{ format: 'HH:mm' }}
-              style={{width: '100%'}}
-              onOk={this.onOk}
-              disabled={true}
-            />
-          </div>
-          <div style={{paddingLeft: '0.5em', textAlign: 'right'}}>
-            {confirmed_going ? 
-              <Tooltip title="State that you are no longer going to go for this session!">
-                <Button
-                  icon="close"
-                  type="danger"
-                  onClick={this.unconfirmSession}
-                />
-              </Tooltip> :
-              <Tooltip title="Confirm you are going for this session!">
-                <Button
-                  icon="check"
-                  style={{
-                    background: '#48BB78',
-                    border: 'none',
-                    color: 'white',
-                  }}
-                  onClick={this.confirmSession}
-                />
-              </Tooltip>
-            }
-          </div>
+          <Col span={2}>
+            <div style={{paddingRight: '0.5em'}}>
+              <Button
+                icon={showAttendees ? 'down' : 'right'}
+                shape="circle"
+                onClick={this.toggleShowAttendees}
+              />
+            </div>
+          </Col>
+          <Col span={20}>
+            <div style={{flexGrow: 1}}>
+              <RangePicker
+                defaultValue={[
+                  moment(start_timestamp),
+                  moment(end_timestamp)
+                ]}
+                placeholder={['Start Time', 'End Time']}
+                format="YYYY-MM-DD HH:mm"
+                showTime={{ format: 'HH:mm' }}
+                style={{width: '100%'}}
+                onOk={this.onOk}
+                disabled={true}
+              />
+            </div>
+          </Col>
+          <Col span={2}>
+            <div style={{paddingLeft: '0.5em', textAlign: 'right'}}>
+              {confirmed_going ? 
+                <Tooltip title="State that you are no longer going to go for this session!">
+                  <Button
+                    icon="close"
+                    type="danger"
+                    onClick={this.unconfirmSession}
+                  />
+                </Tooltip> :
+                <Tooltip title="Confirm you are going for this session!">
+                  <Button
+                    icon="check"
+                    style={{
+                      background: '#48BB78',
+                      border: 'none',
+                      color: 'white',
+                    }}
+                    onClick={this.confirmSession}
+                  />
+                </Tooltip>
+              }
+            </div>
+          </Col>
         </Row>
         {showAttendees ?
           <Row style={{marginTop: '0.5em', width: '100%'}}>
