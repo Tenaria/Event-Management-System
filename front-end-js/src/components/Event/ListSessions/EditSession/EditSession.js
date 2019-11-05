@@ -44,7 +44,29 @@ class EditSession extends React.Component {
   }
 
   uncancelSession = async () => {
-    // TODO: Uncancel session
+    const { id, token } = this.context;
+    const sessionId = this.props.id;
+
+    const res = await fetch('http://localhost:8000/uncancel_event_sessions', {
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        event_id: id,
+        session_id: sessionId,
+        token
+      })
+    })
+
+    if (res.status === 200) {
+      message.success('You have successfully uncancelled a session!');
+      this.props.refresh();
+    } else {
+      message.error('The system has encountered an error. Contact your admin!');
+    }
   }
 
   deleteSession = async () => {
