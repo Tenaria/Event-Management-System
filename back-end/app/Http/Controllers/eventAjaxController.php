@@ -1460,19 +1460,19 @@ class eventAjaxController extends Controller
 				if(!is_null($event_data)) {
 					foreach($event_data as $events) {
 						// checking last week events
-						if(('earliest_date >' .(round(microtime(true) * 1000)) - (7 * 24 * 60 * 60 * 1000)) && ('earliest_date <' .round(microtime(true) * 1000))) {
+						if(($event_data->earliest_date > round(microtime(true) * 1000)) - (7 * 24 * 60 * 60 * 1000) && ($event_data->earliest_date < round(microtime(true) * 1000))) {
 							$lastWk_event_number++;
 							
 						}
 						
 						//checking for next week events
-						if(('latest_date=0 OR latest_date > '.(round(microtime(true) * 1000)) +  (7 * 24 * 60 * 60 * 1000)) && ('latest_date OR latest_date > '.round(microtime(true) * 1000))) {
+						if(($event_data->latest_date = 0 OR $event_data->latest_date > (round(microtime(true) * 1000)) +  (7 * 24 * 60 * 60 * 1000)) && ($event_data->latest_date OR $event_data->latest_date > round(microtime(true) * 1000))) {
 							$nextWk_event_number++;
 							
 						}
 						
 						//checking for this week events
-						if(('latest_date=0 OR latest_date < '.(round(microtime(true) * 1000))) && ('earliest_date > '.round(microtime(true) * 1000))) {
+						if(($event_data->latest_date = 0 OR $event_data->latest_date < (round(microtime(true) * 1000))) && ($event_data->earliest_date > round(microtime(true) * 1000))) {
 							$thisWk_event_number++;
 							
 						}
