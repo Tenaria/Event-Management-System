@@ -2,7 +2,7 @@
   This is a component that is responsible for managing your event. So you are able to view a list
   of events you host.
  */
-import { Button, Card, Empty, Icon, Menu, Row, Spin, Tags, Tooltip, Typography } from 'antd';
+import { Button, Card, Empty, Icon, Menu, Row, Spin, Tag, Tooltip, Typography } from 'antd';
 import React from 'react';
 import { Redirect } from "react-router-dom";
 
@@ -127,6 +127,9 @@ class EventManager extends React.Component {
       // Loop through the upcoming events
       for (let i = 0; i < events.length; ++i) {
         const upcomingEvent = events[i];
+        const tagElms = upcomingEvent.events_tags.map(tag =>
+          <Tag>{tag}</Tag>
+        );
         eventElms.push(
           <Card
             className={upcomingEvent.events_cancelled ? "my-event-cancelled" : "my-event-card"}
@@ -154,6 +157,7 @@ class EventManager extends React.Component {
               (upcomingEvent.events_cancelled ? " (Cancelled)" : "")
             ]}
           >
+            <div>{tagElms}</div>
             <p>{upcomingEvent.events_desc ? upcomingEvent.events_desc : 'No description'}</p>
             <Row style={{
               position: 'absolute',

@@ -43,7 +43,7 @@
 .my-event-cancelled, .my-event-card {
   position: relative;
   .ant-card-body {
-    padding-bottom: 2.5em;
+    padding-bottom: 3em;
   }
 }
 
@@ -57,3 +57,5 @@
   background: $PRIMARY_RED;
   color: black;
 }
+
+.ant-tag { border-radius: 25px; }
