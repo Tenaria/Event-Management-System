@@ -1,10 +1,12 @@
-import { Skeleton } from 'antd';
+import { Avatar, Button, Divider, Row, Skeleton, Typography } from 'antd';
 import React from 'react';
 
 import AccountEdit from './AccountEdit';
 import AccountInfo from './AccountInfo';
 
 import TokenContext from '../../context/TokenContext';
+
+const { Title } = Typography;
 
 class AccountDetail extends React.Component {
   state = {
@@ -52,18 +54,28 @@ class AccountDetail extends React.Component {
     let displayElm = <Skeleton avatar active paragraph={{ rows: 14 }} />;
     
     if (loaded) {
-      if (editing) {
-        displayElm = <AccountEdit fName={fName} lName={lName} toggleEdit={this.toggleEdit} />;
-      } else {
-        displayElm = <AccountInfo fName={fName} lName={lName} email={email} toggleEdit={this.toggleEdit} />;
-      }
+      displayElm = (
+        <React.Fragment>
+          <div>
+            <Row type="flex">
+              <Avatar size={64} icon="user" />
+              <div style={{margin: "0.5em"}}></div>
+              <Row type="flex" justify="center" style={{flexDirection: "column"}}>
+                <Title level={4} style={{margin: 0}}>{fName} {lName}</Title>
+                <div>{email}</div>
+              </Row>
+            </Row>
+            <Divider orientation="left">Details</Divider>
+            <Row style={{marginBottom: '1em'}}>
+              Lorem ipsum dolor sit amet, veri movet id est, usu te temporibus instructior. Omnis regione epicurei et per, in qui errem tamquam fierent. Id quem fuisset ius. Assum erant definitionem ad eam, apeirian expetenda duo ex. Fugit omittantur conclusionemque sit no, qui te augue abhorreant. Agam legere vis ei.
+            </Row>
+            <AccountEdit fName={fName} lName={lName} toggleEdit={this.toggleEdit} />;
+          </div>
+        </React.Fragment>
+      );
     }
 
-    return (
-      <React.Fragment>
-        { displayElm }
-      </React.Fragment>
-    );
+    return displayElm;
   }
 }
 

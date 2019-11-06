@@ -130,25 +130,11 @@ class AccountEdit extends React.Component {
             </React.Fragment> : ''
           }
           <Form.Item>
-            <Row gutter={6}>
-              <Col span={12}>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  block
-                >Edit Account</Button>
-              </Col>
-              <Col span={12}>
-                <Popconfirm
-                  title="Are you sure you want to stop editting?"
-                  onConfirm={() => this.props.toggleEdit()}
-                  okText="Yes"
-                  cancelText="No"
-                >
-                  <Button type="danger" block>Cancel</Button>
-                </Popconfirm>
-              </Col>
-            </Row>
+            <Button
+              type="primary"
+              htmlType="submit"
+              block
+            >Edit Account</Button>
           </Form.Item>
         </Form>
       </div>
