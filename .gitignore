@@ -37,3 +37,4 @@ Homestead.yaml
 npm-debug.log
 yarn-error.log
 back-end/composer.lock
+back-end/yarn.lock
