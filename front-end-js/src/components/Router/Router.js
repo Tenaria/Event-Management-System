@@ -15,6 +15,7 @@ import Event from '../Event';
 import EventViewer from '../EventViewer';
 import EventDetails from '../EventDetails';
 import Test from '../Test';
+import Timetable from '../Timetable/Timetable';
 
 const {  Content, Sider } = Layout;
 
@@ -52,6 +53,12 @@ class RouterComponent extends React.PureComponent {
                   <span className="nav-text">Manage Your Events</span>
                 </Link>
               </Menu.Item>
+              <Menu.Item key="timetable">
+                <Link to="/timetable">
+                  <Icon type="calendar" />
+                  <span className="nav-text">Your Timetable</span>
+                </Link>
+              </Menu.Item>
               <Menu.Item key="4">
                 <Link to="/account">
                   <Icon type="user" />
@@ -75,6 +82,9 @@ class RouterComponent extends React.PureComponent {
                 <Switch>
                   <Route path='/test'>
                     <Test />
+                  </Route>
+                  <Route path='/timetable'>
+                    <Timetable />
                   </Route>
                   <Route path='/event'>
                     <Event />
