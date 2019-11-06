@@ -1187,7 +1187,7 @@ class eventAjaxController extends Controller
 				$events_array = [];
 				//query the database for these events
 				$event_data = DB::table('events_access AS a')
-								->select('e.events_id', 'e.events_name', 'e.events_public', 'e.events_status', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start_time ASC LIMIT 1), 2147483647000) as 'dates_earliest'"), DB::raw("(SELECT GROUP_CONCAT(DISTINCT CONCAT(t.tags_linking_value) SEPARATOR '~') FROM events_tags_linking AS t WHERE t.tags_linking_events_id=a.access_events_id AND t.tags_linking_active=1) as 'tags'"))
+								->select('e.events_id', 'e.events_name', 'e.events_public', 'e.events_status', 'e.events_desc', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start_time ASC LIMIT 1), 2147483647000) as 'dates_earliest'"), DB::raw("(SELECT GROUP_CONCAT(DISTINCT CONCAT(t.tags_linking_value) SEPARATOR '~') FROM events_tags_linking AS t WHERE t.tags_linking_events_id=a.access_events_id AND t.tags_linking_active=1) as 'tags'"))
 								->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
 								->where([
 									["a.access_user_id", $token_data['user_id']],
