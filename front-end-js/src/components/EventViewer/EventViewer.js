@@ -167,7 +167,7 @@ class EventViewer extends React.Component {
     return (
       <React.Fragment>
         <Title level={2}>Event Viewer</Title>
-        <p>View a list of upcoming events made by other users. You can also search for events here</p>
+        <p>View a list of upcoming events made by other users. You can also search for events here and also view past events.</p>
         {displayElm}
       </React.Fragment>
     );
