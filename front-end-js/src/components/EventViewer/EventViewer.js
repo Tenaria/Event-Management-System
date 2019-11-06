@@ -1,7 +1,7 @@
 /*
   This allows you to view the events that are available for the user
  */
-import { Button, Card, Empty, Icon, Input, Menu, Row, Spin, Typography } from 'antd';
+import { Button, Card, Empty, Icon, Input, Menu, Row, Spin, Tag, Typography } from 'antd';
 import { Redirect } from "react-router-dom";
 import React from 'react';
 
@@ -99,6 +99,9 @@ class EventViewer extends React.Component {
       // Loop through the upcoming events
       for (let i = 0; i < events.length; ++i) {
         const upcomingEvent = events[i];
+        const tagElms = upcomingEvent.events_tags.map(tag =>
+          <Tag>{tag}</Tag>
+        );
         eventElms.push(
           <Card
             className="my-event-card"
@@ -107,6 +110,7 @@ class EventViewer extends React.Component {
             size="small"
             title={upcomingEvent.events_name}
           >
+            <div>{tagElms}</div>
             <p>{upcomingEvent.events_desc ? upcomingEvent.events_desc : 'No description'}</p>
             <Row style={{
               position: 'absolute',
@@ -114,9 +118,10 @@ class EventViewer extends React.Component {
               bottom: '1em'
             }}>
               <Button
+                icon="eye"
                 type="primary"
                 onClick={() => this.selectEvent(upcomingEvent.events_id)}
-              >View Event Details</Button>
+              />
             </Row>
           </Card>
         );

@@ -1,4 +1,4 @@
-import { Form, Checkbox, Icon, Input, message, Modal, Row, Typography} from 'antd';
+import { Form, Checkbox, Icon, Input, message, Modal, Row, Select, Typography} from 'antd';
 import React from 'react';
 
 import TokenContext from '../../../context/TokenContext';
@@ -13,6 +13,8 @@ class AddEventForm extends React.Component {
     this.props.form.validateFieldsAndScroll( async (err, values) => {
       if (!err) {
         console.log('Received values of: ', values);
+
+        console.log(values);
 
         const sendData = {...values, token};
 
@@ -81,6 +83,19 @@ class AddEventForm extends React.Component {
                 valuePropName: 'checked',
                 initialValue: false,
               })(<Checkbox>Public Event</Checkbox>)}
+            </Form.Item>
+          </Row>
+          <Row>
+            <Form.Item label="Event Tags">
+              {getFieldDecorator('event_tags')(
+                <Select
+                  mode="tags"
+                  style={{ width: '100%' }}
+                  tokenSeparators={[',']}
+                  dropdownRender={() => (<div></div>)}
+                >
+                </Select>
+              )}
             </Form.Item>
           </Row>
           <Row>
