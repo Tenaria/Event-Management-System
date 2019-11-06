@@ -1,8 +1,9 @@
-import { Card, Divider, Empty, Icon, Row, Spin, Typography } from 'antd';
+import { Card, Divider, Empty, Icon, Row, Spin, Typography, Button } from 'antd';
 import React from 'react';
 import Slider from 'react-slick';
 
 import TokenContext from '../../context/TokenContext';
+
 
 const { Title } = Typography;
 const spinIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
@@ -60,6 +61,7 @@ class Dashboard extends React.Component {
     if (upcomingEvent) {
       if (upcomingEvent.length > 0) {
         upcomingEventsElm = [];
+
         upcomingEventsElm.push(
           <Card>
             <p>Card content</p>
@@ -80,23 +82,31 @@ class Dashboard extends React.Component {
         <Divider orientation="left">Your Upcoming Events</Divider>
         <Row style={sliderStyle}>
           <Slider {...settings}>
-            <Card>
-              <p>Card content</p>
-              <p>Card content</p>
-              <p>Card content</p>
+            <Card>                           
+              <p><Button type="primary" onclick={upcomingEvent}>10:00, Wed 30/10</Button></p>
+              <p>15:30, Fri 31/10</p>
+              <p>20:00, Sat 01/11</p>
             </Card>
-            <Card>
-              <p>Card content</p>
-              <p>Card content</p>
-              <p>Card content</p>
+            <Card
+              hoverable
+              style={{ width: 20 }}
+              cover={<img alt="Event 1" src="https://secure.meetupstatic.com/photos/event/6/2/e/1/600_484585313.jpeg" />}
+            >
+              <p></p>
+              <p></p>
+              <p></p>
             </Card>
           </Slider>
         </Row>
         <Divider orientation="left">Events You Manage</Divider>
         <Row style={sliderStyle}>
           <Slider {...settings}>
-            <Card>
-              <p>Card content</p>
+            <Card
+              hoverable
+              style={{ width: 50 }}
+              cover={<img alt="Event 1" src="https://secure.meetupstatic.com/photos/event/6/2/e/1/600_484585313.jpeg" />}
+            >
+              <p>10:00 Wed, 30/10</p>
               <p>Card content</p>
               <p>Card content</p>
             </Card>
