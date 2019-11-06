@@ -1447,6 +1447,39 @@ class eventAjaxController extends Controller
  				$thisWk_event_number = 0;
 				
  				//getting last week events
+				
+				
+				$event_data = DB::table('events AS e')
+								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'earliest_date'")), DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'latest_date'")
+								->where ([
+									['e.events_active', 1],
+									['e.events_createdby', $token_data['user_id']]
+								])
+								->get();
+								
+				if(!is_null($event_data)) {
+					foreach($event_data as $events) {
+						// checking last week events
+						if(('earliest_date >' .(round(microtime(true) * 1000)) - (7 * 24 * 60 * 60 * 1000)) && ('earliest_date <' .round(microtime(true) * 1000))) {
+							$lastWk_event_number++;
+							
+						}
+						
+						//checking for next week events
+						if(('latest_date=0 ORlatest_date > '.(round(microtime(true) * 1000)) +  (7 * 24 * 60 * 60 * 1000)) && ('latest_date OR latest_date > '.round(microtime(true) * 1000))) {
+							$nextWk_event_number++;
+							
+						}
+						
+						//checking for this week events
+						if(('latest_date=0 OR latest_date < '.(round(microtime(true) * 1000))) && ('earliest_date=0 OR earliest_date > '.round(microtime(true) * 1000))) {
+							$thisWk_event_number++;
+							
+						}
+						
+					}
+				}
+				 /*
  				$last_public_event_data = DB::table('events AS e')
  								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'dates_earliest'"))
  								->where ([
@@ -1547,7 +1580,7 @@ class eventAjaxController extends Controller
  				//getting number of this week public events
 				
 				
-				//getting number of this week private events
+				//getting number of this week private events*/
 				
 				
 			}
