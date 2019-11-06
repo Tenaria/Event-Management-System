@@ -31,7 +31,7 @@ class RouterComponent extends React.PureComponent {
     return (
       <Router>
         <Layout>
-          <Sider breakpoint="lg" collapsedWidth="0" style={{minHeight: '100vh'}}>
+          <Sider breakpoint="lg" collapsedWidth="0">
             <div className="logo" />
             <Menu theme="dark" mode="inline" onClick={this.handleClick}>
               <Menu.Item key="1">
@@ -62,12 +62,8 @@ class RouterComponent extends React.PureComponent {
                 key="logout"
                 style={{
                   backgroundColor: '#E53E3E',
-                  color: '#FFFFFF',
-                  position: 'absolute',
-                  left: 0,
-                  bottom: 0,
-                  margin: 0
-                }}>
+                  color: '#FFFFFF'
+              }}>
                 <Icon type="logout" />
                 <span className="nav-text">Log Out</span>
               </Menu.Item>
