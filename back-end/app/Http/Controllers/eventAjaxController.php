@@ -298,7 +298,7 @@ class eventAjaxController extends Controller
 					if(isset($tags) && !empty($tags)) {
 						$tags_insert = [];
 						foreach($tags as $tag) {
-							$tags_insert = [
+							$tags_insert[] = [
 								'tags_linking_events_id' => $new_event_id,
 								'tags_linking_value' => strtolower($tag),
 								'tags_linking_active' => 1
