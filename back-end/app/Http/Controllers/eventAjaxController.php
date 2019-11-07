@@ -2348,6 +2348,24 @@ class eventAjaxController extends Controller
 			if($token_data == true) {
 				$one_week = 7*24*60*60*1000;
 
+				//sorting through newly passed through data
+				$max_recurrence = 1;
+				$new_coordinates = [];
+				$recurring_coordinates = [];
+				if(!is_null($timetable_data)) {
+					foreach($imetable_data as $data) {
+						if(is_numeric($data["recurring"]) && $data["recurring"] > $max_recurrence) {
+							$max_recurrence = (int)$data["recurring"];
+						}
+
+						if(!is_numeric($data['recurring']) && $data['recurring'] > 1) {
+							$recurring_coordinates[] = $data;
+						}
+
+						$new_coordinates[] = $data["coordinate_x"].",".$data["coordinate_y"];
+					}
+				}
+
 				// grab existing data in the database
 				$existing_data = DB::table('timtables')
 									->where([
@@ -2364,8 +2382,12 @@ class eventAjaxController extends Controller
 					}
 				}
 
-				$new_coordinates = [];
-				$recuring_coordinates = [];
+				// figure out which coordinates to remove
+
+				// figure out which coordinates to add
+				// try to add them, if clash detected abort transaction
+
+				
 
 				/*
 						epoch - start of week
@@ -2376,7 +2398,7 @@ class eventAjaxController extends Controller
 				*/
 
 			}
-			
+
 			return Response::json([], 200);
 		}
 		
