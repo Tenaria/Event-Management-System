@@ -2360,7 +2360,7 @@ class eventAjaxController extends Controller
 				$existing_coordinates = [];
 				if(count($existing_data) > 0) {
 					foreach($existing_data as $data) {
-						$existing_coordinates[] = $data->timetables_coordinate_x.",".$data->timetables_coordinate_y
+						$existing_coordinates[] = $data->timetables_coordinate_x.",".$data->timetables_coordinate_y;
 					}
 				}
 
@@ -2374,9 +2374,9 @@ class eventAjaxController extends Controller
 						recurring - integer --> default 1
 						labelling = can be null
 				*/
-				}
 
 			}
+			
 			return Response::json([], 200);
 		}
 		
