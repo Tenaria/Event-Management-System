@@ -2326,18 +2326,58 @@ class eventAjaxController extends Controller
 
 	public function save_timetable_details(Request $request) {
 		$token = $request->input('token');
+		$week_start = $request->input('week_start'); // INTEGER NOT NULL (EPOCH IN MILLISECONDS OF START OF WEEK)
+		$timetable_data = $request->input('timetable_data');
+		//ASSUMES TIMETABLE DATA IS AN ASSOCIATE TWO DIMENSIONAL ARRAY IN THE FORMAT:
+			//"coordinate_x" => int NOT NULL
+			//"coordinate_y" => int NOT NULL
+			//"duration" => FLOAT 0-24
+			//"recurring" => integer (IF NULL THEN DEFAULTS TO 1 CYCLE)
+			//"labelling" => string NULLABLE
 
 		if (!isset($token) || empty($token)) {
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+
+		if (!isset($week_start) || empty($week_start)) {
+			return Response::json(['error' => 'Week start is either not set or null'], 400);
 		}
 		
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
-				//TODO
+				$one_week = 7*24*60*60*1000;
 
-				return Response::json([], 400);
+				// grab existing data in the database
+				$existing_data = DB::table('timtables')
+									->where([
+										['timetables_week_start', $week_start],
+										['timetables_active', 1],
+										['timetables_owner', $token_data['user_data']]
+									])
+									->get();
+
+				$existing_coordinates = [];
+				if(count($existing_data) > 0) {
+					foreach($existing_data as $data) {
+						$existing_coordinates[] = $data->timetables_coordinate_x.",".$data->timetables_coordinate_y
+					}
+				}
+
+				$new_coordinates = [];
+				$recuring_coordinates = [];
+
+				/*
+						epoch - start of week
+						each block - beginning coordinate
+						duration - float 0-24
+						recurring - integer --> default 1
+						labelling = can be null
+				*/
+				}
+
 			}
+			return Response::json([], 200);
 		}
 		
 		return Response::json([], 400);
@@ -2392,6 +2432,5 @@ class eventAjaxController extends Controller
 		}
 		
 		return Response::json([], 400);
-
 	}
 }

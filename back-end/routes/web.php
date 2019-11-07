@@ -11,7 +11,6 @@
 |
 */
 
-// SPRINT 1 (AUTHENTICATION ROUTES)
 Route::post('/log_in', 'eventAjaxController@log_in');
 Route::post('/sign_up', 'eventAjaxController@sign_up');
 Route::post('/get_account_details', 'eventAjaxController@get_account_details');
@@ -19,7 +18,6 @@ Route::post('/create_account', 'eventController@create_account');
 Route::post('/edit_account', 'eventAjaxController@edit_account');
 Route::post('/get_account_details', 'eventAjaxController@get_account_details');
 
-// SPRINT 2 (EVENT ROUTES)
 Route::post('/create_event', 'eventAjaxController@create_event');
 Route::post('/edit_event', 'eventAjaxController@edit_event');
 Route::post('/get_event_details', 'eventAjaxController@get_event_details');
@@ -30,11 +28,8 @@ Route::post('/get_invited_events_upcoming', 'eventAjaxController@get_invited_eve
 Route::post('/get_emails_exclude_user', 'eventAjaxController@get_emails_exclude_user');
 Route::post('/mark_as_going','eventAjaxController@mark_as_going');
 
-// SPRINT 3 (ROUTES)
 Route::post('/get_attendees_of_event', 'eventAjaxController@get_attendees_of_event');
 Route::post('/get_past_events', 'eventAjaxController@get_past_events');
-Route::post('/get_timetable_details', 'eventAjaxController@get_timetable_details');
-Route::post('/save_timetable_details', 'eventAjaxController@save_timetable_details');
 Route::post('/load_event_sessions', 'eventAjaxController@load_event_sessions');
 Route::post('/create_event_sessions', 'eventAjaxController@create_event_sessions');
 Route::post('/edit_event_sessions', 'eventAjaxController@edit_event_sessions');
@@ -46,6 +41,12 @@ Route::get('/', 'eventAjaxController@get_summary_dashboard');
 Route::post('/cancel_event_sessions', 'eventAjaxController@cancel_event_sessions');
 Route::post('/uncancel_event_sessions', 'eventAjaxController@uncancel_event_sessions');
 Route::post('/unmark_as_going', 'eventAjaxController@unmark_as_going');
+
+Route::post('/get_timetable_details', 'eventAjaxController@get_timetable_details');
+Route::post('/save_timetable_details', 'eventAjaxController@save_timetable_details');
+
+//SPRINT 4 ????
+
 
 // SPRINT 4 (ROUTES)
 // US-6 (Notify Attendees), US-16 (Mark as Going), US-4 (Cancel Session from Event)
