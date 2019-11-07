@@ -2307,17 +2307,22 @@ class eventAjaxController extends Controller
 
 	public function get_timetable_details(Request $request) {
 		$token = $request->input('token');
+		$week_start = $request->input('week_start'); // INTEGER NOT NULL (EPOCH IN MILLISECONDS OF START OF WEEK)
 
 		if (!isset($token) || empty($token)) {
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+
+		if (!isset($week_start) || empty($week_start)) {
+			return Response::json(['error' => 'Week start is either not set or null'], 400);
 		}
 		
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
-					//TODO
+					//TODO: RETURN THE TIMETABLE DATA FOR THE GIVEN WEEK START AND THE OWNER (USER ID GRABBED FRO TOKEN)
 
-				return Response::json([], 400);
+				return Response::json([], 200);
 			}
 		}
 		
@@ -2352,8 +2357,13 @@ class eventAjaxController extends Controller
 				$max_recurrence = 1;
 				$new_coordinates = [];
 				$recurring_coordinates = [];
+				$all_data_indexed_by_coordinate = [];
 				if(!is_null($timetable_data)) {
 					foreach($imetable_data as $data) {
+						if($data["coordinate_y"] + duration > 24) {
+							return Response::json(['error' => 'Coordinate + Duration exceeds the day'], 400);
+						}
+
 						if(is_numeric($data["recurring"]) && $data["recurring"] > $max_recurrence) {
 							$max_recurrence = (int)$data["recurring"];
 						}
@@ -2362,47 +2372,125 @@ class eventAjaxController extends Controller
 							$recurring_coordinates[] = $data;
 						}
 
-						$new_coordinates[] = $data["coordinate_x"].",".$data["coordinate_y"];
+						$coordinate = $data["coordinate_x"].",".$data["coordinate_y"];
+						$new_coordinates[] = $coordinate;
+						$all_data_indexed_by_coordinate[$coordinate] = $data;
 					}
 				}
 
 				// grab existing data in the database
 				$existing_data = DB::table('timtables')
 									->where([
-										['timetables_week_start', $week_start],
+										['timetables_week_start', '>=', $week_start],
 										['timetables_active', 1],
 										['timetables_owner', $token_data['user_data']]
 									])
 									->get();
 
-				$existing_coordinates = [];
+				$existing_coordinates_this_week = [];
+				$existing_coordinates_other_week = [];
+				$existing_coordinate_to_id_mapping = [];
 				if(count($existing_data) > 0) {
 					foreach($existing_data as $data) {
-						$existing_coordinates[] = $data->timetables_coordinate_x.",".$data->timetables_coordinate_y;
+						$x = $data->timetables_coordinate_x;
+						$y = $data->timetables_coordinate_y;
+						$coordinate = $x.",".$y;
+
+						if($data->timetables_week_start == $week_start) {
+							$existing_coordinates_this_week[] = $coordinate;
+						} else {
+							$existing_coordinates_other_week[$data->timetables_week_start][] = $coordinate;
+						}
+
+						$existing_coordinate_to_id_mapping[$coordinate] = $data->timetables_id;
+					}
+				}
+
+				$insert = [];
+				// figure out which coordinates are new to add for the current week
+				$new_coordinates = array_diff($new_coordinates, $existing_coordinates_this_week);
+
+				if(count($new_coordinates) > 0) {
+					foreach($new_coordinates AS $new_coordinate) {
+						$local_data = $all_data_indexed_by_coordinate[$new_coordinate];
+
+						$insert[] = [
+							'timetables_week_start' => $week_start,
+							'timetables_coordinate_x' => $local_data["coordinate_x"],
+							'timetables_coordinate_y' => $local_data["coordinate_y"],
+							'timetables_duration' => $local_data["duration"],
+							'timetables_label' => $local_data["label"],
+							'timetables_active' => 1,
+							'timetables_owner' => $token_data['user_data']
+						];
 					}
 				}
 
 				// figure out which coordinates to remove
+				$old_coordinates = array_diff($existing_coordinates_this_week, $new_coordinates);
 
-				// figure out which coordinates to add
+				// check recurring coordinates and see if we need to abort due to a clash with a future coordinate
+				// figure out which coordinates to add for future weeks
 				// try to add them, if clash detected abort transaction
+				if(count($recurring_coordinates) > 0) {
+					foreach($recurring_coordinates as $recurring_coordinate) {
+						$beginning = $week_start;
+						$recurring = $recurring_coordinate["recurring"] - 1; //subtract one since we already do the first insert above
+						while($recurring > 0) {
+							$recurring_week_start += $one_week;
 
-				
+							//TODO: CLAIRE: CHECK FOR CLASHES
 
-				/*
-						epoch - start of week
-						each block - beginning coordinate
-						duration - float 0-24
-						recurring - integer --> default 1
-						labelling = can be null
-				*/
+							//"coordinate_x" => int NOT NULL
+							//"coordinate_y" => int NOT NULL
+							//"duration" => FLOAT 0-24
+							//"recurring" => integer (IF NULL THEN DEFAULTS TO 1 CYCLE)
+							//"labelling" => string NULLABLE
 
+							$insert[] = [
+								'timetables_week_start' => $recurring_week_start,
+								'timetables_coordinate_x' => $recurring_coordinate["coordinate_x"],
+								'timetables_coordinate_y' => $recurring_coordinate["coordinate_y"],
+								'timetables_duration' => $recurring_coordinate["duration"],
+								'timetables_label' => $recurring_coordinate["label"],
+								'timetables_active' => 1,
+								'timetables_owner' => $token_data['user_data']
+							];
+
+							$recurring--;
+						}
+					}
+				}
+
+				// actually remove old coordinates
+				if(count($old_coordinates) > 0) {
+					$to_remove_array = [];
+
+					foreach($old_coordinate AS $old_coordinate) {
+						$to_remove_array[] = $existing_coordinate_to_id_mapping[$old_coordinate];
+					}
+
+					DB::table('timetables')
+						->where([
+							['timetables_owner', $token_data['user_data']],
+							['timetables_active', 1]
+						])
+						->whereIn('timetables_id', $to_remove_array)
+						->update(['timetables_active' => 0]);
+				}
+
+				//insert new coordinates
+				if(count($insert) > 0) {
+					DB::table('timetables')
+						->insert($insert);
+				}
+
+				// success
+				return Response::json([], 200);
 			}
-
-			return Response::json([], 200);
 		}
 		
-		return Response::json([], 400);
+		return Response::json(['error' => 'invalid or expired JWT token'], 400);
 	}
 
 	public function timetable_privacy(Request $request){
