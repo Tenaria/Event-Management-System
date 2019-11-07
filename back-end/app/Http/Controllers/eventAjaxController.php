@@ -2320,9 +2320,35 @@ class eventAjaxController extends Controller
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
-					//TODO: RETURN THE TIMETABLE DATA FOR THE GIVEN WEEK START AND THE OWNER (USER ID GRABBED FRO TOKEN)
+				$timetable_data = [];
+				// RETURN THE TIMETABLE DATA FOR THE GIVEN WEEK START AND THE OWNER (USER ID GRABBED FRO TOKEN)
+				$existing_data = DB::table('timtables')
+								->where([
+									['timetables_week_start', '>=', $week_start],
+									['timetables_active', 1],
+									['timetables_owner', $token_data['user_data']]
+								])
+								->orderBy('timetables_coordinate_x', 'asc')
+								->orderBy('timetables_coordinate_y', 'asc')
+								->get();
 
-				return Response::json([], 200);
+				if(count($existing_data) > 0) {
+					foreach($existing_data as $data) {
+						$timetable_data[] = [
+							'coordinate_x' => $data->timetables_coordinate_x,
+							'coordinate_y' => $data->timetables_coordinate_y,
+							'duration' => $data->timetables_duration,
+							'label' => $data->timetables_label
+						];
+					}
+				}
+
+				//returns data in a two dimensional array in the format
+					//COORDINATE X => INT 0-23
+					//COORINDATE Y => INT 0-23
+					//DURATION => FLOAT 0-24
+					//LABEL => STRING BUT CAN BE NULL
+				return Response::json(['timetable_data' => $timetable_data], 200);
 			}
 		}
 		
