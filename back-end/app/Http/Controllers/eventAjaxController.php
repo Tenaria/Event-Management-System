@@ -2513,6 +2513,8 @@ class eventAjaxController extends Controller
 							$time_to_add = $one_week*4;
 						}
 
+						$recurring--; //decrement recurring number
+
 						if($ignore_clashes == false && timetable_check_clash($taken_counters, $coordinate_x, $coordinate_y, $duration, $week_start)) {
 							return Response::json(['error' => 'clash detected!'], 400);
 						} else if($ignore_clashes == true && timetable_check_clash($taken_counters, $coordinate_x, $coordinate_y, $duration, $week_start)) {
@@ -2529,8 +2531,6 @@ class eventAjaxController extends Controller
 							'timetables_active' => 1,
 							'timetables_owner' => $token_data['user_id']
 						];
-
-						$recurring--; //decrement recurring number
 					}
 				}
 
