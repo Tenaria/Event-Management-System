@@ -2435,7 +2435,7 @@ class eventAjaxController extends Controller
 				}
 
 				//next we want to check if a valid time descriptor is set
-				if(!is_null($recurring_descriptor) || $recurring_descriptor != "daily" || $recurring_descriptor != "fortnightly" || $recurring_descriptor != "monthly" || $recurring_descriptor != "yearly") {
+				if(!is_null($recurring_descriptor) || $recurring_descriptor != "daily" || $recurring_descriptor != "fortnightly" || $recurring_descriptor != "monthly") {
 					return Response::json(['error' => 'Invalid monthly descriptor passed through'], 400);
 				}
 
