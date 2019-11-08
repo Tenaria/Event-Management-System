@@ -2374,13 +2374,13 @@ class eventAjaxController extends Controller
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
 				// remove the timetable block
-				$existing_data = DB::table('timetables')
+				DB::table('timetables')
 								->where([
 									['timetables_active', 1],
 									['timetables_owner', $token_data['user_id']],
-									['timetables_id', $timetables_id]
+									['timetables_id', $timetable_id]
 								])
-								->get();
+								->update(['timetables_active' => 0]);
 
 				return Response::json([], 200);
 			}
@@ -2489,6 +2489,7 @@ class eventAjaxController extends Controller
 					while($recurring > 0) {
 						// check if recurrence is daily
 						if($recurring_descriptor == "daily") {
+							$coordinate_x++;
 							if($coordinate_x > 6) {
 								$coordinate_x = 0;
 								$week_start += $one_week;
