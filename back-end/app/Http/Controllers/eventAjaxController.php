@@ -2459,7 +2459,7 @@ class eventAjaxController extends Controller
 
 						while($local_duration > 0) {
 							$taken_counters[$local_week_start][$x][] = $y;
-							$y += 0.5;
+							$y += 1;
 							$local_duration = $local_duration - 0.5;
 						}
 					}

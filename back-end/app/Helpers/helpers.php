@@ -90,7 +90,7 @@ if (!function_exists('timetable_check_clash')) {
         $clash_detected = false;
 
         while($given_date_duration > 0) {
-            $given_date_y += 0.5;
+            $given_date_y += 1;
 
             if(isset($taken_dates_array[$given_date_week][$given_date_x]) && in_array($given_date_y, $taken_dates_array[$given_date_week][$given_date_x])) {
                 $clash_detected = true;
