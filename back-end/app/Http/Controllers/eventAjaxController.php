@@ -2402,6 +2402,7 @@ class eventAjaxController extends Controller
 		$recurring_descriptor = $request->input('recurring_descriptor'); // STRING CAN BE NULL
 		$labelling = $request->input('labelling'); // STRING CAN BE NULL
 		$ignore_clashes = $request->input('ignore_clashes');
+		$insert = [];
 
 		if($ignore_clashes != true) {
 			$ignore_clashes == false;
