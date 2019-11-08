@@ -2401,6 +2401,11 @@ class eventAjaxController extends Controller
 		$recurring = $request->input('recurring'); // INTEGER MINIMUM 1
 		$recurring_descriptor = $request->input('recurring_descriptor'); // STRING CAN BE NULL
 		$labelling = $request->input('labelling'); // STRING CAN BE NULL
+		$ignore_clashes = $request->input('ignore_clashes');
+
+		if($ignore_clashes != true) {
+			$ignore_clashes == false;
+		}
 
 		if (!isset($token) || empty($token)) {
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
@@ -2467,20 +2472,22 @@ class eventAjaxController extends Controller
 				}
 
 				//check for clashes
-				if(timetable_check_clash($taken_counters, $coordinate_x, $coordinate_y, $duration, $week_start)) {
+				if($ignore_clashes == false && timetable_check_clash($taken_counters, $coordinate_x, $coordinate_y, $duration, $week_start)) {
 					return Response::json(['error' => 'clash detected!'], 400);
+				} else if(!timetable_check_clash($taken_counters, $coordinate_x, $coordinate_y, $duration, $week_start)) {
+					// insert first timetable instance
+					$insert[] = [
+						'timetables_week_start' => $week_start,
+						'timetables_coordinate_x' => $coordinate_x,
+						'timetables_coordinate_y' => $coordinate_y,
+						'timetables_duration' => $duration,
+						'timetables_label' => $labelling,
+						'timetables_active' => 1,
+						'timetables_owner' => $token_data['user_id']
+					];
 				}
 
-				// insert first timetable instance
-				$insert[] = [
-					'timetables_week_start' => $week_start,
-					'timetables_coordinate_x' => $coordinate_x,
-					'timetables_coordinate_y' => $coordinate_y,
-					'timetables_duration' => $duration,
-					'timetables_label' => $labelling,
-					'timetables_active' => 1,
-					'timetables_owner' => $token_data['user_id']
-				];
+				
 
 				$recurring--; // decrement recurring number
 
@@ -2495,38 +2502,22 @@ class eventAjaxController extends Controller
 								$coordinate_x = 0;
 								$week_start += $one_week;
 							}
-
-							if(timetable_check_clash($taken_counters, $coordinate_x, $coordinate_y, $duration, $week_start)) {
-								return Response::json(['error' => 'clash detected!'], 400);
-							}
 						// or check if recurrence is weekly
 						} else if($recurring_descriptor == "weekly") {
 							$week_start += $one_week;
-
-							if(timetable_check_clash($taken_counters, $coordinate_x, $coordinate_y, $duration, $week_start)) {
-								return Response::json(['error' => 'clash detected!'], 400);
-							}
 						// or check if recurrence is fortnightly
 						} else if($recurring_descriptor == "fortnightly") {
 							$week_start += $one_week*2;
-
-							if(timetable_check_clash($taken_counters, $coordinate_x, $coordinate_y, $duration, $week_start)) {
-								return Response::json(['error' => 'clash detected!'], 400);
-							}
 						// or check if recurrence is monthly
 						} else if($recurring_descriptor == "monthly") {
 							$time_to_add = $one_week*4;
+						}
 
-							if(timetable_check_clash($taken_counters, $coordinate_x, $coordinate_y, $duration, $week_start)) {
-								return Response::json(['error' => 'clash detected!'], 400);
-							}
-						// or check if recurrence is yearly
-						} //else if($recurring_descriptor == "yearly") {
-						// 	$time_to_add = $one_week*52;
-
-						// 	//TODO: CLAIRE: CHECK FOR CLASH
-						// 	//TODO: CLAIRE: INSERT
-						// }
+						if($ignore_clashes == false && timetable_check_clash($taken_counters, $coordinate_x, $coordinate_y, $duration, $week_start)) {
+							return Response::json(['error' => 'clash detected!'], 400);
+						} else if($ignore_clashes == true && timetable_check_clash($taken_counters, $coordinate_x, $coordinate_y, $duration, $week_start)) {
+							continue;
+						}
 
 						// create new insertion with incremented timestamps
 						$insert[] = [
