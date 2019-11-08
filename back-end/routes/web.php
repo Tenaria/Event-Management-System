@@ -55,7 +55,9 @@ Route::post('/uncancel_event_sessions', 'eventAjaxController@uncancel_event_sess
 
 // timetable routes
 Route::post('/get_timetable_details', 'eventAjaxController@get_timetable_details');
-Route::post('/save_timetable_details', 'eventAjaxController@save_timetable_details');
+//Route::post('/save_timetable_details', 'eventAjaxController@save_timetable_details');
+Route::post('/add_timetable_block', 'eventAjaxController@add_timetable_block');
+Route::post('/remove_timetable_block', 'eventAjaxController@remove_timetable_block');
 
 // other routes
 Route::get('/', 'eventAjaxController@get_summary_dashboard');

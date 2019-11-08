@@ -2355,6 +2355,41 @@ class eventAjaxController extends Controller
 		return Response::json([], 400);
 	}
 
+	public function remove_timetable_block(Request $request) {
+		$token = $request->input('token');
+		$timetable_id = $request->input('timetable_id'); // INTEGER NOT NULL 
+
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+
+		if (!isset($timetable_id) || empty($timetable_id)) {
+			return Response::json(['error' => 'Timetable ID is either not set or null'], 400);
+		}
+		
+		if(isset($token) && !empty($token)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				// remove the timetable block
+				$existing_data = DB::table('timtables')
+								->where([
+									['timetables_active', 1],
+									['timetables_owner', $token_data['user_data']],
+									['timetables_id', $timetables_id]
+								])
+								->get();
+
+				return Response::json([], 200);
+			}
+		}
+		
+		return Response::json([], 400);
+	}
+
+	public function add_timetable_block(Request $request) {
+
+	}
+
 	public function save_timetable_details(Request $request) {
 		$token = $request->input('token');
 		$week_start = $request->input('week_start'); // INTEGER NOT NULL (EPOCH IN MILLISECONDS OF START OF WEEK)
