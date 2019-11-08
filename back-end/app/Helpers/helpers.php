@@ -86,17 +86,17 @@ if (!function_exists('send_generic_email')) {
 
 if (!function_exists('timetable_check_clash')) {
     // helper function to check if there is a clash
-    function timetable_check_clash($taken_dates_array, $given_date_x, $given_date_y, $give_date_duration, $given_date_week) {
+    function timetable_check_clash($taken_dates_array, $given_date_x, $given_date_y, $given_date_duration, $given_date_week) {
         $clash_detected = false;
 
-        while($give_date_duration > 0) {
-            $give_date_y += 0.5;
+        while($given_date_duration > 0) {
+            $given_date_y += 0.5;
 
-            if(in_array($given_date_y, $taken_dates_array[$given_date_week][$given_date_x])) {
+            if(isset($taken_dates_array[$given_date_week][$given_date_x]) && in_array($given_date_y, $taken_dates_array[$given_date_week][$given_date_x])) {
                 $clash_detected = true;
             }
-            
-            $give_date_duration -= 0.5;
+
+            $given_date_duration -= 0.5;
         }
 
         return $clash_detected;

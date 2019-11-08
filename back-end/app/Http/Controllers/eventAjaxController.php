@@ -2322,7 +2322,7 @@ class eventAjaxController extends Controller
 			if($token_data == true) {
 				$timetable_data = [];
 				// RETURN THE TIMETABLE DATA FOR THE GIVEN WEEK START AND THE OWNER (USER ID GRABBED FRO TOKEN)
-				$existing_data = DB::table('timtables')
+				$existing_data = DB::table('timetables')
 								->where([
 									['timetables_week_start', '>=', $week_start],
 									['timetables_active', 1],
@@ -2374,7 +2374,7 @@ class eventAjaxController extends Controller
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
 				// remove the timetable block
-				$existing_data = DB::table('timtables')
+				$existing_data = DB::table('timetables')
 								->where([
 									['timetables_active', 1],
 									['timetables_owner', $token_data['user_id']],
@@ -2440,7 +2440,7 @@ class eventAjaxController extends Controller
 				}
 
 				//now we want to check for clashes between the new coordinate and existing coordinates
-				$existing_data = DB::table('timtables')
+				$existing_data = DB::table('timetables')
 									->where([
 										['timetables_week_start', '>=', $week_start],
 										['timetables_active', 1],
@@ -2613,7 +2613,7 @@ class eventAjaxController extends Controller
 				}
 
 				// grab existing data in the database
-				$existing_data = DB::table('timtables')
+				$existing_data = DB::table('timetables')
 									->where([
 										['timetables_week_start', '>=', $week_start],
 										['timetables_active', 1],
