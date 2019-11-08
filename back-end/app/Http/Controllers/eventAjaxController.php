@@ -2386,9 +2386,9 @@ class eventAjaxController extends Controller
 				$all_data_indexed_by_coordinate = [];
 				if(!is_null($timetable_data)) {
 					foreach($imetable_data as $data) {
-						if($data["coordinate_y"] + duration > 24) {
-							return Response::json(['error' => 'Coordinate + Duration exceeds the day'], 400);
-						}
+						// if($data["coordinate_y"] + duration > 24) {
+						// 	return Response::json(['error' => 'Coordinate + Duration exceeds the day'], 400);
+						// }
 
 						if(is_numeric($data["recurring"]) && $data["recurring"] > $max_recurrence) {
 							$max_recurrence = (int)$data["recurring"];
