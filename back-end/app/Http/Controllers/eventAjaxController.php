@@ -2326,7 +2326,7 @@ class eventAjaxController extends Controller
 								->where([
 									['timetables_week_start', '>=', $week_start],
 									['timetables_active', 1],
-									['timetables_owner', $token_data['user_data']]
+									['timetables_owner', $token_data['user_id']]
 								])
 								->orderBy('timetables_coordinate_x', 'asc')
 								->orderBy('timetables_coordinate_y', 'asc')
@@ -2377,7 +2377,7 @@ class eventAjaxController extends Controller
 				$existing_data = DB::table('timtables')
 								->where([
 									['timetables_active', 1],
-									['timetables_owner', $token_data['user_data']],
+									['timetables_owner', $token_data['user_id']],
 									['timetables_id', $timetables_id]
 								])
 								->get();
@@ -2406,19 +2406,19 @@ class eventAjaxController extends Controller
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
 		}
 
-		if (!isset($coordinate_x) || null($coordinate_x)) {
+		if (!isset($coordinate_x) || is_null($coordinate_x)) {
 			return Response::json(['error' => 'Coordinate x is either not set or null'], 400);
 		}
 
-		if (!isset($coordinate_y) || null($coordinate_y)) {
+		if (!isset($coordinate_y) || is_null($coordinate_y)) {
 			return Response::json(['error' => 'Coordinate y is either not set or null'], 400);
 		}
 		
-		if (!isset($week_start) || null($week_start)) {
+		if (!isset($week_start) || is_null($week_start)) {
 			return Response::json(['error' => 'Week start is either not set or null'], 400);
 		}
 
-		if (!isset($duration) || null($duration)) {
+		if (!isset($duration) || is_null($duration)) {
 			$duration = 0.5;
 		}
 
@@ -2435,8 +2435,8 @@ class eventAjaxController extends Controller
 				}
 
 				//next we want to check if a valid time descriptor is set
-				if(!is_null($recurring_descriptor) || $recurring_descriptor != "daily" || $recurring_descriptor != "fortnightly" || $recurring_descriptor != "monthly") {
-					return Response::json(['error' => 'Invalid monthly descriptor passed through'], 400);
+				if(!is_null($recurring_descriptor) && $recurring_descriptor != "daily" && $recurring_descriptor != "fortnightly" && $recurring_descriptor != "monthly") {
+					return Response::json(['error' => 'Invalid descriptor passed through'], 400);
 				}
 
 				//now we want to check for clashes between the new coordinate and existing coordinates
@@ -2444,7 +2444,7 @@ class eventAjaxController extends Controller
 									->where([
 										['timetables_week_start', '>=', $week_start],
 										['timetables_active', 1],
-										['timetables_owner', $token_data['user_data']]
+										['timetables_owner', $token_data['user_id']]
 									])
 									->get();
 
@@ -2478,7 +2478,7 @@ class eventAjaxController extends Controller
 					'timetables_duration' => $duration,
 					'timetables_label' => $labelling,
 					'timetables_active' => 1,
-					'timetables_owner' => $token_data['user_data']
+					'timetables_owner' => $token_data['user_id']
 				];
 
 				$recurring--; // decrement recurring number
@@ -2534,7 +2534,7 @@ class eventAjaxController extends Controller
 							'timetables_duration' => $duration,
 							'timetables_label' => $labelling,
 							'timetables_active' => 1,
-							'timetables_owner' => $token_data['user_data']
+							'timetables_owner' => $token_data['user_id']
 						];
 
 						$recurring--; //decrement recurring number
@@ -2617,7 +2617,7 @@ class eventAjaxController extends Controller
 									->where([
 										['timetables_week_start', '>=', $week_start],
 										['timetables_active', 1],
-										['timetables_owner', $token_data['user_data']]
+										['timetables_owner', $token_data['user_id']]
 									])
 									->get();
 
@@ -2655,7 +2655,7 @@ class eventAjaxController extends Controller
 							'timetables_duration' => $local_data["duration"],
 							'timetables_label' => $local_data["label"],
 							'timetables_active' => 1,
-							'timetables_owner' => $token_data['user_data']
+							'timetables_owner' => $token_data['user_id']
 						];
 					}
 				}
@@ -2688,7 +2688,7 @@ class eventAjaxController extends Controller
 								'timetables_duration' => $recurring_coordinate["duration"],
 								'timetables_label' => $recurring_coordinate["label"],
 								'timetables_active' => 1,
-								'timetables_owner' => $token_data['user_data']
+								'timetables_owner' => $token_data['user_id']
 							];
 
 							$recurring--;
@@ -2706,7 +2706,7 @@ class eventAjaxController extends Controller
 
 					DB::table('timetables')
 						->where([
-							['timetables_owner', $token_data['user_data']],
+							['timetables_owner', $token_data['user_id']],
 							['timetables_active', 1]
 						])
 						->whereIn('timetables_id', $to_remove_array)
@@ -2744,7 +2744,7 @@ class eventAjaxController extends Controller
 				foreach(array_diff($viewer, $user_ids) as $remove){
 
 						DB::table('timetable_show')
-						->where([['timetable_show_owner', $token_data['user_data']],
+						->where([['timetable_show_owner', $token_data['user_id']],
 							['timetable_show_viewer', $remove]])
 						->update(['timetable_show_active', 0]);
 
@@ -2753,12 +2753,12 @@ class eventAjaxController extends Controller
 				foreach(array_diff($user_ids, $viewer) as $add){
 					if(is_int($add)){
 						$update = DB::table('timetable_show')
-						->where([['timetable_show_owner', $token_data['user_data']],
+						->where([['timetable_show_owner', $token_data['user_id']],
 								['timetable_show_viewer', $add]])
 						->first();
 						if(isset($update) && !empty($update)){
 							DB::table('timetable_show')
-							->where([['timetable_show_owner', $token_data['user_data']],
+							->where([['timetable_show_owner', $token_data['user_id']],
 								['timetable_show_viewer', $add]])
 							->update(['timetable_show_active', 1]);
 						}else{
