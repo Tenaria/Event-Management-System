@@ -2355,6 +2355,9 @@ class eventAjaxController extends Controller
 		return Response::json([], 400);
 	}
 
+	/*
+		function to remove a timetable block given an id
+	*/
 	public function remove_timetable_block(Request $request) {
 		$token = $request->input('token');
 		$timetable_id = $request->input('timetable_id'); // INTEGER NOT NULL 
@@ -2386,8 +2389,215 @@ class eventAjaxController extends Controller
 		return Response::json([], 400);
 	}
 
+	/*
+		function to add a timetable block given data indicated below
+	*/
 	public function add_timetable_block(Request $request) {
+		$token = $request->input('token');
+		$coordinate_x = $request->input('coordinate_x'); // INTEGER 0 - 47 NOT NULL
+		$coordinate_y = $request->input('coordinate_y'); // INTEGER 0 - 47 NOT NULL
+		$week_start = $request->input('week_start'); // INTEGER NOT NULL (EPOCH IN MILLISECONDS OF START OF WEEK)
+		$duration = $request->input('duration'); // INTEGER IF NULL WILL BE SET TO 0.5
+		$recurring = $request->input('recurring'); // INTEGER MINIMUM 1
+		$recurring_descriptor = $request->input('recurring_descriptor'); // STRING CAN BE NULL
+		$labelling = $request->input('labelling'); // STRING CAN BE NULL
 
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+
+		if (!isset($coordinate_x) || null($coordinate_x)) {
+			return Response::json(['error' => 'Coordinate x is either not set or null'], 400);
+		}
+
+		if (!isset($coordinate_y) || null($coordinate_y)) {
+			return Response::json(['error' => 'Coordinate y is either not set or null'], 400);
+		}
+		
+		if (!isset($week_start) || null($week_start)) {
+			return Response::json(['error' => 'Week start is either not set or null'], 400);
+		}
+
+		if (!isset($duration) || null($duration)) {
+			$duration = 0.5;
+		}
+
+		if (!isset($recurring) || empty($recurring)) {
+			return Response::json(['error' => 'recurring is either not set or null. Recurring should be atleast 1.'], 400);
+		}
+
+		if(isset($token) && !empty($token)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				//first check we have a valid duration set. It can not exceed 47
+				if($coordinate_y + $duration > 47) {
+					return Response::json(['error' => 'Coordinate Y + Duration exceeds the day'], 400);
+				}
+
+				//next we want to check if a valid time descriptor is set
+				if(!is_null($recurring_descriptor) || $recurring_descriptor != "daily" || $recurring_descriptor != "fortnightly" || $recurring_descriptor != "monthly" || $recurring_descriptor != "yearly") {
+					return Response::json(['error' => 'Invalid monthly descriptor passed through'], 400);
+				}
+
+				//now we want to check for clashes between the new coordinate and existing coordinates
+				//TODO: CLAIRE
+				$existing_data = DB::table('timtables')
+									->where([
+										['timetables_week_start', '>=', $week_start],
+										['timetables_active', 1],
+										['timetables_owner', $token_data['user_data']]
+									])
+									->get();
+
+				$taken_counters = [];
+				if(count($existing_data) > 0) {
+					foreach($existing_data as $data) {
+						$local_duration = $data->timetables_duration;
+						$x = $data->timetables_coordinate_x;
+						$y = $data->timetables_coordinate_y;
+
+						while($local_duration > 0) {
+							$taken_counters[$data->timetables_week_start][$x][] = $y;
+							$y += 0.5;
+							$local_duration = $local_duration - 0.5;
+						}
+					}
+				}
+
+				//check for clashes
+				if(timetable_check_clash($taken_counters, $coordinate_x, $coordinate_y, $duration, $week_start)) {
+					return Response::json(['error' => ''], 400);
+				}
+
+				// insert first timetable instance
+				$insert[] = [
+					'timetables_week_start' => $week_start,
+					'timetables_coordinate_x' => $coordinate_x,
+					'timetables_coordinate_y' => $coordinate_y,
+					'timetables_duration' => $duration,
+					'timetables_label' => $labelling,
+					'timetables_active' => 1,
+					'timetables_owner' => $token_data['user_data']
+				];
+
+				$recurring--; // decrement recurring number
+
+				// if recurring is set to greater than one we need additional insertions
+				$one_week = 7*24*60*60*1000;
+				if(!is_null($recurring_descriptor) && $recurring >= 1) {
+					while($recurring > 0) {
+						// check if recurrence is daily
+						if($recurring_descriptor == "daily") {
+							if($coordinate_x > 6) {
+								$coordinate_x = 0;
+								$week_start += $one_week;
+							}
+
+							if(timetable_check_clash($taken_counters, $coordinate_x, $coordinate_y, $duration, $week_start)) {
+								return Response::json(['error' => ''], 400);
+							}
+
+							$insert[] = [
+								'timetables_week_start' => $week_start,
+								'timetables_coordinate_x' => $coordinate_x,
+								'timetables_coordinate_y' => $coordinate_y,
+								'timetables_duration' => $duration,
+								'timetables_label' => $labelling,
+								'timetables_active' => 1,
+								'timetables_owner' => $token_data['user_data']
+							];
+						// or check if recurrence is weekly
+						} else if($recurring_descriptor == "weekly") {
+							$week_start += $one_week;
+
+							if(timetable_check_clash($taken_counters, $coordinate_x, $coordinate_y, $duration, $week_start)) {
+								return Response::json(['error' => ''], 400);
+							}
+
+							$insert[] = [
+								'timetables_week_start' => $week_start,
+								'timetables_coordinate_x' => $coordinate_x,
+								'timetables_coordinate_y' => $coordinate_y,
+								'timetables_duration' => $duration,
+								'timetables_label' => $labelling,
+								'timetables_active' => 1,
+								'timetables_owner' => $token_data['user_data']
+							];
+						// or check if recurrence is fortnightly
+						} else if($recurring_descriptor == "fortnightly") {
+							$week_start += $one_week*2;
+
+							if(timetable_check_clash($taken_counters, $coordinate_x, $coordinate_y, $duration, $week_start)) {
+								return Response::json(['error' => ''], 400);
+							}
+
+							$insert[] = [
+								'timetables_week_start' => $week_start,
+								'timetables_coordinate_x' => $coordinate_x,
+								'timetables_coordinate_y' => $coordinate_y,
+								'timetables_duration' => $duration,
+								'timetables_label' => $labelling,
+								'timetables_active' => 1,
+								'timetables_owner' => $token_data['user_data']
+							];
+						// or check if recurrence is monthly
+						} else if($recurring_descriptor == "monthly") {
+							$time_to_add = $one_week*4;
+
+							if(timetable_check_clash($taken_counters, $coordinate_x, $coordinate_y, $duration, $week_start)) {
+								return Response::json(['error' => ''], 400);
+							}
+
+							$insert[] = [
+								'timetables_week_start' => $week_start,
+								'timetables_coordinate_x' => $coordinate_x,
+								'timetables_coordinate_y' => $coordinate_y,
+								'timetables_duration' => $duration,
+								'timetables_label' => $labelling,
+								'timetables_active' => 1,
+								'timetables_owner' => $token_data['user_data']
+							];
+
+						// or check if recurrence is yearly
+						} //else if($recurring_descriptor == "yearly") {
+						// 	$time_to_add = $one_week*52;
+
+						// 	//TODO: CLAIRE: CHECK FOR CLASH
+						// 	//TODO: CLAIRE: INSERT
+						// }
+
+						// create new insertion with incremented timestamps
+						$insert[] = [
+							'timetables_week_start' => $week_start,
+							'timetables_coordinate_x' => $coordinate_x,
+							'timetables_coordinate_y' => $coordinate_y,
+							'timetables_duration' => $duration,
+							'timetables_label' => $labelling,
+							'timetables_active' => 1,
+							'timetables_owner' => $token_data['user_data']
+						];
+
+						$recurring--; //decrement recurring number
+					}
+				}
+
+				// create the session in the database
+				$new_session_id = DB::table('timetables')
+										->insert($insert);
+
+				//$coordinate_x
+				//$coordinate_y
+				//$week_start
+				//$duration
+				//$recurring
+				//$recurring_descriptor
+				//$labelling
+
+				return Response::json([], 200);
+			}
+		}
+		
+		return Response::json([], 400);
 	}
 
 	public function save_timetable_details(Request $request) {
