@@ -2440,7 +2440,6 @@ class eventAjaxController extends Controller
 				}
 
 				//now we want to check for clashes between the new coordinate and existing coordinates
-				//TODO: CLAIRE
 				$existing_data = DB::table('timtables')
 									->where([
 										['timetables_week_start', '>=', $week_start],
@@ -2449,15 +2448,17 @@ class eventAjaxController extends Controller
 									])
 									->get();
 
+				//create an array of all time blocks tha are token
 				$taken_counters = [];
 				if(count($existing_data) > 0) {
 					foreach($existing_data as $data) {
 						$local_duration = $data->timetables_duration;
+						$local_week_start = $data->timetables_week_start;
 						$x = $data->timetables_coordinate_x;
 						$y = $data->timetables_coordinate_y;
 
 						while($local_duration > 0) {
-							$taken_counters[$data->timetables_week_start][$x][] = $y;
+							$taken_counters[$local_week_start][$x][] = $y;
 							$y += 0.5;
 							$local_duration = $local_duration - 0.5;
 						}
@@ -2496,16 +2497,6 @@ class eventAjaxController extends Controller
 							if(timetable_check_clash($taken_counters, $coordinate_x, $coordinate_y, $duration, $week_start)) {
 								return Response::json(['error' => ''], 400);
 							}
-
-							$insert[] = [
-								'timetables_week_start' => $week_start,
-								'timetables_coordinate_x' => $coordinate_x,
-								'timetables_coordinate_y' => $coordinate_y,
-								'timetables_duration' => $duration,
-								'timetables_label' => $labelling,
-								'timetables_active' => 1,
-								'timetables_owner' => $token_data['user_data']
-							];
 						// or check if recurrence is weekly
 						} else if($recurring_descriptor == "weekly") {
 							$week_start += $one_week;
@@ -2513,16 +2504,6 @@ class eventAjaxController extends Controller
 							if(timetable_check_clash($taken_counters, $coordinate_x, $coordinate_y, $duration, $week_start)) {
 								return Response::json(['error' => ''], 400);
 							}
-
-							$insert[] = [
-								'timetables_week_start' => $week_start,
-								'timetables_coordinate_x' => $coordinate_x,
-								'timetables_coordinate_y' => $coordinate_y,
-								'timetables_duration' => $duration,
-								'timetables_label' => $labelling,
-								'timetables_active' => 1,
-								'timetables_owner' => $token_data['user_data']
-							];
 						// or check if recurrence is fortnightly
 						} else if($recurring_descriptor == "fortnightly") {
 							$week_start += $one_week*2;
@@ -2530,16 +2511,6 @@ class eventAjaxController extends Controller
 							if(timetable_check_clash($taken_counters, $coordinate_x, $coordinate_y, $duration, $week_start)) {
 								return Response::json(['error' => ''], 400);
 							}
-
-							$insert[] = [
-								'timetables_week_start' => $week_start,
-								'timetables_coordinate_x' => $coordinate_x,
-								'timetables_coordinate_y' => $coordinate_y,
-								'timetables_duration' => $duration,
-								'timetables_label' => $labelling,
-								'timetables_active' => 1,
-								'timetables_owner' => $token_data['user_data']
-							];
 						// or check if recurrence is monthly
 						} else if($recurring_descriptor == "monthly") {
 							$time_to_add = $one_week*4;
@@ -2547,17 +2518,6 @@ class eventAjaxController extends Controller
 							if(timetable_check_clash($taken_counters, $coordinate_x, $coordinate_y, $duration, $week_start)) {
 								return Response::json(['error' => ''], 400);
 							}
-
-							$insert[] = [
-								'timetables_week_start' => $week_start,
-								'timetables_coordinate_x' => $coordinate_x,
-								'timetables_coordinate_y' => $coordinate_y,
-								'timetables_duration' => $duration,
-								'timetables_label' => $labelling,
-								'timetables_active' => 1,
-								'timetables_owner' => $token_data['user_data']
-							];
-
 						// or check if recurrence is yearly
 						} //else if($recurring_descriptor == "yearly") {
 						// 	$time_to_add = $one_week*52;
