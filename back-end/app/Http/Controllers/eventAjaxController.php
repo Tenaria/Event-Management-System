@@ -2467,7 +2467,7 @@ class eventAjaxController extends Controller
 
 				//check for clashes
 				if(timetable_check_clash($taken_counters, $coordinate_x, $coordinate_y, $duration, $week_start)) {
-					return Response::json(['error' => ''], 400);
+					return Response::json(['error' => 'clash detected!'], 400);
 				}
 
 				// insert first timetable instance
@@ -2495,28 +2495,28 @@ class eventAjaxController extends Controller
 							}
 
 							if(timetable_check_clash($taken_counters, $coordinate_x, $coordinate_y, $duration, $week_start)) {
-								return Response::json(['error' => ''], 400);
+								return Response::json(['error' => 'clash detected!'], 400);
 							}
 						// or check if recurrence is weekly
 						} else if($recurring_descriptor == "weekly") {
 							$week_start += $one_week;
 
 							if(timetable_check_clash($taken_counters, $coordinate_x, $coordinate_y, $duration, $week_start)) {
-								return Response::json(['error' => ''], 400);
+								return Response::json(['error' => 'clash detected!'], 400);
 							}
 						// or check if recurrence is fortnightly
 						} else if($recurring_descriptor == "fortnightly") {
 							$week_start += $one_week*2;
 
 							if(timetable_check_clash($taken_counters, $coordinate_x, $coordinate_y, $duration, $week_start)) {
-								return Response::json(['error' => ''], 400);
+								return Response::json(['error' => 'clash detected!'], 400);
 							}
 						// or check if recurrence is monthly
 						} else if($recurring_descriptor == "monthly") {
 							$time_to_add = $one_week*4;
 
 							if(timetable_check_clash($taken_counters, $coordinate_x, $coordinate_y, $duration, $week_start)) {
-								return Response::json(['error' => ''], 400);
+								return Response::json(['error' => 'clash detected!'], 400);
 							}
 						// or check if recurrence is yearly
 						} //else if($recurring_descriptor == "yearly") {
