@@ -2560,6 +2560,9 @@ class eventAjaxController extends Controller
 		return Response::json([], 400);
 	}
 
+	/*
+		IGNORE THIS FOR NOW
+	*/
 	public function save_timetable_details(Request $request) {
 		$token = $request->input('token');
 		$week_start = $request->input('week_start'); // INTEGER NOT NULL (EPOCH IN MILLISECONDS OF START OF WEEK)
