@@ -28,9 +28,7 @@ class Timetable extends React.Component {
 
   render() {
     return (
-      <DragDropContext
-        onDragEnd={this.onDragEnd}
-      >
+      <DragDropContext onDragEnd={this.onDragEnd}>
         <Droppable droppableId="test">
           {(provided) => 
             <div ref={provided.innerRef} {...provided.droppableProps}>
@@ -53,6 +51,17 @@ class Timetable extends React.Component {
                     {...provided.dragHandleProps}
                   >
                     Hello2
+                  </div>
+                }
+              </Draggable>
+              <Draggable draggableId="test3">
+                {(provided) => 
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                  >
+                    Hello3
                   </div>
                 }
               </Draggable>
