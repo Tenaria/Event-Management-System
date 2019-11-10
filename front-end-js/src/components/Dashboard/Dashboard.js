@@ -1,45 +1,57 @@
-import { Card, Divider, Empty, Icon, Row, Spin, Typography, Button } from 'antd';
+import { Card, Collapse, Empty, Icon,  Spin, Typography } from 'antd';
 import React from 'react';
-import Slider from 'react-slick';
 
 import TokenContext from '../../context/TokenContext';
-
 
 const { Title } = Typography;
 const spinIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
 
 class Dashboard extends React.Component {
   state = {
-    upcomingEvent: null
+    upcomingEventsMe: [],
+    upcomingEventsInvited: [],
+    upcomingEventsPublic: [],
+    loaded: false
   }
 
-  componentDidMount = async () => {
+  componentDidMount = () => {
     const { token } = this.context;
+    
+    const loadData = url => new Promise(async (resolve, reject) => {
+      const res = await fetch(url, {
+        method: 'POST',
+        mode: 'cors',
+        cache: 'no-cache',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token })
+      });
 
-    const res = await fetch('http://localhost:8000/get_upcoming_events', {
-      method: 'POST',
-      mode: 'cors',
-      cache: 'no-cache',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({token})
+      if (res.status === 200) {
+        const data = await res.json();
+        console.log(url, data);
+        resolve(data);
+      } else {
+        resolve({events: []});
+      }
     });
 
-    const data = await res.json();
-    this.setState({upcomingEvent: data.events});
+    Promise.all([
+      loadData('http://localhost:8000/get_upcoming_events'),
+      loadData('http://localhost:8000/get_invited_events_upcoming'),
+      loadData('http://localhost:8000/search_public_event'),
+    ]).then(values => {
+      console.log(values);
+      this.setState({
+        upcomingEventsMe: values[0].events,
+        upcomingEventsInvited: values[1].events,
+        upcomingEventsPublic: values[2].results,
+        loaded: true
+      });
+    })
   }
 
   render() {
-    const {upcomingEvent} = this.state;
-
-    const settings = {
-      dots: true,
-      infinite: true,
-      speed: 500,
-      slidesToShow: 1,
-      slidesToScroll: 1
-    };
+    const { upcomingEventsMe, upcomingEventsInvited, upcomingEventsPublic } = this.state;
 
     const sliderStyle = {
       backgroundColor: '#2D3748',
@@ -51,72 +63,10 @@ class Dashboard extends React.Component {
       padding: '2em',
       textAlign: 'center'
     }
-
-    let upcomingEventsElm = (
-      <div style={spinStyle}>
-        <Spin indicator={spinIcon} style={{color: 'white'}} />
-      </div>
-    );
-
-    if (upcomingEvent) {
-      if (upcomingEvent.length > 0) {
-        upcomingEventsElm = [];
-
-        upcomingEventsElm.push(
-          <Card>
-            <p>Card content</p>
-            <p>Card content</p>
-            <p>Card content</p>
-          </Card>
-        );
-      } else {
-        upcomingEventsElm = <div style={spinStyle}><Empty style={{color: 'white'}} /></div>;
-      }
-    }
-
+  
     return (
       <div>
         <Title level={2}>Dashboard</Title>
-        <Divider orientation="left">Recently Added Events</Divider>
-        <Row style={sliderStyle}>{upcomingEventsElm}</Row>
-        <Divider orientation="left">Your Upcoming Events</Divider>
-        <Row style={sliderStyle}>
-          <Slider {...settings}>
-            <Card>                           
-              <p><Button type="primary" onclick={upcomingEvent}>10:00, Wed 30/10</Button></p>
-              <p>15:30, Fri 31/10</p>
-              <p>20:00, Sat 01/11</p>
-            </Card>
-            <Card
-              hoverable
-              style={{ width: 20 }}
-              cover={<img alt="Event 1" src="https://secure.meetupstatic.com/photos/event/6/2/e/1/600_484585313.jpeg" />}
-            >
-              <p></p>
-              <p></p>
-              <p></p>
-            </Card>
-          </Slider>
-        </Row>
-        <Divider orientation="left">Events You Manage</Divider>
-        <Row style={sliderStyle}>
-          <Slider {...settings}>
-            <Card
-              hoverable
-              style={{ width: 50 }}
-              cover={<img alt="Event 1" src="https://secure.meetupstatic.com/photos/event/6/2/e/1/600_484585313.jpeg" />}
-            >
-              <p>10:00 Wed, 30/10</p>
-              <p>Card content</p>
-              <p>Card content</p>
-            </Card>
-            <Card>
-              <p>Card content</p>
-              <p>Card content</p>
-              <p>Card content</p>
-            </Card>
-          </Slider>
-        </Row>
       </div>
     );
   }
