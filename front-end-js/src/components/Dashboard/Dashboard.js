@@ -50,6 +50,11 @@ class Dashboard extends React.Component {
     })
   }
 
+  selectEvent = id => {
+    sessionStorage.setItem('event_id', id);
+    this.setState({ viewingEvent: true });
+  }
+
   render() {
     const { upcomingEventsMe, upcomingEventsInvited, upcomingEventsPublic, loaded } = this.state;
   
