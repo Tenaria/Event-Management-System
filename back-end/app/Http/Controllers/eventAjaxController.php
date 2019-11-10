@@ -1443,8 +1443,14 @@ class eventAjaxController extends Controller
  			$token_data = validate_jwt($token);
  			if($token_data == true) {
  				$lastWk_event_number = 0;
+				$lastWk_public = 0;
+				$lastWk_private = 0;
  				$nextWk_event_number = 0;
+				$nextWk_public = 0;
+				$nextWk_private = 0;
  				$thisWk_event_number = 0;
+				$thisWk_public = 0;
+				$thisWk_private = 0;
 				
  				//getting last week events
 				
@@ -1460,127 +1466,42 @@ class eventAjaxController extends Controller
 				if(!is_null($event_data)) {
 					foreach($event_data as $events) {
 						// checking last week events
-						if(($event_data->earliest_date > round(microtime(true) * 1000)) - (7 * 24 * 60 * 60 * 1000) && ($event_data->earliest_date < round(microtime(true) * 1000))) {
-							$lastWk_event_number++;
+						if(($events->earliest_date > round(microtime(true) * 1000)) - (7 * 24 * 60 * 60 * 1000) && ($events->earliest_date < round(microtime(true) * 1000))) {
+							if ($event->events_public == 1) {
+								$lastWk_public++;
+							} else {
+								$lastWk_private++;
+							}
+							//$lastWk_event_number++;	
 							
 						}
 						
 						//checking for next week events
-						if(($event_data->latest_date = 0 OR $event_data->latest_date > (round(microtime(true) * 1000)) +  (7 * 24 * 60 * 60 * 1000)) && ($event_data->latest_date OR $event_data->latest_date > round(microtime(true) * 1000))) {
-							$nextWk_event_number++;
-							
+						if(($events->latest_date = 0 OR $events->latest_date > (round(microtime(true) * 1000)) +  (7 * 24 * 60 * 60 * 1000)) && ($events->latest_date OR $events->latest_date > round(microtime(true) * 1000))) {
+							//$nextWk_event_number++;
+							if ($event->events_public == 1) {
+								$nextWk_public++;
+							} else {
+								$nextWk_private++;
+							}
 						}
 						
 						//checking for this week events
-						if(($event_data->latest_date = 0 OR $event_data->latest_date < (round(microtime(true) * 1000))) && ($event_data->earliest_date > round(microtime(true) * 1000))) {
-							$thisWk_event_number++;
-							
+						if(($events->latest_date = 0 OR $events->latest_date < (round(microtime(true) * 1000))) && ($events->earliest_date > round(microtime(true) * 1000))) {
+							//$thisWk_event_number++;
+							if ($event->events_public == 1) {
+								$thisWk_public++;
+							} else {
+								$thisWk_private++;
+							}
 						}
 						
 					}
+					$lastWk_event_number = $lastWk_private + $lastWk_public;
+					$nextWk_event_number = $nextWk_private + $nextWk_public;
+					$thisWk_event_number = $thisWk_private + $thisWk_public;
 				}
-				 /*
- 				$last_public_event_data = DB::table('events AS e')
- 								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'dates_earliest'"))
- 								->where ([
- 									['e.events_active', 1],
- 									['e.events_createdby', $token_data['user_id']]
- 									//['e.events_status', 0]
-									
- 								])
- 								 // 7 * 24 * 60 * 60 is the unix timp stamp calculated in second for one week time
- 								->havingRaw('dates_earliest > '.(round(microtime(true) * 1000)) - (7 * 24 * 60 * 60 * 1000))
- 								->havingRaw('dates_earliest < '.round(microtime(true) * 1000))
-								->get();
 				
- 				if(!is_null($last_public_event_data)) {
- 					foreach($last_public_event_data as $events) {
- 						$lastWk_event_number++;
- 					}
- 				}
-				
-				
-
-				$last_private_event_data = DB::table('events_access AS a')
- 								->select('e.events_id', 'e.events_name', 'e.events_public', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'dates_earliest'"))
- 								->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
- 								->where([
- 									["a.access_user_id", $token_data['user_id']],
- 									["a.access_active", 1], 
-									["a.access_archived", 0],
- 									["e.events_createdby", '!=', $token_data['user_id']]
- 								])
-
- 								// 7 * 24 * 60 * 60 is the unix timp stamp calculated in second for one week time
-								->havingRaw('dates_earliest > '.(round(microtime(true) * 1000)) - (7 * 24 * 60 * 60 * 1000))
-								->havingRaw('dates_earliest < '.round(microtime(true) * 1000))
- 								->get();
-
- 				if(!is_null($last_private_event_data)) {
-					foreach($last_private_event_data as $events) {
-						$lastWk_event_number++;
-					}
-				}				
-				
- 				//getting future private event
- 				$next_private_events = 0;
- 				$next_private_event_data = DB::table('events_access AS a')
- 								->select('e.events_id', 'e.events_name', 'e.events_public', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"))
- 								->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
- 								->where([
- 									["a.access_user_id", $token_data['user_id']],
- 									["a.access_active", 1], 
- 									//["a.access_accepted", 0],
-									["e.events_createdby", '!=', $token_data['user_id']],
- 									["a.access_archived", 0]
- 								])
-
- 								// 7 * 24 * 60 * 60 is the unix timp stamp calculated in second for one week time
- 								->havingRaw('dates_latest=0 OR dates_latest > '.(round(microtime(true) * 1000)) +  (7 * 24 * 60 * 60 * 1000))
-
- 								->havingRaw('dates_latest=0 OR dates_latest > '.round(microtime(true) * 1000))
- 								->get();
-
- 				if(!is_null($next_private_event_data)) {
- 					foreach($next_private_event_data as $private_events) {
- 						$next_private_events++;
- 					}
- 				}
- 				//getting future public event
- 				$next_public_events = 0;
- 				$next_public_event_data = DB::table('events AS e')
- 								->select('e.*', 'a.access_id', DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_end_time DESC LIMIT 1), 0) as 'dates_latest'"))
- 								->leftJoin('events_access AS a', function($join) use ($token_data) {
- 									$join->on('a.access_events_id', '=', 'e.events_id')
- 										->where([
- 											["a.access_user_id", $token_data['user_id']],
- 											["a.access_active", 1]
- 										]);
- 								})
- 								->where ([
- 									['e.events_active', 1],
- 									['e.events_createdby','!=',$token_data['user_id']],
- 									['e.events_public', 1]
- 								])
-
- 								// 7 * 24 * 60 * 60 is the unix timp stamp calculated in second for one week time
- 								->havingRaw('dates_latest=0 OR dates_latest > '.(round(microtime(true) * 1000)) +  (7 * 24 * 60 * 60 * 1000))
-
- 								->havingRaw('dates_latest=0 OR dates_latest > '.round(microtime(true) * 1000))
-
- 								->get();
-								
- 				if(!is_null($next_public_event_data)) {
- 					foreach($next_public_event_data as $public_events) {
- 						$next_public_events++;
- 					}
- 				}
- 				$nextWk_event_number = $next_private_events + $next_public_events;
-				
- 				//getting number of this week public events
-				
-				
-				//getting number of this week private events*/
 				
 				
 			}
