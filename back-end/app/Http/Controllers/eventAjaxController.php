@@ -1502,10 +1502,11 @@ class eventAjaxController extends Controller
 					$thisWk_event_number = $thisWk_private + $thisWk_public;
 				}
 				
-				
+				//return the numbers
 				
 			}
  		}
+		return Response::json([], 400);
  	}
 
 	/*
