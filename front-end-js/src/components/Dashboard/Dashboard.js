@@ -99,14 +99,14 @@ class Dashboard extends React.Component {
       );
     }
 
-    for (let i in upcomingEventsMe) {
-      let event = upcomingEventsMe[i];
+    for (let i in upcomingEventsInvited) {
+      let event = upcomingEventsInvited[i];
 
       const tagElms = event.events_tags.map(tag =>
         <Tag>{tag}</Tag>
       );
 
-      myUpcomingEventElms.push(
+      myUpcomingInvitedElms.push(
         <Card
           className="my-event-card"
           key={i}
@@ -131,14 +131,14 @@ class Dashboard extends React.Component {
       );
     }
 
-    for (let i in upcomingEventsMe) {
-      let event = upcomingEventsMe[i];
+    for (let i in upcomingEventsPublic) {
+      let event = upcomingEventsPublic[i];
 
       const tagElms = event.events_tags.map(tag =>
         <Tag>{tag}</Tag>
       );
 
-      myUpcomingEventElms.push(
+      upcomingElms.push(
         <Card
           className="my-event-card"
           key={i}
@@ -171,8 +171,10 @@ class Dashboard extends React.Component {
             {myUpcomingEventElms}
           </Panel>
           <Panel header="My Upcoming Invited Events" key="2">
+            {myUpcomingInvitedElms}
           </Panel>
           <Panel header="Upcoming Public Events" key="3">
+            {upcomingElms}
           </Panel>
         </Collapse>
       </div>
