@@ -1,4 +1,5 @@
 import { Button, Card, Collapse, Empty, Icon, Row, Spin, Tag, Typography, Col } from 'antd';
+import { Redirect } from "react-router-dom";
 import React from 'react';
 
 import TokenContext from '../../context/TokenContext';
@@ -12,6 +13,7 @@ class Dashboard extends React.Component {
     upcomingEventsMe: [],
     upcomingEventsInvited: [],
     upcomingEventsPublic: [],
+    viewedEvent: false,
     loaded: false
   }
 
@@ -52,11 +54,17 @@ class Dashboard extends React.Component {
 
   selectEvent = id => {
     sessionStorage.setItem('event_id', id);
-    this.setState({ viewingEvent: true });
+    this.setState({ viewedEvent: true });
   }
 
   render() {
-    const { upcomingEventsMe, upcomingEventsInvited, upcomingEventsPublic, loaded } = this.state;
+    const {
+      upcomingEventsMe,
+      upcomingEventsInvited,
+      upcomingEventsPublic,
+      loaded,
+      viewedEvent
+    } = this.state;
   
     const cardStyle = {
       margin: '1%',
@@ -167,9 +175,12 @@ class Dashboard extends React.Component {
         </Card>
       );
     }
+
+    console.log(viewedEvent);
   
     return (
       <div>
+        {viewedEvent ? <Redirect to="/event_details" /> : ''}
         <Title level={2}>Dashboard</Title>
         <Collapse defaultActiveKey={['1', '2', '3']}>
           <Panel header="My Upcoming Events" key="1">
