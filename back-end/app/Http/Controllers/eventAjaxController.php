@@ -2665,7 +2665,7 @@ class eventAjaxController extends Controller
 					//add id to show
 				foreach(array_diff($user_ids, $viewer) as $add){
 					if(is_int($add)){
-						DB:table('timetable_show')
+						DB::table('timetable_show')
 							->updateOrInsert(['timetable_show_owner' => $token_data['user_id']],
 								['timetable_show_viewer', $add],
 								['timetable_show_active' => 1]);
