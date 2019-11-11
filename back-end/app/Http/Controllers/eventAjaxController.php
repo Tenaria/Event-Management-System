@@ -2657,33 +2657,19 @@ class eventAjaxController extends Controller
 					->where([['timetable_show_owner', $token_data['user_id']],['timetable_show_active', 1]])
 					->pluck('timetable_show_viewer')->toArray();	
 					//remove id from show
-				foreach(array_diff($viewer, $user_ids) as $remove){
-
-						DB::table('timetable_show')
-						->where([['timetable_show_owner', $token_data['user_id']],
-							['timetable_show_viewer', $remove]])
+					DB:table('timetable_show')
+						->where(['timetable_show_owner', $token_data['user_id']])
+						->whereIn('timetable_show_owner', $viewer)
 						->update(['timetable_show_active', 0]);
 
-				}
-				//add id to show
+					//add id to show
 				foreach(array_diff($user_ids, $viewer) as $add){
 					if(is_int($add)){
-						$update = DB::table('timetable_show')
-						->where([['timetable_show_owner', $token_data['user_id']],
-								['timetable_show_viewer', $add]])
-						->first();
-						if(isset($update) && !empty($update)){
-							DB::table('timetable_show')
-							->where([['timetable_show_owner', $token_data['user_id']],
-								['timetable_show_viewer', $add]])
-							->update(['timetable_show_active', 1]);
-						}else{
-							DB::table('timetable_show')
-							->insert(['timetable_show_owner' => $token_data['user_id'],
-								'timetable_show_viewer' => $add,
-								'timetable_show_active' => 1
-								]);
-						}
+						DB:table('timetable_show')
+							->updateOrInsert(['timetable_show_owner' => $token_data['user_id']],
+								['timetable_show_viewer', $add],
+								['timetable_show_active' => 1]);
+
 					}
 				}
 
