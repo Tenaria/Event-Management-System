@@ -1481,7 +1481,7 @@ class eventAjaxController extends Controller
 				
 				
 				$event_data = DB::table('events AS e')
-								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'earliest_date'"), DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'latest_date'"))
+								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'earliest_date'"), DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'latest_date'"),DB::raw("(SELECT GROUP_CONCAT(DISTINCT CONCAT(t.tags_linking_value) SEPARATOR '~') FROM events_tags_linking AS t WHERE t.tags_linking_events_id=a.access_events_id AND t.tags_linking_active=1) as 'tags'"))
 								->where ([
 									['e.events_active', 1],
 									['e.events_createdby', $token_data['user_id']]
@@ -1489,8 +1489,20 @@ class eventAjaxController extends Controller
 								->get();
 								
 				if(!is_null($event_data)) {
+					
+					$tags = [];
+					
+					
 					foreach($event_data as $events) {
 						// checking last week events
+						
+						if(isset($event->tags) && !is_null($event->tags)) {
+							$tag_data = explode('~', $event->tags);
+							foreach($tag_data AS $tag) {
+								$tags[] = $tag;
+							}
+						}
+						
 						if(($events->earliest_date > round(microtime(true) * 1000)) - (7 * 24 * 60 * 60 * 1000) && ($events->earliest_date < round(microtime(true) * 1000))) {
 							if ($event->events_public == 1) {
 								$lastWk_public++;
