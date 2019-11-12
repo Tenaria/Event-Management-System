@@ -2698,8 +2698,43 @@ class eventAjaxController extends Controller
 					}
 				}
 
+				return Response::json([], 200);
+
 			}
-			return Response::json([], 200);
+		}
+		
+		return Response::json([], 400);
+	}
+
+	public function notify_attendees(Request $request) {
+		$token = $request->input('token');
+		$subject = $request->input('subject');
+		$body = $request->input('body');
+		$event_id = $request->input('event_id');
+
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+
+		if(!isset($subject) || is_null($subject)) {
+			return Response::json(['error' => 'Subject is either not set or null'], 400);
+		}
+
+		if(!isset($body) || is_null($body)) {
+			return Response::json(['error' => 'Subject is either not set or null'], 400);
+		}
+
+		if(!isset($event_id) || is_null($event_id)) {
+			return Response::json(['error' => 'Event id is either not set or null'], 400);
+		}
+		
+		if(isset($token) && !empty($token)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				
+
+				return Response::json([], 200);
+			}
 		}
 		
 		return Response::json([], 400);
