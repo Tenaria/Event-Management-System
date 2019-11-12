@@ -153,7 +153,7 @@ class eventAjaxController extends Controller
 		return Response::json([], 400);
 	}
 	
-	public function tags_list (Request $request) {
+/*	public function tags_list (Request $request) {
 		$token = $request->input('token');
 		
 		if (!isset($token) || empty($token)) {
@@ -170,7 +170,7 @@ class eventAjaxController extends Controller
 		}
 		
 		return Response::json([], 400);
-	}
+	} */
 
 	/*
 	function to modify a user's account given some new information

@@ -60,5 +60,5 @@ Route::post('/add_timetable_block', 'eventAjaxController@add_timetable_block');
 Route::post('/remove_timetable_block', 'eventAjaxController@remove_timetable_block');
 
 // other routes
-Route::post('/get_summary_dashboard', 'eventAjaxController@get_summary_dashboard');
-Route::get('/','eventAjaxController@tags_list');
+Route::get('/', 'eventAjaxController@get_summary_dashboard');
+//Route::get('/','eventAjaxController@tags_list');
