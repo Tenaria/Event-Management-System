@@ -302,6 +302,8 @@ class eventAjaxController extends Controller
 								]);
 
 					//INESRT EVENT ATTENDEES IF GIVEN
+					//TODO: CLAIRE: EMAIL ATTENDEES EXCLUDE YOU
+					//send_generic_email($email, $email_subject, $to_name, $text_block, $button_url, $button_name);
 					if(isset($event_attendees) && !empty($event_attendees)) {
 						foreach($event_attendees as $attendee) {
 							DB::table('events_access')
@@ -489,6 +491,8 @@ class eventAjaxController extends Controller
 							// ADD IN NEW ATTENDEES
 							$insert = [];
 							if(!empty($new_attendees)) {
+								//TODO: CLAIRE: EMAIL ATTENDEES EXCLUDE YOU
+								//send_generic_email($email, $email_subject, $to_name, $text_block, $button_url, $button_name);
 								foreach($new_attendees as $new_attendee) {
 									$insert[] = [
 										'access_user_id' => $new_attendee,
@@ -2626,8 +2630,6 @@ class eventAjaxController extends Controller
 						while($recurring > 0) {
 							$recurring_week_start += $one_week;
 
-							//TODO: CLAIRE: CHECK FOR CLASHES
-
 							//"coordinate_x" => int NOT NULL
 							//"coordinate_y" => int NOT NULL
 							//"duration" => FLOAT 0-24
@@ -2764,8 +2766,8 @@ class eventAjaxController extends Controller
 
 					foreach($attendees AS $attendee) {
 						if($attendee->users_id != $token_data['user_id']) {
-							//TOOD: UNCOMMENT OUT
-							//send_buttonless_email($attendee->users_email, $subject, $attendee->users_fname, $body);
+							//send the emails to each of the users containing the email subject and body as appropriate
+							send_buttonless_email($attendee->users_email, $subject, $attendee->users_fname, $body);
 						}
 					}
 				}
