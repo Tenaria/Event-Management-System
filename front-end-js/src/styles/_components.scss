@@ -59,3 +59,36 @@
 }
 
 .ant-tag { border-radius: 25px; }
+
+.timetable {
+  display: flex;
+  .timetable-column {
+    &:not(:first-child) {
+      border-left: 1px solid #7B341E;
+    }
+    .timetable-cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 2.5em;
+      width: 10em;
+    }
+    .timetable-cell:nth-child(even) {
+      background-color: #FEEBC8;
+    }
+    .timetable-cell.label {
+      background-color: #F6AD55;
+    }
+    .timetable-cell.title {
+      background-color: #C05621;
+      color: white;
+      font-weight: bold;
+    }
+    .timetable-cell.selected {
+      background-color: #68D391;
+    }
+    .timetable-cell.selected:nth-child(even) {
+      background-color: #48BB78;
+    }
+  }
+}
