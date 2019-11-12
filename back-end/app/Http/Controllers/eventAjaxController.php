@@ -756,7 +756,7 @@ class eventAjaxController extends Controller
 							DB::table('events_sessions_attendance')
 								->updateOrInsert([
 									'sessions_attendance_sessions_id' => $session_id,
-									'sessions_attendance_activeccess_id' => $session_data->access_id
+									'sessions_attendance_access_id' => $session_data->access_id
 									],
 									['sessions_attendance_active' => 1,
 									 'sessions_attendance_going' => 1
@@ -1973,6 +1973,7 @@ class eventAjaxController extends Controller
 		}
 		
 		$token_data = validate_jwt($token);
+		$sessions_sentence = "";
 		if($token_data == true) {
 			// check events exists and is valid, not cancelled nad not set
 			$event_data = DB::table('events')
@@ -1983,6 +1984,8 @@ class eventAjaxController extends Controller
 								['events_status', 0]
 							])
 							->first();
+
+			$sessions_sentence .= date('l jS F Y h:ia', $start_timestamp/1000)." until ".date('l jS F Y h:ia', $end_timestamp/1000).", ";
 
 			if(!is_null($event_data)) {
 				$insert = [];
@@ -2033,6 +2036,8 @@ class eventAjaxController extends Controller
 							'sessions_events_id' => $event_id
 						];
 
+						$sessions_sentence .= date('l jS F Y h:ia', $start_timestamp/1000)." until ".date('l jS F Y h:ia', $end_timestamp/1000).", ";
+
 						$recurring--; //decrement recurring number
 					}
 				}
@@ -2040,6 +2045,24 @@ class eventAjaxController extends Controller
 				// create the session in the database
 				$new_session_id = DB::table('events_sessions')
 										->insert($insert);
+
+				$affected_users = DB::table('events_access AS a')
+					->join('users AS u', 'u.users_id', '=', 'a.access_user_id')
+					->where([
+						['a.access_active', 1],
+						['a.access_archived', 0],
+						['a.access_events_id', $event_id],
+						['u.users_id', '!=', $token_data['user_id']],
+						['u.users_active', 1]
+					])
+					->get();
+
+				$sessions_sentence = rtrim($sessions_sentence, ', ');
+				if(count($affected_users) > 0) {
+					foreach($affected_users as $users) {
+						send_generic_email($users->users_email, 'New Session(s) To Attend!', $users->users_fname, 'The host ('.$token_data['name'].') of the event '.$event_data->events_name.' has added new session(s)! The new session(s) are on '.$sessions_sentence.' If you are interested in attending these session(s), view the event on GoMeet!', '', 'Go to GoMeet!');
+					}
+				}
 
 				return Response::json([], 200);
 			}
@@ -2218,6 +2241,27 @@ class eventAjaxController extends Controller
 								['sessions_id', $session_id]
 							])
 							->update(['sessions_status' => 1]);
+
+						$affected_users = DB::table('events_sessions_attendance AS sa')
+											->join('events_access AS a', 'a.access_id', '=', 'sa.sessions_attendance_access_id')
+											->join('users AS u', 'u.users_id', '=', 'a.access_user_id')
+											->where([
+												['sa.sessions_attendance_active', 1],
+												['sa.sessions_attendance_sessions_id', $session_id],
+												['sa.sessions_attendance_going', 1],
+												['a.access_active', 1],
+												['a.access_archived', 0],
+												['a.access_events_id', $event_id],
+												['u.users_id', '!=', $token_data['user_id']],
+												['u.users_active', 1]
+											])
+											->get();
+
+						if(count($affected_users) > 0) {
+							foreach($affected_users as $users) {
+								send_generic_email($users->users_email, 'A Session You Were Attending Has Been Cancelled!', $users->users_fname, 'You have marked yourself as going to a session for '.$event->events_name.'. Unfortunately, this session has been cancelled. Sorry! To view more details about the event, view the event on GoMeet!', '', 'Go to GoMeet!');
+							}
+						}
 
 						return Response::json([],200);
 					}
