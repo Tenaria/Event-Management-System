@@ -8,18 +8,20 @@ const { TextArea } = Input;
 
 class ContactAttendees extends React.Component {
   handleCreate = () => {
-    const { token } = this.context;
+    const { id, token } = this.context;
 
     this.props.form.validateFieldsAndScroll( async (err, values) => {
       if (!err) {
         console.log('Received values of: ', values);
 
         console.log(values);
-
-        const sendData = {...values, token};
+        const eventID = sessionStorage.getItem('event_id');
+        
+        const sendData = {...values, event_id: eventID, token};
 
         console.log(sendData);
 
+        //console.log(id);
         const res = await fetch('http://localhost:8000/notify_attendees', {
           method: 'POST',
           mode: 'cors',
