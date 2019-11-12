@@ -73,7 +73,10 @@ class Timetable extends React.Component {
     this.setState({ttData});
   }
 
-  mouseDown = () => this.setState({mouseDown: true})
+  mouseDown = e => {
+    e.preventDefault();
+    this.setState({mouseDown: true})
+  }
   mouseUp = () => this.setState({mouseDown: false})
 
   render() {
