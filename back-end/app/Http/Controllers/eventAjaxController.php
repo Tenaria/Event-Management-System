@@ -303,8 +303,15 @@ class eventAjaxController extends Controller
 
 					//INESRT EVENT ATTENDEES IF GIVEN
 					//TODO: CLAIRE: EMAIL ATTENDEES EXCLUDE YOU
-					//send_generic_email($email, $email_subject, $to_name, $text_block, $button_url, $button_name);
 					if(isset($event_attendees) && !empty($event_attendees)) {
+						$users_email = DB::table('users')
+										->where([
+											['users_active', 1],
+											['users_email', '!=', $token_data['user_id']] //DO NOT EMAIL YOURSELF
+										])
+										->whereIn('users_id', $event_attendees)
+										->get();
+
 						foreach($event_attendees as $attendee) {
 							DB::table('events_access')
 								->insert([
@@ -312,6 +319,12 @@ class eventAjaxController extends Controller
 									'access_active' => 1,
 									'access_events_id' => $new_event_id
 								]);
+						}
+
+						if(count($users_email) > 0) {
+							foreach($users_email as $users) {
+								send_generic_email($users->users_email, 'You Have Been Invited to an Event!', $users->users_fname, 'You have been invited to '.$event_name.' which is being hosted at '.$location.'. To view more details about the event, view the event on GoMeet!', '', 'Go to GoMeet!');
+							}
 						}
 					}
 
@@ -491,8 +504,15 @@ class eventAjaxController extends Controller
 							// ADD IN NEW ATTENDEES
 							$insert = [];
 							if(!empty($new_attendees)) {
+								$users_email = DB::table('users')
+										->where([
+											['users_active', 1],
+											['users_email', '!=', $token_data['user_id']] //DO NOT EMAIL YOURSELF
+										])
+										->whereIn('users_id', $new_attendees)
+										->get();
+
 								//TODO: CLAIRE: EMAIL ATTENDEES EXCLUDE YOU
-								//send_generic_email($email, $email_subject, $to_name, $text_block, $button_url, $button_name);
 								foreach($new_attendees as $new_attendee) {
 									$insert[] = [
 										'access_user_id' => $new_attendee,
@@ -503,6 +523,12 @@ class eventAjaxController extends Controller
 
 								DB::table('events_access')
 									->insert($insert);
+
+								if(count($users_email) > 0) {
+									foreach($users_email as $users) {
+										send_generic_email($users->users_email, 'You Have Been Invited to an Event!', $users->users_fname, 'You have been invited to '.$new_event_name.' which is being hosted at '.$new_event_location.'. To view more details about the event, view the event on GoMeet!','', 'Go to GoMeet!');
+									}
+								}
 							}
 						}
 						
