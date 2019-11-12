@@ -2706,6 +2706,9 @@ class eventAjaxController extends Controller
 		return Response::json([], 400);
 	}
 
+	/*
+		function to send out an email to all users attending an event
+	*/
 	public function notify_attendees(Request $request) {
 		$token = $request->input('token');
 		$subject = $request->input('subject');
@@ -2731,8 +2734,31 @@ class eventAjaxController extends Controller
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
-				
+				//get all the attendees of an evnet where the event is active and the user has been invited to the event
+				$attendees = DB::table('events_access AS a')
+								->select('u.users_email', 'u.users_id', 'e.events_public', 'a.access_user_id', 'u.users_fname')
+								->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
+								->join('users AS u', 'a.access_user_id', '=', 'u.users_id')
+								->where([
+									['a.access_events_id', $event_id],
+									['e.events_active', 1],
+									['a.access_active', 1],
+									['e.events_createdby', $token_data['user_id']] //ONLY OWNER CAN NOTIFY ATTENDEES
+								])
+								->get();
 
+				if(!is_null($attendees) && count($attendees) > 0) {
+					$return_error = true;
+
+					foreach($attendees AS $attendee) {
+						if($attendee->users_id != $token_data['user_id']) {
+							//TOOD: UNCOMMENT OUT
+							//send_buttonless_email($attendee->users_email, $subject, $attendee->users_fname, $body);
+						}
+					}
+				}
+
+				
 				return Response::json([], 200);
 			}
 		}
