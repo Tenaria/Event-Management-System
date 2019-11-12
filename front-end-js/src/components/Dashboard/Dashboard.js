@@ -184,13 +184,13 @@ class Dashboard extends React.Component {
         <Title level={2}>Dashboard</Title>
         <Collapse defaultActiveKey={['1', '2', '3']}>
           <Panel header="My Upcoming Events" key="1">
-            {myUpcomingEventElms}
+            <Row type="flex">{myUpcomingEventElms}</Row>
           </Panel>
           <Panel header="My Upcoming Invited Events" key="2">
-            {myUpcomingInvitedElms}
+            <Row type="flex">{myUpcomingInvitedElms}</Row>
           </Panel>
           <Panel header="Upcoming Public Events" key="3">
-            {upcomingElms}
+            <Row type="flex">{upcomingElms}</Row>
           </Panel>
         </Collapse>
       </div>
