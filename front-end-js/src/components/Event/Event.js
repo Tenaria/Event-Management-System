@@ -3,12 +3,13 @@
   the two actual forms that are able to edit an event. Essentially, all this component does is
   load information and send it to the two separate forms.
  */
-import { Collapse, Divider, Empty, Icon, Spin, Typography } from 'antd';
+import { Button, Collapse, Divider, Empty, Icon, Spin, Typography } from 'antd';
 import React from 'react';
 
 import EditEventForm from './EditEventForm';
 import EditAttendee from './EditAttendees';
 import ListSessions from './ListSessions';
+import ContactAttendees from './ContactAttendees';
 
 import EventContext from '../../context/EventContext';
 import TokenContext from '../../context/TokenContext';
@@ -19,6 +20,7 @@ const spinIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
 
 class Event extends React.Component {
   state = {
+    contactAttendees: false,
     id: 0,
     name: '',
     desc: '',
@@ -53,6 +55,7 @@ class Event extends React.Component {
       console.log(data);
 
       this.setState({
+        contactAttendees: false,
         id: eventID,
         name: data.events_name,
         desc: data.events_desc,
@@ -71,8 +74,15 @@ class Event extends React.Component {
     }
   }
 
+  // Collection of functions used to show/hide the add event form modal
+  toggleAddForm = () => this.setState({contactAttendees: !this.state.contactAttendees})
+  closeContactForm = () => {
+    this.setState({contactAttendees: false});
+    //this.loadData(); //TODO: ASK ALENG ABOUT THIS
+  }
+
   render() {
-    const { id, name, desc, created, event_public, loaded, location, valid, tags } = this.state;
+    const { contactAttendees, id, name, desc, created, event_public, loaded, location, valid, tags } = this.state;
     const { token } = this.context;
     const spinStyle = {
       padding: '2em',
@@ -109,10 +119,16 @@ class Event extends React.Component {
       <React.Fragment>
         <Title level={2}>Edit Event</Title>
         <p>View a single event and edit it.</p>
+        <div style={{textAlign: 'right'}}>
+        <Button 
+          onClick={this.toggleAddForm}
+        >Contact Attendees</Button>
+        </div>
         <Divider orientation="left">Event</Divider>
         <div>
           { eventElm }
         </div>
+        <ContactAttendees visible={contactAttendees} onCancel={this.closeContactForm} />
       </React.Fragment>
     );
   }
