@@ -16,7 +16,7 @@ class ContactAttendees extends React.Component {
 
         console.log(values);
         const eventID = sessionStorage.getItem('event_id');
-        
+
         const sendData = {...values, event_id: eventID, token};
 
         console.log(sendData);
@@ -62,7 +62,7 @@ class ContactAttendees extends React.Component {
                 }],
               })(<Input
                 placeholder="Subject"
-                prefix={<Icon type="tag" style={{ color: 'rgba(0,0,0,.25)' }} />}
+                prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />}
               />)}
             </Form.Item>
           </Row>
