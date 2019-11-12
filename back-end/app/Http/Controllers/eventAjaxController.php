@@ -152,6 +152,25 @@ class eventAjaxController extends Controller
 
 		return Response::json([], 400);
 	}
+	
+	public function tags_list (Request $request) {
+		$token = $request->input('token');
+		
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+		
+		if(isset($token) && !empty($token)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				
+				
+				
+			}
+		}
+		
+		return Response::json([], 400);
+	}
 
 	/*
 	function to modify a user's account given some new information
@@ -849,6 +868,8 @@ class eventAjaxController extends Controller
 							$tags[] = $tag_data;
 						}
 					}
+					
+					
 
 					// grab string to primary key mapping of attributes
 					$attributes_name_to_id = get_event_attributes_pk();
@@ -910,6 +931,8 @@ class eventAjaxController extends Controller
 		
 		return Response::json([], 400);
 	}
+	
+	
 
 	/*
 		functoinality to cancel the entirety of an event
@@ -1133,6 +1156,8 @@ class eventAjaxController extends Controller
 								$tags[] = $tag;
 							}
 						}
+						
+						
 
 						// chekc if event has been cancelled
 						$cancelled = false;
