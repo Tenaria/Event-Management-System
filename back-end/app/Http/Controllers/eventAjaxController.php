@@ -735,7 +735,7 @@ class eventAjaxController extends Controller
 
 							//NOTIFY HOST IF NOT HOST MARKED AS ATTENDING
 							if($token_data['user_id'] != $event_data->events_createdby) {
-								send_generic_email($event_data->users_email, 'Someone is Going to Your Event: '.$event_data->events_name.'!', $event_data->users_fname, 'A user ('.$token_data['name'].') has marked themself as going to a session at the event '.$event_data->events_name.'! For more informatoin, view the event on GoMeet!', '', 'Go to GoMeet!');
+								send_generic_email($event_data->users_email, 'Someone is Going to Your Event: '.$event_data->events_name.'!', $event_data->users_fname, 'A user ('.$token_data['name'].') has marked themself as going to a session at the event '.$event_data->events_name.'! For more information, view the event on GoMeet!', '', 'Go to GoMeet!');
 							}
 							
 							return Response::json([], 200);
@@ -775,7 +775,7 @@ class eventAjaxController extends Controller
 
 							//NOTIFY HOST IF NOT HOST MARKED AS ATTENDING
 							if($token_data['user_id'] != $event_data->events_createdby) {
-								send_generic_email($event_data->users_email, 'Someone is Going to Your Event: '.$event_data->events_name.'!', $event_data->users_fname, 'A user ('.$token_data['name'].') has marked themself as going to a session at the event '.$event_data->events_name.'! For more informatoin, view the event on GoMeet!', '', 'Go to GoMeet!');
+								send_generic_email($event_data->users_email, 'Someone is Going to Your Event: '.$event_data->events_name.'!', $event_data->users_fname, 'A user ('.$token_data['name'].') has marked themself as going to a session at the event '.$event_data->events_name.'! For more information, view the event on GoMeet!', '', 'Go to GoMeet!');
 							}
 							
 							return Response::json([], 200);
@@ -853,7 +853,7 @@ class eventAjaxController extends Controller
 
 					//NOTIFY HOST IF NOT HOST MARKED AS ATTENDING
 					if($token_data['user_id'] != $access->events_createdby) {
-						send_generic_email($access->users_email, 'Someone is Not Going to Your Event Anymore: '.$access->events_name.'!', $access->users_fname, 'A user ('.$token_data['name'].') has marked themself as not going to a session at the event '.$access->events_name.'! For more informatoin, view the event on GoMeet!', '', 'Go to GoMeet!');
+						send_generic_email($access->users_email, 'Someone is Not Going to Your Event Anymore: '.$access->events_name.'!', $access->users_fname, 'A user ('.$token_data['name'].') has marked themself as not going to a session at the event '.$access->events_name.'! For more information, view the event on GoMeet!', '', 'Go to GoMeet!');
 					}
 
 					return Response::json([], 200);
