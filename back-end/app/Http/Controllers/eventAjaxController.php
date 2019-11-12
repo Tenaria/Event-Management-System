@@ -670,11 +670,12 @@ class eventAjaxController extends Controller
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
 				//check that event is valid and exists
-				$event_data = DB::table('events')
-								->where ([
-									['events_active', 1],
-									['events_id', $event_id],
-									['events_status', 0]
+				$event_data = DB::table('events AS e')
+								->join('users AS u', 'u.users_id', '=', 'e.events_createdby')
+								->where([
+									['e.events_active', 1],
+									['e.events_id', $event_id],
+									['e.events_status', 0]
 								])
 								->first();
 
@@ -693,11 +694,13 @@ class eventAjaxController extends Controller
 						if(!is_null($session_data)){
 							$acess_id = 0;
 							//CHECK iF USER ALREADY HAS ACCESS TO A EVENT
-							$curr_event_access = DB::table('events_access')
+							$curr_event_access = DB::table('events_access AS a')
+												->join('users AS u', 'u.users_id', '=', 'a.access_user_id')
 												->where([
-													['access_events_id', $event_id],
-													['access_active', 1],
-													['access_user_id', $token_data['user_id']]
+													['a.access_events_id', $event_id],
+													['a.access_active', 1],
+													['a.access_user_id', $token_data['user_id']],
+													['u.users_active', 1]
 												])
 												->first();
 
@@ -729,6 +732,11 @@ class eventAjaxController extends Controller
 							} else {
 								return Response::json(['error' => 'access id has not been set (bacekend issue)'], 400);
 							}
+
+							//NOTIFY HOST IF NOT HOST MARKED AS ATTENDING
+							if($token_data['user_id'] != $event_data->events_createdby) {
+								send_generic_email($event_data->users_email, 'Someone is Going to Your Event: '.$event_data->events_name.'!', $event_data->users_fname, 'A user ('.$token_data['name'].') has marked themself as going to a session at the event '.$event_data->events_name.'! For more informatoin, view the event on GoMeet!', '', 'Go to GoMeet!');
+							}
 							
 							return Response::json([], 200);
 						} else {
@@ -743,12 +751,13 @@ class eventAjaxController extends Controller
 												$join->on('a.access_events_id', '=', 's.sessions_events_id')
 													->where('a.access_active', 1);
 											})
+											->join('users AS u', 'u.users_id', '=', 'a.access_user_id')
 											->where([
 												['s.sessions_active', 1],
 												['s.sessions_events_id', $event_id],
 												['s.sessions_id', $session_id],
-												['a.access_user_id', $token_data['user_id']]
-												
+												['a.access_user_id', $token_data['user_id']],
+												['u.users_active', 1]
 											])
 											->first();
 						
@@ -763,6 +772,11 @@ class eventAjaxController extends Controller
 									 'sessions_attendance_going' => 1
 									]
 								);
+
+							//NOTIFY HOST IF NOT HOST MARKED AS ATTENDING
+							if($token_data['user_id'] != $event_data->events_createdby) {
+								send_generic_email($event_data->users_email, 'Someone is Going to Your Event: '.$event_data->events_name.'!', $event_data->users_fname, 'A user ('.$token_data['name'].') has marked themself as going to a session at the event '.$event_data->events_name.'! For more informatoin, view the event on GoMeet!', '', 'Go to GoMeet!');
+							}
 							
 							return Response::json([], 200);
 						} else {
@@ -803,6 +817,7 @@ class eventAjaxController extends Controller
 											['a.access_events_id', $event_id]
 										]);
 								})
+								->join('users AS u', 'u.users_id', '=', 'e.events_createdby')
 								->join('events_sessions AS s', function($join) use($session_id) {
 									$join->on('s.sessions_events_id', '=', 'a.access_events_id')
 										->where([
@@ -822,7 +837,8 @@ class eventAjaxController extends Controller
 								->where([
 									['e.events_id', $event_id],
 									['e.events_active', 1],
-									['e.events_status', 0]
+									['e.events_status', 0],
+									['u.users_active', 1]
 								])
 								->first();
 
@@ -834,6 +850,11 @@ class eventAjaxController extends Controller
 							['sessions_attendance_id', $sessions_attendance_id]
 						])
 						->delete();
+
+					//NOTIFY HOST IF NOT HOST MARKED AS ATTENDING
+					if($token_data['user_id'] != $access->events_createdby) {
+						send_generic_email($access->users_email, 'Someone is Not Going to Your Event Anymore: '.$access->events_name.'!', $access->users_fname, 'A user ('.$token_data['name'].') has marked themself as not going to a session at the event '.$access->events_name.'! For more informatoin, view the event on GoMeet!', '', 'Go to GoMeet!');
+					}
 
 					return Response::json([], 200);
 				}
