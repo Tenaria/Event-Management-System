@@ -64,7 +64,7 @@ if (!function_exists('send_generic_email')) {
     }
 }
 
-if (!function_exists('send_generic_email')) {
+if (!function_exists('send_buttonless_email')) {
     //e.g you have been removed from the event blah by Claire. Sorry!
     function send_buttonless_email($email, $email_subject, $to_name, $text_block) {
         $client = new PostmarkClient(env('POSTMARKCLIENT_KEY', ''));
