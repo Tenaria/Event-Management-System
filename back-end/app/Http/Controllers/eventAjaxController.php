@@ -1552,6 +1552,12 @@ class eventAjaxController extends Controller
 							$tag_data = explode('~', $event->tags);
 							foreach($tag_data AS $tag) {
 								$tags[] = $tag;
+								if(!isset($tags[$tag])) {
+									$tags[$tag] = 1;
+									
+								} else {
+									$tags[$tag]++;
+								}
 							}
 						}
 						
