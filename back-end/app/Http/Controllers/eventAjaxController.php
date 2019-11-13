@@ -2237,14 +2237,14 @@ class eventAjaxController extends Controller
 			if($token_data == true) {
 				// grab event and check it belongs to the user, is not cancelled and is still active
 				$event = DB::table('events')
-							->select('events_createdby', 'events_status')
+							->select('events_createdby', 'events_status', 'events_name')
 							->where([
 								['events_active', 1],
 								['events_id', $events_id],
 								['events_createdby', $token_data['user_id']],
 								['events_status', 0]
 							])
-							->get();
+							->first();
 
 				if(!is_null($event)){
 					// check session exists, has not been cancelled and belongs to event before removing it
@@ -2273,7 +2273,7 @@ class eventAjaxController extends Controller
 												['sa.sessions_attendance_going', 1],
 												['a.access_active', 1],
 												['a.access_archived', 0],
-												['a.access_events_id', $event_id],
+												['a.access_events_id', $events_id],
 												['u.users_id', '!=', $token_data['user_id']],
 												['u.users_active', 1]
 											])
