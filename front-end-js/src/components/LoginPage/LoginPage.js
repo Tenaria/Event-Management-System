@@ -33,6 +33,8 @@ class LoginPage extends React.Component {
           message.error('Invalid email or password. Please try again!');
           this.setState({submitting: false});
         }
+      } else {
+        this.setState({submitting: false});
       }
     })
   }
@@ -49,10 +51,10 @@ class LoginPage extends React.Component {
             {getFieldDecorator('email', {
               rules: [{
                 type: 'email',
-                message: 'The input is not valid E-mail!',
+                message: 'The input is not a valid email!',
               },{
                 required: true,
-                message: 'Please input your E-mail!',
+                message: 'Please input your email!',
               }],
             })(<Input
               placeholder="Email"
