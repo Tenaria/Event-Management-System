@@ -1,4 +1,4 @@
-import { Form, Button, Icon, Input, Typography } from 'antd';
+import { Form, Button, Icon, Input, message, Typography } from 'antd';
 import React from 'react';
 
 const { Title } = Typography;
@@ -25,9 +25,14 @@ class LoginPage extends React.Component {
           body: JSON.stringify(values)
         })
 
-        const data = await res.json();
-        this.props.onLogin(data.token);
-        this.setState({submitting: false});
+        if (res.status === 200) {
+          const data = await res.json();
+          this.props.onLogin(data.token);
+          this.setState({submitting: false});
+        } else {
+          message.error('Invalid email or password. Please try again!');
+          this.setState({submitting: false});
+        }
       }
     })
   }
