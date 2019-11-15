@@ -2780,32 +2780,46 @@ class eventAjaxController extends Controller
 		return Response::json(['error' => 'invalid or expired JWT token'], 400);
 	}
 
-	public function timetable_privacy(Request $request){
-		$token = $request->input('token');
-		$user_ids = $request->input('user_ids');
+	/*
+		function to update for a user which other users can view their timetable/ event clashes
+	*/
+	public function update_timetable_privacy(Request $request){
+		$token = $request->input('token'); // STRING; NOT NULL
+		$user_ids = $request->input('user_ids'); // ARRAY; of user ids e.g [1,2,3]
 		if (!isset($token) || empty($token)) {
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
 		}
-		
+		$user_ids = [];
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
 				$viewer = DB::table('timetable_show')
-					->where([['timetable_show_owner', $token_data['user_id']],['timetable_show_active', 1]])
+					->where([
+						['timetable_show_owner', $token_data['user_id']],
+						['timetable_show_active', 1]
+					])
 					->pluck('timetable_show_viewer')->toArray();	
+
+				$to_remove = array_diff($viewer, $user_ids);
 					//remove id from show
-					DB:table('timetable_show')
-						->where(['timetable_show_owner', $token_data['user_id']])
-						->whereIn('timetable_show_owner', $viewer)
-						->update(['timetable_show_active', 0]);
+					DB::table('timetable_show')
+						->where('timetable_show_owner', $token_data['user_id'])
+						->whereIn('timetable_show_owner', $to_remove)
+						->update(['timetable_show_active' => 0]);
 
 					//add id to show
 				foreach(array_diff($user_ids, $viewer) as $add){
 					if(is_int($add)){
 						DB::table('timetable_show')
-							->updateOrInsert(['timetable_show_owner' => $token_data['user_id']],
-								['timetable_show_viewer', $add],
-								['timetable_show_active' => 1]);
+							->updateOrInsert(
+								[
+									'timetable_show_owner' => $token_data['user_id'],
+									'timetable_show_viewer' => $add
+								],
+								[
+									'timetable_show_active' => 1
+								]
+							);
 
 					}
 				}
