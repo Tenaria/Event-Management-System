@@ -20,7 +20,7 @@ Route::post('/get_account_details', 'eventAjaxController@get_account_details');
 Route::post('/create_account', 'eventController@create_account');
 Route::post('/edit_account', 'eventAjaxController@edit_account');
 Route::post('/get_account_details', 'eventAjaxController@get_account_details');
-Route::post('/verify', 'eventAjaxController@verify');
+Route::post('/verify_acc', 'eventAjaxController@verify_acc');
 
 // event modification routes
 Route::post('/create_event', 'eventAjaxController@create_event');
