@@ -1530,31 +1530,28 @@ class eventAjaxController extends Controller
 				$thisWk_private = 0;
 				
  				//getting last week events
-				
-				
 				$event_data = DB::table('events AS e')
-								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'earliest_date'"), DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start ASC LIMIT 1), 2147483647) as 'latest_date'"), DB::raw("(SELECT GROUP_CONCAT(DISTINCT CONCAT(t.tags_linking_value) SEPARATOR '~') FROM events_tags_linking AS t WHERE t.tags_linking_events_id=a.access_events_id AND t.tags_linking_active=1) as 'tags'"))
+								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start_time ASC LIMIT 1), 2147483647) as 'earliest_date'"), DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start_time ASC LIMIT 1), 2147483647) as 'latest_date'"), DB::raw("(SELECT GROUP_CONCAT(DISTINCT CONCAT(t.tags_linking_value) SEPARATOR '~') FROM events_tags_linking AS t WHERE t.tags_linking_events_id=e.events_id AND t.tags_linking_active=1) as 'tags'"))
 								->where ([
 									['e.events_active', 1],
 									['e.events_createdby', $token_data['user_id']]
 								])
 								->get();
-								
+				
+				$tags = [];
+				$tags_last_week = [];	
+				$tags_this_week = [];
+				$tags_next_week = [];			
 				if(!is_null($event_data)) {
 					
 					
-					$tags = [];
-					
 					foreach($event_data as $events) {
 						// checking last week events
-						
-						if(isset($event->tags) && !is_null($event->tags)) {
-							$tag_data = explode('~', $event->tags);
+						if(isset($events->tags) && !is_null($events->tags)) {
+							$tag_data = explode('~', $events->tags);
 							foreach($tag_data AS $tag) {
-								$tags[] = $tag;
 								if(!isset($tags[$tag])) {
 									$tags[$tag] = 1;
-									
 								} else {
 									$tags[$tag]++;
 								}
@@ -1562,32 +1559,64 @@ class eventAjaxController extends Controller
 						}
 						
 						if(($events->earliest_date > round(microtime(true) * 1000)) - (7 * 24 * 60 * 60 * 1000) && ($events->earliest_date < round(microtime(true) * 1000))) {
-							if ($event->events_public == 1) {
+							if ($events->events_public == 1) {
 								$lastWk_public++;
 							} else {
 								$lastWk_private++;
 							}
 							//$lastWk_event_number++;	
-							
+
+							if(isset($events->tags) && !is_null($events->tags)) {
+								$tag_data = explode('~', $events->tags);
+								foreach($tag_data AS $tag) {
+									if(!isset($tags_last_week[$tag])) {
+										$tags_last_week[$tag] = 1;
+									} else {
+										$tags_last_week[$tag]++;
+									}
+								}
+							}
 						}
 						
 						//checking for next week events
 						if(($events->latest_date = 0 OR $events->latest_date > (round(microtime(true) * 1000)) +  (7 * 24 * 60 * 60 * 1000)) && ($events->latest_date OR $events->latest_date > round(microtime(true) * 1000))) {
 							//$nextWk_event_number++;
-							if ($event->events_public == 1) {
+							if ($events->events_public == 1) {
 								$nextWk_public++;
 							} else {
 								$nextWk_private++;
+							}
+
+							if(isset($events->tags) && !is_null($events->tags)) {
+								$tag_data = explode('~', $events->tags);
+								foreach($tag_data AS $tag) {
+									if(!isset($tags_next_week[$tag])) {
+										$tags_next_week[$tag] = 1;
+									} else {
+										$tags_next_week[$tag]++;
+									}
+								}
 							}
 						}
 						
 						//checking for this week events
 						if(($events->latest_date = 0 OR $events->latest_date < (round(microtime(true) * 1000))) && ($events->earliest_date > round(microtime(true) * 1000))) {
 							//$thisWk_event_number++;
-							if ($event->events_public == 1) {
+							if ($events->events_public == 1) {
 								$thisWk_public++;
 							} else {
 								$thisWk_private++;
+							}
+
+							if(isset($events->tags) && !is_null($events->tags)) {
+								$tag_data = explode('~', $events->tags);
+								foreach($tag_data AS $tag) {
+									if(!isset($tags_last_week[$tag])) {
+										$tags_this_week[$tag] = 1;
+									} else {
+										$tags_this_week[$tag]++;
+									}
+								}
 							}
 						}
 						
@@ -1598,7 +1627,15 @@ class eventAjaxController extends Controller
 				}
 				
 				//return the numbers
-				
+				return Response::json([
+					'last_week_attended_count' => $lastWk_event_number,
+					'this_week_attend_count' => $nextWk_event_number,
+					'next_week_attend_count' => $thisWk_event_number,
+					'tags_distribution' => $tags,
+					'tags_last_week' => $tags_last_week,
+					'tags_this_week' => $tags_this_week,
+					'tags_next_week' => $tags_next_week
+				], 200);
 			}
  		}
 		return Response::json([], 400);
