@@ -2429,6 +2429,7 @@ class eventAjaxController extends Controller
 	public function get_timetable_details(Request $request) {
 		$token = $request->input('token');
 		$week_start = $request->input('week_start'); // INTEGER NOT NULL (EPOCH IN MILLISECONDS OF START OF WEEK)
+		$user_id = $request->input('user_id'); // USER YOU WANT TO VIEW
 
 		if (!isset($token) || empty($token)) {
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
@@ -2441,13 +2442,31 @@ class eventAjaxController extends Controller
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
+				if (!isset($user_id) || empty($user_id)) {
+					$user_id = $token_data['user_id'];
+				}
+
+				if($user_id != $token_data['user_id']) {
+					$check_access = DB::table('timetable_show')
+										->where([
+											['timetable_show_owner', $token_data['user_id']],
+											['timetable_show_viewer', $user_id],
+											['timetable_show_active', 1]
+										])
+										->first();
+
+					if(is_null($check_access)) {
+						return Response::json(['error' => 'invalid access to timetable without permission from user'], 400);
+					}
+				}
+
 				$timetable_data = [];
 				// RETURN THE TIMETABLE DATA FOR THE GIVEN WEEK START AND THE OWNER (USER ID GRABBED FRO TOKEN)
 				$existing_data = DB::table('timetables')
 								->where([
 									['timetables_week_start', '>=', $week_start],
 									['timetables_active', 1],
-									['timetables_owner', $token_data['user_id']]
+									['timetables_owner', $user_id]
 								])
 								->orderBy('timetables_coordinate_x', 'asc')
 								->orderBy('timetables_coordinate_y', 'asc')
