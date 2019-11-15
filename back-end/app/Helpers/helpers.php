@@ -169,7 +169,6 @@ if(!function_exists('check_email_notication_blocked')) {
                     ->pluck('notifications_blocked_user_id')->toArray();
 
         return array_diff($user_ids, $data);
-
     }
 }
 
