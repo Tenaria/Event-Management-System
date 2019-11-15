@@ -2801,13 +2801,15 @@ class eventAjaxController extends Controller
 					->pluck('timetable_show_viewer')->toArray();	
 
 				$to_remove = array_diff($viewer, $user_ids);
+				if(count($to_remove) > 0) {
 					//remove id from show
 					DB::table('timetable_show')
 						->where('timetable_show_owner', $token_data['user_id'])
 						->whereIn('timetable_show_owner', $to_remove)
 						->update(['timetable_show_active' => 0]);
+				}
 
-					//add id to show
+				//add id to show
 				foreach(array_diff($user_ids, $viewer) as $add){
 					if(is_int($add)){
 						DB::table('timetable_show')
@@ -2820,7 +2822,6 @@ class eventAjaxController extends Controller
 									'timetable_show_active' => 1
 								]
 							);
-
 					}
 				}
 
@@ -2837,7 +2838,7 @@ class eventAjaxController extends Controller
 	*/
 	public function save_email_notifications(Request $request) {
 		$token = $request->input('token'); // STRING; NOT NULL
-		$email_blocks = $request->input('email_blocks'); // ARRAY OF EMAIL IDS OF BLOCKED EMAILS E.G [1,2,3]
+		$email_blocks = $request->input('email_blocks'); // ARRAY OF EMAIL TYPES OF BLOCKED EMAILS E.G [1,2,3]
 
 		if (!isset($token) || empty($token)) {
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
@@ -2846,7 +2847,39 @@ class eventAjaxController extends Controller
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
-				
+				$existing = DB::table('email_notifications_blocked')
+									->where([
+										['notifications_blocked_user_id', $token_data['user_id']],
+										['notifications_blocked_active', 1]
+									])
+									->pluck('notifications_blocked_type')->toArray();
+
+				$old = array_diff($existing, $email_blocks);
+				if(count($old) > 0) {
+					DB::table('email_notifications_blocked')
+						->where([
+							['notifications_blocked_user_id', $token_data['user_id']],
+							['notifications_blocked_active', 1]
+						])
+						->whereIn('notifications_blocked_type', $old)
+						->update(['notifications_blocked_active' => 0]);
+				}
+
+				$new = array_diff($email_blocks, $existing);
+				if(count($new) > 0) {
+					foreach($new as $n) {
+						DB::table('email_notifications_blocked')
+							->updateOrInsert(
+								[
+									'notifications_blocked_user_id' => $token_data['user_id'],
+									'notifications_blocked_type' => $n
+								],
+								[
+									'notifications_blocked_active' => 1
+								]
+							);
+					}
+				}
 
 				return Response::json([], 200);
 
