@@ -3,7 +3,7 @@
 use Firebase\JWT\JWT;
 use Postmark\PostmarkClient;
 
-if (!function_exists('validate_jwt')) {
+if(!function_exists('validate_jwt')) {
     function validate_jwt($token=null) {
         if(isset($token) && !empty($token) && !is_null($token)) {
             $decoded = JWT::decode($token, env('JWT_KEY'), ['HS256']);
@@ -18,13 +18,13 @@ if (!function_exists('validate_jwt')) {
     }
 }
 
-if (!function_exists('proper_empty_check')) {
+if(!function_exists('proper_empty_check')) {
     function proper_empty_check($string="") {
         return (str_replace(' ', '', $string) != '');
     }
 }
 
-if (!function_exists('get_event_attributes_pk')) {
+if(!function_exists('get_event_attributes_pk')) {
     function get_event_attributes_pk() {
         $attributes_array = [];
         $attributes = DB::table('events_attributes')   
@@ -42,7 +42,7 @@ if (!function_exists('get_event_attributes_pk')) {
     }
 }
 
-if (!function_exists('send_generic_email')) {
+if(!function_exists('send_generic_email')) {
     //e.g you have been added to an event, click here to view it!
     function send_generic_email($email, $email_subject, $to_name, $text_block, $button_url, $button_name) {
         $client = new PostmarkClient(env('POSTMARKCLIENT_KEY', ''));
@@ -64,7 +64,7 @@ if (!function_exists('send_generic_email')) {
     }
 }
 
-if (!function_exists('send_buttonless_email')) {
+if(!function_exists('send_buttonless_email')) {
     //e.g you have been removed from the event blah by Claire. Sorry!
     function send_buttonless_email($email, $email_subject, $to_name, $text_block) {
         $client = new PostmarkClient(env('POSTMARKCLIENT_KEY', ''));
@@ -84,7 +84,7 @@ if (!function_exists('send_buttonless_email')) {
     }
 }
 
-if (!function_exists('timetable_check_clash')) {
+if(!function_exists('timetable_check_clash')) {
     // helper function to check if there is a clash
     function timetable_check_clash($taken_dates_array, $given_date_x, $given_date_y, $given_date_duration, $given_date_week) {
         $clash_detected = false;
@@ -102,7 +102,7 @@ if (!function_exists('timetable_check_clash')) {
     }
 }
 
-if (!function_exists('check_valid_time_descriptor')) {
+if(!function_exists('check_valid_time_descriptor')) {
     //returns false if something went wrong, otherwise whether the given timestamps can recurr "weekly", "monthly" or "yearly"
     function check_valid_time_descriptor($start_timestamp, $end_timestamp, $descriptor, $recurrence) {
         $difference = $end_timestamp-$start_timestamp;
@@ -154,6 +154,22 @@ if (!function_exists('check_valid_time_descriptor')) {
         }
 
         return true;
+    }
+}
+
+if(!function_exists('check_email_notication_blocked')) {
+    // helper function given an array of user ids, returns the users that should receive the notification
+    function check_email_notication_blocked($user_ids=[], $notification_type=0) {
+        $data = DB::table('email_notifications_blocked')
+                    ->where([
+                        ['notifications_blocked_type', $notification_type],
+                        ['notifications_blocked_active', 1]
+                    ])
+                    ->whereIn('notifications_blocked_user_id', $user_ids)
+                    ->pluck('notifications_blocked_user_id')->toArray();
+
+        return array_diff($user_ids, $data);
+
     }
 }
 
