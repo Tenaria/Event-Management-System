@@ -172,3 +172,21 @@ if(!function_exists('check_email_notication_blocked')) {
     }
 }
 
+if(!function_exists('generate_random_string')) {
+    // helper function to generate random alphanumeric string
+    // referenced from: https://code.tutsplus.com/tutorials/generate-random-alphanumeric-strings-in-php--cms-32132
+    function generate_random_string($user_ids=[], $notification_type=0) {
+        $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+        $input_length = strlen($permitted_chars);
+        $strength = 13;
+        $random_string = '';
+        for($i = 0; $i < $strength; $i++) {
+            $random_character = $permitted_chars[mt_rand(0, $input_length - 1)];
+            $random_string .= $random_character;
+        }
+     
+        return $random_string;
+    }
+}
+

@@ -11,6 +11,24 @@ use Illuminate\Support\Facades\Hash;
 class eventAjaxController extends Controller
 {
 	/*
+		function to verify an account
+	*/
+	public function verify(Request $request, $user_id=0, $verification_token="") {
+		$verification_token = $request->input('verification_token'); // STRING; NOT EMPTY
+        $user_id = $request->input('user_id'); // INTEGER; NOT EMPTY
+
+		DB::table('users')
+			->where([
+				['users_id', $user_id],
+				['users_verification_token', $verification_token],
+				['users_active', 0]
+			])
+			->update(['users_verification_token' => NULL, 'users_active' => 1]);
+
+		return Response::json([], 200);
+	}
+
+	/*
 		function to add a user to the users database given a set of information
 	*/
 	public function sign_up(Request $request) {
@@ -33,14 +51,19 @@ class eventAjaxController extends Controller
 	        if(is_null($check)) {
 	        	// check that the two passwords match, that user has not made a typo
 	           	if($password == $password_confirm) {
+	           		$verification_token = generate_random_string().'-'.generate_random_string().'-'.generate_random_string();
+
 		            $user_id = DB::table('users')
 			                            ->insertGetId([
 			                            	'users_fname' => $fname, 
 			                            	'users_lname' => $lname, 
 			                            	'users_email' => $email, 
 			                                'users_password' => Hash::make($password),
-			                                'users_active' => 1
+			                                'users_active' => 0,
+			                                'users_verification_token' => $verification_token
 			                            ]);
+
+			        send_generic_email($email, 'Welcome to GoMeet!', $fname, 'Thank you for signing up to our platform, we look forward to your usage of our platform! To activate your account, click the button below and you can start using GoMeet instantly! If you have not made an account with GoMeet please ignore this email. Thanks!', '/verify/'.$user_id.'/'.$verification_token, 'Activate Account');
 			        
 			        return Response::json([], 200);
 		        }
