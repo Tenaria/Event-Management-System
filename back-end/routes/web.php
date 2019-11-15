@@ -61,5 +61,10 @@ Route::post('/remove_timetable_block', 'eventAjaxController@remove_timetable_blo
 
 // other routes
 Route::get('/', 'eventAjaxController@get_summary_dashboard');
+
+//email routes
 Route::post('/notify_attendees', 'eventAjaxController@notify_attendees');
+Route::post('/save_email_notifications', 'eventAjaxController@save_email_notifications');
+Route::post('/get_email_notifications', 'eventAjaxController@get_email_notifications');
+
 //Route::get('/','eventAjaxController@tags_list');

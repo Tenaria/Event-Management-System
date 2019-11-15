@@ -2819,6 +2819,20 @@ class eventAjaxController extends Controller
 	}
 
 	/*
+		function to save email notificatoin blocking changes
+	*/
+	public function save_email_notifications(Request $request) {
+
+	}
+
+	/*
+		function to return what email notifications have been blocked
+	*/
+	public function get_email_notifications(Request $request) {
+
+	}
+
+	/*
 		function to send out an email to all users attending an event
 	*/
 	public function notify_attendees(Request $request) {
