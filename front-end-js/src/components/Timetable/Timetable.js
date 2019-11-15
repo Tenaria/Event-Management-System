@@ -19,8 +19,9 @@ class Column extends React.Component {
           <div
             key={name + '-' + i}
             className="timetable-cell selected"
-            onClick={!title ? () => toggleCell(i) : null}
+            onMouseDown={!title ? e => this.props.onMouseDown(e, i) : null}
             onMouseEnter={!title & mouseDown ? () => toggleCell(i) : null}
+            onMouseUp={this.props.onMouseUp}
           >
           </div>
         );
@@ -30,8 +31,9 @@ class Column extends React.Component {
           <div
             key={name + '-' + i}
             className={"timetable-cell " + (title ? 'label' : '')}
-            onClick={!title ? () => toggleCell(i) : null}
+            onMouseDown={!title ? e => this.props.onMouseDown(e, i) : null}
             onMouseEnter={!title & mouseDown ? () => toggleCell(i) : null}
+            onMouseUp={this.props.onMouseUp}
           >
             {title ? i+':00' : ''}
           </div>
@@ -62,6 +64,8 @@ class Timetable extends React.Component {
   }
 
   toggleCell = (day, id) => {
+    console.log('Toggle')
+    console.log(day, id);
     const { ttData } = this.state;
     const indexOfData = ttData[day].indexOf(id);
     if (indexOfData > -1) {
@@ -73,11 +77,23 @@ class Timetable extends React.Component {
     this.setState({ttData});
   }
 
-  mouseDown = e => {
+  mouseDown = (e, day, id) => {
+    console.log('WTF');
+    console.log(day, id, this.state.mouseDown);
     e.preventDefault();
-    this.setState({mouseDown: true})
+    const { ttData } = this.state;
+    const indexOfData = ttData[day].indexOf(id);
+    if (indexOfData > -1) {
+      ttData[day].splice(indexOfData, 1);
+    } else {
+      ttData[day].push(id);
+    }
+    this.setState({mouseDown: true, ttData});
   }
-  mouseUp = () => this.setState({mouseDown: false})
+  mouseUp = () => {
+    console.log('UP')
+    this.setState({mouseDown: false});
+  }
 
   render() {
     const { ttData, mouseDown } = this.state;
@@ -85,40 +101,50 @@ class Timetable extends React.Component {
       <Column key='time' title={true} name={'Time'} />,
       <Column key='monday' name={'Monday'} selected={ttData.monday}
         toggleCell={id => this.toggleCell('monday', id)}
+        onMouseDown={(e, id) => this.mouseDown(e, 'monday', id)}
+        onMouseUp={this.mouseUp}
         mouseDown={mouseDown}
       />,
       <Column key='tuesday' name={'Tuesday'} selected={ttData.tuesday}
         toggleCell={id => this.toggleCell('tuesday', id)}
+        onMouseDown={(e, id) => this.mouseDown(e, 'tuesday', id)}
+        onMouseUp={this.mouseUp}
         mouseDown={mouseDown}
       />,
       <Column key='wednesday' name={'Wednesday'} selected={ttData.wednesday}
         toggleCell={id => this.toggleCell('wednesday', id)}
+        onMouseDown={(e, id) => this.mouseDown(e, 'wednesday', id)}
+        onMouseUp={this.mouseUp}
         mouseDown={mouseDown}
       />,
       <Column key='thursday' name={'Thursday'} selected={ttData.thursday}
         toggleCell={id => this.toggleCell('thursday', id)}
+        onMouseDown={(e, id) => this.mouseDown(e, 'thursday', id)}
+        onMouseUp={this.mouseUp}
         mouseDown={mouseDown}
       />,
       <Column key='friday' name={'Friday'} selected={ttData.friday}
         toggleCell={id => this.toggleCell('friday', id)}
+        onMouseDown={(e, id) => this.mouseDown(e, 'friday', id)}
+        onMouseUp={this.mouseUp}
         mouseDown={mouseDown}
       />,
       <Column key='saturday' name={'Saturday'} selected={ttData.saturday}
         toggleCell={id => this.toggleCell('saturday', id)}
+        onMouseDown={(e, id) => this.mouseDown(e, 'saturday', id)}
+        onMouseUp={this.mouseUp}
         mouseDown={mouseDown}
       />,
       <Column key='sunday' name={'Sunday'} selected={ttData.sunday}
         toggleCell={id => this.toggleCell('sunday', id)}
+        onMouseDown={(e, id) => this.mouseDown(e, 'sunday', id)}
+        onMouseUp={this.mouseUp}
         mouseDown={mouseDown}
       />
     ]
     return (
       <React.Fragment>
-        <div
-          className="timetable"
-          onMouseDown={this.mouseDown}
-          onMouseUp={this.mouseUp}
-        >{ttCols}</div>
+        <div className="timetable">{ttCols}</div>
       </React.Fragment>
     );
   }
