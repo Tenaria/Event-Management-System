@@ -2822,24 +2822,70 @@ class eventAjaxController extends Controller
 		function to save email notificatoin blocking changes
 	*/
 	public function save_email_notifications(Request $request) {
+		$token = $request->input('token'); // STRING; NOT NULL
+		$email_blocks = $request->input('email_blocks'); // ARRAY OF EMAIL IDS OF BLOCKED EMAILS E.G [1,2,3]
 
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+		
+		if(isset($token) && !empty($token)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				
+
+				return Response::json([], 200);
+
+			}
+		}
+		
+		return Response::json([], 400);
 	}
 
 	/*
 		function to return what email notifications have been blocked
 	*/
 	public function get_email_notifications(Request $request) {
+		$token = $request->input('token'); // STRING; NOT NULL
 
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+		
+		if(isset($token) && !empty($token)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				$blocked_emails = [1 => false, 2 => false, 3 => false, 4 => false, 5 => false, 6 => false, 7 => false];
+				
+				$email_data = DB::table('email_notifications_blocked')
+								->where([
+									['notifications_blocked_user_id', $token_data['user_id']],
+									['notifications_blocked_active', 1]
+								])
+								->get();
+
+				if(count($email_data) > 0) {
+					foreach($email_data AS $data) {
+						$blocked_emails[$data->notifications_blocked_type] = true;
+					}
+				}
+
+				return Response::json(['emails_blocked_data' => $blocked_emails], 200);
+
+			}
+		}
+		
+		return Response::json([], 400);
 	}
 
 	/*
 		function to send out an email to all users attending an event
 	*/
 	public function notify_attendees(Request $request) {
-		$token = $request->input('token');
-		$subject = $request->input('subject');
-		$body = $request->input('body');
-		$event_id = $request->input('event_id');
+		$token = $request->input('token'); // STRING; NOT NULL
+		$subject = $request->input('subject'); // STRING; NOT EMPTY
+		$body = $request->input('body'); // STRING; NOT EMPTY
+		$event_id = $request->input('event_id'); // INTEGER; NOT NULL
 
 		if (!isset($token) || empty($token)) {
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
