@@ -2755,7 +2755,7 @@ class eventAjaxController extends Controller
 			//"coordinate_y" => int NOT NULL
 			//"duration" => FLOAT 0-24
 			//"recurring" => integer (IF NULL THEN DEFAULTS TO 1 CYCLE)
-			//"labelling" => string NULLABLE
+			//"labelling" => string NULLABLEHamlet
 
 		if (!isset($token) || empty($token)) {
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
@@ -3164,6 +3164,24 @@ class eventAjaxController extends Controller
 		
 		$token_data = validate_jwt($token);
 		if($token_data == true) {
+			if (!isset($user_id) || empty($user_id)) {
+				$user_id = $token_data['user_id'];
+			}
+
+			if($user_id != $token_data['user_id']) {
+				$check_access = DB::table('timetable_show')
+									->where([
+										['timetable_show_owner', $token_data['user_id']],
+										['timetable_show_viewer', $user_id],
+										['timetable_show_active', 1]
+									])
+									->first();
+
+				if(is_null($check_access)) {
+					return Response::json(['error' => 'invalid access to timetable without permission from user'], 400);
+				}
+			}
+				
 			$data = DB::select('SELECT * FROM ah_timetable WHERE week = ?', array($week));
 			return Response::json($data, 200);
 		}
