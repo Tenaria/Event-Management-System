@@ -13,7 +13,8 @@ class eventAjaxController extends Controller
 	/*
 	*	function to verify an account
 	*	@param
-	*		$request: Json request containing a non-empty verification_token and user_id
+	*		$request: containing a verification_token (int) and user_id (str)
+	*		$user_id and $verification_token: return values. Default user_id==0, verification_token==""
 	*	@return
 	*		Sets user_id and verification_token to the request's values, and returns HTTP code 200
 	*/
@@ -35,7 +36,7 @@ class eventAjaxController extends Controller
 	/*
 	*	function to add a user to the users database given a set of information
 	*	@param
-	*		$request: containing fname, lname, email, password and password_confirm
+	*		$request: containing fname, lname, email, password and password_confirm (all strings)
 	*	@return
 	*		HTTP 200 if successful, http 400 and 'status' message otherwise
 	*/
@@ -93,8 +94,10 @@ class eventAjaxController extends Controller
 
     /*
     *	log in functionality, that given some credentials will check they match against the database for some user
-    *	@param: $request containing email and password
-    *	@return: HTTP 200 if successful, HTTP 400 with 'error' message otherwise.
+    *	@param
+    *		$request: containing email and password (string)
+    *	@return
+    *		HTTP 200 and 'token' if successful, HTTP 400 with 'error' message (string) otherwise.
     */
 	public function log_in(Request $request) {
 		$email = $request->input('email'); // STRING; NOT EMPTY
@@ -149,7 +152,12 @@ class eventAjaxController extends Controller
 	}
 
 	/*
-	function to get a user's details including name and email
+	*	function to get a user's details including name and email
+	*	@param
+	*		$request: containing 'token' (string)
+	*	@return
+	*		'users_fname', 'users_lname', users_email' (strings) and HTTP 200 if successful
+	*		HTTP 400 otherwise
 	*/
 
 	public function get_account_details(Request $request) {
@@ -206,7 +214,11 @@ class eventAjaxController extends Controller
 	} */
 
 	/*
-	function to modify a user's account given some new information
+	*	function to modify a user's account given some new information
+	*	@param
+	*		$request: containing 'fname', 'lname', 'password', 'password_confirm' and 'token' (strings)
+	*	@return
+	*		HTTP 200 on success, and HTTP 400 with 'error' message (string) otherwise 
 	*/
 
 	public function edit_account(Request $request) {
@@ -276,11 +288,15 @@ class eventAjaxController extends Controller
 	}
 
 	/*
-		basic function to create an event in the database given a set of details
+	*	basic function to create an event in the database given a set of details
+	*	@param
+	*		$request: containing 'token' (string), 'event' (string), 'desc' (string), 'event_location'(string), 'event_attendees'(int[]), 'event_public' (1 or 0) and'event_tags' (string[])
+	*	@return
+	*		HTTP 200 on success, and HTTP 400 with 'error' message (string) otherwise
 	*/
 	public function create_event(Request $request) {
 		$token = $request->input('token'); // STRING; NOT EMPTY
-		$event_name = $request->input('event'); // STRING; NOT EPTY
+		$event_name = $request->input('event'); // STRING; NOT EMPTY
 		$event_desc = $request->input('desc'); // STRING
 		$event_location = $request->input('event_location'); // STRING; NOT EMPTY
 		$event_attendees = $request->input('event_attendees'); // ARRAY OF INTEGERS
@@ -387,7 +403,11 @@ class eventAjaxController extends Controller
 	}
 
 	/*
-		given a new set of details, modifies and updates database to reflect these changes for an existing event
+	*	given a new set of details, modifies and updates database to reflect these changes for an existing event
+	*	@param
+	*		$request: containing 'token' (string), 'event_id' (int),'event' (string), 'event_desc' (string), 'event_location'(string), 'event_attendees'(int[]), 'event_public' (1 or 0) and'event_tags' (string[])
+	*	@return
+	*		HTTP 200 on success, and HTTP 400 with 'error' or 'status' message (string) otherwise
 	*/
 	public function edit_event(Request $request) {
 		$token = $request->input('token'); // STRING; NOT EMPTY
@@ -633,12 +653,18 @@ class eventAjaxController extends Controller
 			return Response::json([], 400);
 		}	
 	}
-
+	/*
+	*	given an events_id and a time range, return the sessions that would clash with the current event
+	*	@param
+	*		$request: containing 'token' (string), 'event_id' (int), 'start_timestamp' (bigint) and 'end_timestamp' (bigint)
+	*	@return
+	*		HTTP 200 and a list of clashing session's session_id on success, and HTTP 400 with 'error' message (string) otherwise
+	*/
 	public function get_event_clash(Request $request){
-		$token = $request->input('token');
-		$events_id = $request->input('events_id');
-		$start_timestamp = $request->input('start_timestamp');
-		$end_timestamp = $request->input('end_timestamp');
+		$token = $request->input('token'); //str, not empty
+		$events_id = $request->input('events_id'); //int, not empty
+		$start_timestamp = $request->input('start_timestamp'); //bigint, not empty
+		$end_timestamp = $request->input('end_timestamp');//bigint, not empty
 		if(isset($token) && !empty($token)&& isset($start_timestamp)
 			&& !empty($end_timestamp) && isset($end_timestamp)&&!empty($end_timestamp)){
 			$token_data = validate_jwt($token);
@@ -653,8 +679,9 @@ class eventAjaxController extends Controller
 						->where([['ea.access_active', 0], ['ea.access_archived', 0]])
 						->select('ea.access_user_id')						
 						->get();
+					$clashlist = [];
 					if(isset($attendees) && !empty($attendees)){
-						$clashlist = [];
+
 						foreach($attendees as $attendee){
 							$clash = DB::tables('events_access as ea')
 								->where([['ea.access_user_id', $attendee->access_user_id],['ea.access_active', 0], ['ea.access_archived', 0]])
@@ -668,14 +695,14 @@ class eventAjaxController extends Controller
 								$clashlist[] = ['sessions_id' => $clash->sessions_id];
 							}
 						}
-						return Response::json(['clashes'=> $clashlist], 200);
+						
 
 					}
-
+					return Response::json(['clashes'=> $clashlist], 200);
 				}
-									
+				return Response::json(['error' => "no such event"], 400);					
 			}
-
+			return Response::json(['error' => "invalid user token"], 400);	
 		}
 		return Response::json([], 400);
 
