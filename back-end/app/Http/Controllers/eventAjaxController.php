@@ -3138,7 +3138,10 @@ class eventAjaxController extends Controller
 			])->get();
 			if ($existing_data->count() > 0) {
 				DB::table('ah_timetable')
-					->where([['week', $week]])
+					->where([
+						['week', $week],
+						['user_id', $token_data['user_id']]
+					])
 					->update(array('week_data'=>json_encode($data), 'week'=>$week));
 			} else {
 				DB::table('ah_timetable')->insert(array('week_data'=>json_encode($data), 'week'=>$week));
@@ -3181,8 +3184,8 @@ class eventAjaxController extends Controller
 					return Response::json(['error' => 'invalid access to timetable without permission from user'], 400);
 				}
 			}
-				
-			$data = DB::select('SELECT * FROM ah_timetable WHERE week = ?', array($week));
+
+			$data = DB::select('SELECT * FROM ah_timetable WHERE week = ? AND ?', array($week, $token_data['user_id']));
 			return Response::json($data, 200);
 		}
 		
