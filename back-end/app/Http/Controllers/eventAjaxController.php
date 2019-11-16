@@ -658,7 +658,7 @@ class eventAjaxController extends Controller
 	*	@param
 	*		$request: containing 'token' (string), 'event_id' (int), 'start_timestamp' (bigint) and 'end_timestamp' (bigint)
 	*	@return
-	*		HTTP 200 and a list of clashing session's session_id on success, and HTTP 400 with 'error' message (string) otherwise
+	*		HTTP 200 and a list of clashing session's session_id (int[])on success, and HTTP 400 with 'error' message (string) otherwise
 	*/
 	public function get_event_clash(Request $request){
 		$token = $request->input('token'); //str, not empty
@@ -707,7 +707,13 @@ class eventAjaxController extends Controller
 		return Response::json([], 400);
 
 	}
-
+	/*
+	*	mark the user as going to an event/session by updating event_access
+	*	@param
+	*		$request: containing 'token' (string), 'event_id' (int) and session_id (int)
+	*	@return
+	*		HTTP 200 on success, and HTTP 400 with 'error' message (string) otherwise
+	*/
 	public function mark_as_going(Request $request) {
 		$token = $request->input('token'); // STRING; NOT EMPTY
 		$event_id = $request->input('event_id'); // INTEGER; NOT EMPTY
@@ -752,7 +758,7 @@ class eventAjaxController extends Controller
 											->first();
 
 						if(!is_null($session_data)){
-							$acess_id = 0;
+							$access_id = 0;
 							//CHECK iF USER ALREADY HAS ACCESS TO A EVENT
 							$curr_event_access = DB::table('events_access AS a')
 												->join('users AS u', 'u.users_id', '=', 'a.access_user_id')
@@ -850,7 +856,13 @@ class eventAjaxController extends Controller
 		}						
 		return Response::json([], 400);
 	}
-
+	/*
+	*	unmark the user from going to an event/session by updating event_access
+	*	@param
+	*		$request: containing 'token' (string), 'event_id' (int) and session_id (int)
+	*	@return
+	*		HTTP 200 on success, and HTTP 400 with 'error' message (string) otherwise
+	*/
 	public function unmark_as_going(Request $request) {
 		$token = $request->input('token'); // STRING; NOT EMPTY
 		$event_id = $request->input('event_id'); //INTEGER; NOT EMPTY
@@ -927,7 +939,7 @@ class eventAjaxController extends Controller
 	}
 
 	/*
-		grab the details of an event such as locatoin, name, description, etc.
+	*	grab the details of an event such as locatoin, name, description, etc.
 	*/
 	public function get_event_details(Request $request) {
 		$token = $request->input('token'); // STRING; NOT EMPTY
