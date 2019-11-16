@@ -78,8 +78,6 @@ class Timetable extends React.Component {
   }
 
   toggleCell = (day, id) => {
-    console.log('Toggle')
-    console.log(day, id);
     const { ttData } = this.state;
     const indexOfData = ttData[day].indexOf(id);
     if (indexOfData > -1) {
@@ -92,8 +90,6 @@ class Timetable extends React.Component {
   }
 
   mouseDown = (e, day, id) => {
-    console.log('WTF');
-    console.log(day, id, this.state.mouseDown);
     e.preventDefault();
     const { ttData } = this.state;
     const indexOfData = ttData[day].indexOf(id);
@@ -104,10 +100,7 @@ class Timetable extends React.Component {
     }
     this.setState({mouseDown: true, ttData});
   }
-  mouseUp = () => {
-    console.log('UP')
-    this.setState({mouseDown: false});
-  }
+  mouseUp = () => this.setState({mouseDown: false});
 
   changeWeek = async (change) => {
     const { token } = this.context;
@@ -115,27 +108,68 @@ class Timetable extends React.Component {
 
     this.setState({loading: true});
 
-    const res = await fetch('http://localhost:8000/get_timetable_details', {
+    const res = await fetch('http://localhost:8000/get_ah_timetable', {
       method: 'POST',
       mode: 'cors',
       cache: 'no-cache',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ token, week_start: moment().weekday(relativeWeek).valueOf() })
+      body: JSON.stringify({
+        token,
+        week: moment().week().valueOf() + this.state.relativeWeek + change
+      })
     });
 
     const data = await res.json();
     if (res.status === 200) {
       console.log(data);
-      this.setState({relativeWeek: this.state.relativeWeek + change, loading: false});
+      this.setState({
+        ttData: (data[0] ? JSON.parse(data[0].week_data) : {
+          'monday' : [],
+          'tuesday' : [],
+          'wednesday' : [],
+          'thursday' : [],
+          'friday' : [],
+          'saturday' : [],
+          'sunday' : []
+        }),
+        relativeWeek: this.state.relativeWeek + change,
+        loading: false
+      });
     } else {
       message.error(data.error);
     }
   }
 
-  advanceWeek = () => this.changeWeek(NUM_OF_DAYS);
-  retreatWeek = () => this.changeWeek(-NUM_OF_DAYS);
+  setWeek = async () => {
+    const { token } = this.context;
+    const { relativeWeek, ttData } = this.state;
+
+    const res = await fetch('http://localhost:8000/set_ah_timetable', {
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        token,
+        data: ttData,
+        week: moment().week().valueOf() + this.state.relativeWeek
+      })
+    });
+
+    const data = await res.json();
+    if (res.status === 200) {
+      console.log(data);
+    } else {
+      message.error(data.error);
+    }
+  }
+
+  advanceWeek = () => this.changeWeek(1);
+  retreatWeek = () => this.changeWeek(-1);
 
   render() {
     const { ttData, loading, mouseDown, relativeWeek } = this.state;
@@ -215,6 +249,7 @@ class Timetable extends React.Component {
           <Button
             style={{left: 0, position: 'absolute'}}
             type="primary"
+            onClick={this.setWeek}
           >Update Timetable</Button>
         </Row>
         <div className="timetable">

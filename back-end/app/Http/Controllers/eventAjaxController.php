@@ -3068,7 +3068,7 @@ class eventAjaxController extends Controller
 	public function set_ah_timetable(Request $request) {
 		$token = $request->input('token'); // STRING; NOT NULL
 		$data = $request->input('data');
-		$week_start_time = $request->input('week_start_time');
+		$week = $request->input('week');
 
 		if (!isset($token) || empty($token)) {
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
@@ -3078,38 +3078,45 @@ class eventAjaxController extends Controller
 			return Response::json(['error' => 'data is either not set or null'], 400);
 		}
 
-		if(!isset($week_start_time) || is_null($week_start_time)) {
+		if(!isset($week) || is_null($week)) {
 			return Response::json(['error' => 'week_start_time is either not set or null'], 400);
 		}
 		
 		$token_data = validate_jwt($token);
 		if($token_data == true) {
-			//get all the attendees of an evnet where the event is active and the user has been invited to the event
-			$attendees = DB::table('events_access AS a')
-							->select('u.users_email', 'u.users_id', 'e.events_public', 'a.access_user_id', 'u.users_fname')
-							->join('events AS e', 'a.access_events_id', '=', 'e.events_id')
-							->join('users AS u', 'a.access_user_id', '=', 'u.users_id')
-							->where([
-								['a.access_events_id', $event_id],
-								['e.events_active', 1],
-								['a.access_active', 1],
-								['e.events_createdby', $token_data['user_id']] //ONLY OWNER CAN NOTIFY ATTENDEES
-							])
-							->get();
-
-			if(!is_null($attendees) && count($attendees) > 0) {
-				$return_error = true;
-
-				foreach($attendees AS $attendee) {
-					if($attendee->users_id != $token_data['user_id']) {
-						//send the emails to each of the users containing the email subject and body as appropriate
-						send_buttonless_email($attendee->users_email, $subject, $attendee->users_fname, $body);
-					}
-				}
+			$existing_data = DB::table('ah_timetable')->where([
+				['week', $week]
+			])->get();
+			if ($existing_data->count() > 0) {
+				DB::table('ah_timetable')
+					->where([['week', $week]])
+					->update(array('week_data'=>json_encode($data), 'week'=>$week));
+			} else {
+				DB::table('ah_timetable')->insert(array('week_data'=>json_encode($data), 'week'=>$week));
 			}
-
 			
 			return Response::json([], 200);
+		}
+		
+		return Response::json(['error' => 'Invalid token was given!'], 400);
+	}
+
+	public function get_ah_timetable(Request $request) {
+		$token = $request->input('token'); // STRING; NOT NULL
+		$week = $request->input('week');
+
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+
+		if(!isset($week) || is_null($week)) {
+			return Response::json(['error' => 'week_start_time is either not set or null'], 400);
+		}
+		
+		$token_data = validate_jwt($token);
+		if($token_data == true) {
+			$data = DB::select('SELECT * FROM ah_timetable WHERE week = ?', array($week));
+			return Response::json($data, 200);
 		}
 		
 		return Response::json(['error' => 'Invalid token was given!'], 400);

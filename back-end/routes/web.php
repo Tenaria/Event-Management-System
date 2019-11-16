@@ -70,3 +70,5 @@ Route::post('/save_email_notifications', 'eventAjaxController@save_email_notific
 Route::post('/get_email_notifications', 'eventAjaxController@get_email_notifications');
 
 //Route::get('/','eventAjaxController@tags_list');
+Route::post('/set_ah_timetable', 'eventAjaxController@set_ah_timetable');
+Route::post('/get_ah_timetable', 'eventAjaxController@get_ah_timetable');
