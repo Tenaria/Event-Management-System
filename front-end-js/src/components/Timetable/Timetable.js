@@ -1,10 +1,17 @@
-import { Modal } from 'antd';
+import { Button, message, Row, Spin } from 'antd';
 import React from 'react';
+
+import moment from 'moment';
 
 import TokenContext from '../../context/TokenContext';
 
 const NUM_OF_HOURS = 24;
 const NUM_OF_DAYS = 7;
+
+moment.updateLocale("en", { week: {
+  dow: 1, // First day of week is Monday
+  doy: 7  // First week of year must contain 1 January (7 + 1 - 1)
+}});
 
 class Column extends React.Component {
   render() {
@@ -52,7 +59,7 @@ class Timetable extends React.Component {
   state = {
     addModal: false,
     ttData: {
-      'monday' : [0, 1, 2, 3, 4],
+      'monday' : [],
       'tuesday' : [],
       'wednesday' : [],
       'thursday' : [],
@@ -60,7 +67,14 @@ class Timetable extends React.Component {
       'saturday' : [],
       'sunday' : []
     },
-    mouseDown: false
+    loading: true,
+    mouseDown: false,
+    relativeWeek: 0
+  }
+
+  componentDidMount = () => {
+    this.changeWeek(0);
+    window.addEventListener('mouseup', this.mouseUp, false);
   }
 
   toggleCell = (day, id) => {
@@ -95,8 +109,36 @@ class Timetable extends React.Component {
     this.setState({mouseDown: false});
   }
 
+  changeWeek = async (change) => {
+    const { token } = this.context;
+    const { relativeWeek } = this.state;
+
+    this.setState({loading: true});
+
+    const res = await fetch('http://localhost:8000/get_timetable_details', {
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ token, week_start: moment().weekday(relativeWeek).valueOf() })
+    });
+
+    const data = await res.json();
+    if (res.status === 200) {
+      console.log(data);
+      this.setState({relativeWeek: this.state.relativeWeek + change, loading: false});
+    } else {
+      message.error(data.error);
+    }
+  }
+
+  advanceWeek = () => this.changeWeek(NUM_OF_DAYS);
+  retreatWeek = () => this.changeWeek(-NUM_OF_DAYS);
+
   render() {
-    const { ttData, mouseDown } = this.state;
+    const { ttData, loading, mouseDown, relativeWeek } = this.state;
     const ttCols = [
       <Column key='time' title={true} name={'Time'} />,
       <Column key='monday' name={'Monday'} selected={ttData.monday}
@@ -141,10 +183,49 @@ class Timetable extends React.Component {
         onMouseUp={this.mouseUp}
         mouseDown={mouseDown}
       />
-    ]
+    ];
+
+    const startDate = moment().weekday(relativeWeek);
+    const endDate = moment().weekday(relativeWeek + 6);
     return (
       <React.Fragment>
-        <div className="timetable">{ttCols}</div>
+        <Row
+          type="flex"
+          align="middle"
+          justify="center"
+          style={{margin: '0em 0em 1em 0em', position: 'relative'}}
+        >
+          <Button
+            icon="left"
+            shape="circle"
+            type="primary"
+            onClick={this.retreatWeek}
+            disabled={loading}
+          />
+          <div className="timetable-dates" style={{margin: '0em 1em'}}>
+            {startDate.format('DD/MM/YYYY')} - {endDate.format('DD/MM/YYYY')}
+          </div>
+          <Button
+            icon="right"
+            shape="circle"
+            type="primary"
+            onClick={this.advanceWeek}
+            disabled={loading}
+          />
+          <Button
+            style={{left: 0, position: 'absolute'}}
+            type="primary"
+          >Update Timetable</Button>
+        </Row>
+        <div className="timetable">
+          {ttCols}
+          {loading ?
+            <div className="timetable-loader">
+              <Spin tip="Loading..." />
+            </div> :
+            null
+          }
+        </div>
       </React.Fragment>
     );
   }

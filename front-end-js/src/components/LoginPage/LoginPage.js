@@ -23,7 +23,7 @@ class LoginPage extends React.Component {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify(values)
-        })
+        });
 
         if (res.status === 200) {
           const data = await res.json();

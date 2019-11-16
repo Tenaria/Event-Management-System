@@ -1,4 +1,4 @@
-import { Button, Card, Collapse, Empty, Icon, Row, Spin, Tag, Typography, Col } from 'antd';
+import { Button, Card, Collapse, Row, Tag, Typography } from 'antd';
 import { Redirect } from "react-router-dom";
 import React from 'react';
 
@@ -6,7 +6,6 @@ import TokenContext from '../../context/TokenContext';
 
 const { Title } = Typography;
 const { Panel } = Collapse;
-const spinIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
 
 class Dashboard extends React.Component {
   state = {
