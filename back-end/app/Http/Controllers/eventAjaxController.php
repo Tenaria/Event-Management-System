@@ -11,7 +11,11 @@ use Illuminate\Support\Facades\Hash;
 class eventAjaxController extends Controller
 {
 	/*
-		function to verify an account
+	*	function to verify an account
+	*	@param
+	*		$request: Json request containing a non-empty verification_token and user_id
+	*	@return
+	*		Sets user_id and verification_token to the request's values, and returns HTTP code 200
 	*/
 	public function verify_acc(Request $request, $user_id=0, $verification_token="") {
 		$verification_token = $request->input('verification_token'); // STRING; NOT EMPTY
@@ -29,7 +33,11 @@ class eventAjaxController extends Controller
 	}
 
 	/*
-		function to add a user to the users database given a set of information
+	*	function to add a user to the users database given a set of information
+	*	@param
+	*		$request: containing fname, lname, email, password and password_confirm
+	*	@return
+	*		HTTP 200 if successful, http 400 and 'status' message otherwise
 	*/
 	public function sign_up(Request $request) {
         $fname = $request->input('fname'); // STRING; NOT EMPTY
@@ -84,7 +92,9 @@ class eventAjaxController extends Controller
     }
 
     /*
-    	log in functionality, that given some credentials will check they match against the database for some user
+    *	log in functionality, that given some credentials will check they match against the database for some user
+    *	@param: $request containing email and password
+    *	@return: HTTP 200 if successful, HTTP 400 with 'error' message otherwise.
     */
 	public function log_in(Request $request) {
 		$email = $request->input('email'); // STRING; NOT EMPTY
