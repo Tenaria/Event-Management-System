@@ -1,4 +1,4 @@
-import { Avatar, Button, Divider, Row, Skeleton, Typography } from 'antd';
+import { Button, message, Row, Col, Skeleton, Switch, Typography, Divider } from 'antd';
 import React from 'react';
 
 import AccountEdit from './AccountEdit';
@@ -14,7 +14,10 @@ class AccountDetail extends React.Component {
     lName: 'Smith',
     email: 'johnsmith@temp.com',
     editing: false,
-    loaded: false,
+    emailOptions: null,
+    accountLoaded: false,
+    emailLoaded: false,
+    savingEmailOptions: false
   }
 
   componentDidMount = () => {
@@ -24,58 +27,178 @@ class AccountDetail extends React.Component {
   loadInfo = async () => {
     const { token } = this.context;
 
-    const res = await fetch('http://localhost:8000/get_account_details', {
+    Promise.all([
+      new Promise(async (resolve, reject) => {
+        const res = await fetch('http://localhost:8000/get_email_notifications', {
+          method: 'POST',
+          mode: 'cors',
+          cache: 'no-cache',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({token})
+        });
+
+        const data = await res.json();
+        resolve(data);
+      }),
+      new Promise(async (resolve, reject) => {
+        const res = await fetch('http://localhost:8000/get_account_details', {
+          method: 'POST',
+          mode: 'cors',
+          cache: 'no-cache',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({token})
+        });
+
+        const data = await res.json();
+        resolve(data);
+      })
+    ]).then(values => {
+      console.log(values);
+
+      this.setState({
+        fName: values[1].users_fname,
+        lName: values[1].users_lname,
+        email: values[1].users_email,
+        emailOptions: values[0].emails_blocked_data,
+        accountLoaded: true,
+        emailLoaded: true
+      });
+    });
+  }
+
+  modifyEmailNotifications = (id, checked) => {
+    const { emailOptions } = this.state;
+    emailOptions[id] = checked;
+    this.setState({emailOptions});
+  }
+
+  updateEmailOptions = async () => {
+    const { token } = this.context;
+    const { emailOptions } = this.state;
+    const parsedOptions = [];
+
+    this.setState({savingEmailOptions: true});
+
+    for(let id in emailOptions) {
+      if (emailOptions[id]) {
+        parsedOptions.push(parseInt(id));
+      }
+    }
+
+    const res = await fetch('http://localhost:8000/save_email_notifications', {
       method: 'POST',
       mode: 'cors',
       cache: 'no-cache',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({token})
+      body: JSON.stringify({
+        email_blocks: parsedOptions,
+        token
+      })
     });
 
-    const data = await res.json();
-
-    this.setState({
-      fName: data.users_fname,
-      lName: data.users_lname,
-      email: data.users_email,
-      loaded: true
-    });
-  }
-
-  toggleEdit = () => {
-    this.loadInfo();
-    this.setState({ editing: !this.state.editing });
+    if (res.status === 200) {
+      message.success('Successfully saved email options!');
+      this.setState({savingEmailOptions: false});
+    }
   }
 
   render() {
-    const { fName, lName, email, editing, loaded } = this.state;
-    let displayElm = <Skeleton avatar active paragraph={{ rows: 14 }} />;
+    const { fName, lName, emailOptions, accountLoaded, emailLoaded, savingEmailOptions } = this.state;
+    let accountElm = <Skeleton active paragraph={{ rows: 8 }} />;
+    let emailElm = <Skeleton active paragraph={{ rows: 8 }} />;
     
-    if (loaded) {
-      displayElm = (
+    if (accountLoaded) {
+      accountElm = <AccountEdit fName={fName} lName={lName}/>;
+    }
+
+    if (emailLoaded && emailOptions) {
+      emailElm = (
         <React.Fragment>
-          <div>
-            <Row type="flex">
-              <Avatar size={64} icon="user" />
-              <div style={{margin: "0.5em"}}></div>
-              <Row type="flex" justify="center" style={{flexDirection: "column"}}>
-                <Title level={4} style={{margin: 0}}>{fName} {lName}</Title>
-                <div>{email}</div>
-              </Row>
-            </Row>
-            <Divider orientation="left">Details</Divider>
-            <Row style={{marginBottom: '1em'}}>
-              Lorem ipsum dolor sit amet, veri movet id est, usu te temporibus instructior. Omnis regione epicurei et per, in qui errem tamquam fierent. Id quem fuisset ius. Assum erant definitionem ad eam, apeirian expetenda duo ex. Fugit omittantur conclusionemque sit no, qui te augue abhorreant. Agam legere vis ei.
-            </Row>
-            <AccountEdit fName={fName} lName={lName} toggleEdit={this.toggleEdit} />;
-          </div>
+          <Row style={{marginBottom: '0.5em'}}>
+            <Switch
+              checked={emailOptions[1]}
+              style={{marginRight: '1em'}}
+              onClick={(checked) => this.modifyEmailNotifications(1, checked)}
+            />
+            Receive email about cancellations/uncancellations of events
+          </Row>
+          <Row style={{marginBottom: '0.5em'}}>
+            <Switch
+              checked={emailOptions[2]}
+              style={{marginRight: '1em'}}
+              onClick={(checked) => this.modifyEmailNotifications(2, checked)}
+            />
+            Receive email about cancellations/uncancellations of sessions
+          </Row>
+          <Row style={{marginBottom: '0.5em'}}>
+            <Switch
+              checked={emailOptions[3]}
+              style={{marginRight: '1em'}}
+              onClick={(checked) => this.modifyEmailNotifications(3, checked)}
+            />
+            Receive email when added / removed from an event
+          </Row>
+          <Row style={{marginBottom: '0.5em'}}>
+            <Switch
+              checked={emailOptions[4]}
+              style={{marginRight: '1em'}}
+              onClick={(checked) => this.modifyEmailNotifications(4, checked)}
+            />
+            Receive email when an user marks themselves as going / not going to one of your events
+          </Row>
+          <Row style={{marginBottom: '0.5em'}}>
+            <Switch
+              checked={emailOptions[5]}
+              style={{marginRight: '1em'}}
+              onClick={(checked) => this.modifyEmailNotifications(5, checked)}
+            />
+            Receive email when a session has being added to an event that you are interested in (Events that you have marked going to in general)
+          </Row>
+          <Row style={{marginBottom: '0.5em'}}>
+            <Switch
+              checked={emailOptions[6]}
+              style={{marginRight: '1em'}}
+              onClick={(checked) => this.modifyEmailNotifications(6, checked)}
+            />
+            Receive email when changes have been made to your account (Recommended for security)
+          </Row>
+          <Row style={{marginBottom: '1em'}}>
+            <Switch
+              checked={emailOptions[7]}
+              style={{marginRight: '1em'}}
+              onClick={(checked) => this.modifyEmailNotifications(7, checked)}
+            />
+            Receive email access to someone else's timetable has being revoked
+          </Row>
+          <Button
+            type="primary"
+            style={{width: '100%'}}
+            onClick={this.updateEmailOptions}
+            disabled={savingEmailOptions}
+          >Update Email Options</Button>
         </React.Fragment>
       );
     }
 
-    return displayElm;
+    return (
+      <React.Fragment>
+        <Row gutter={24}>
+          <Col span={12}>
+            {accountElm}
+          </Col>
+          <Col span={12}>
+            <Divider orientation="left">Email Options</Divider>
+            {emailElm}
+          </Col>
+        </Row>
+      </React.Fragment>
+    );
   }
 }
 
