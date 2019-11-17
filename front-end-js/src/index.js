@@ -23,8 +23,11 @@ class VerifyAccountParams extends React.Component {
   state = { verified: false }
 
   componentDidMount = async () => {
-    const token = this.props.match.token;
-    const user_id = this.props.match.user_id;
+    const token = this.props.match.params.token;
+    const user_id = this.props.match.params.user_id;
+
+    console.log(this.props.match);
+    console.log(this.props.match.user_id);
 
     const res = await fetch('http://localhost:8000/verify_acc', {
       method: 'POST',
@@ -33,7 +36,7 @@ class VerifyAccountParams extends React.Component {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         verification_token: token,
-        user_id
+        user_id: user_id,
       })
     });
 
