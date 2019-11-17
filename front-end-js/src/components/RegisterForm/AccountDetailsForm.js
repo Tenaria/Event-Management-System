@@ -4,12 +4,13 @@ import React from 'react';
 const { Title } = Typography;
 
 class RegisterForm extends React.Component {
+  state = { confirm: false, sending: false }
 
   handleSubmit = e => {
     e.preventDefault();
     this.props.form.validateFieldsAndScroll( async (err, values) => {
       if (!err) {
-        console.log('Received values of: ', values);
+        this.setState({ sending: true });
 
         const res = await fetch('http://localhost:8000/sign_up', {
           method: 'POST',
@@ -21,6 +22,10 @@ class RegisterForm extends React.Component {
         });
 
         console.log(res);
+
+        if (res.status === 200) {
+          this.setState({confirm: true, sending: false});
+        }
       }
     })
   }
@@ -34,12 +39,15 @@ class RegisterForm extends React.Component {
     }
   }
 
+  registerAgain = () => this.setState({confirm: false});
+
   render() {
+    const { confirm, sending } = this.state;
     const { getFieldDecorator } = this.props.form;
 
     return (
       <div className="form-wrapper">
-        <Form onSubmit={this.handleSubmit}>
+        {!confirm ? <Form onSubmit={this.handleSubmit}>
           <Title level={2}>REGISTER FORM</Title>
           <Row gutter={24}>
             <Col span={12}>
@@ -52,6 +60,7 @@ class RegisterForm extends React.Component {
                 })(<Input
                   placeholder="First Name"
                   prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
+                  disabled={sending}
                 />)}
               </Form.Item>
             </Col>
@@ -65,6 +74,7 @@ class RegisterForm extends React.Component {
                 })(<Input
                   placeholder="Last Name"
                   prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
+                  disabled={sending}
                 />)}
               </Form.Item>
             </Col>
@@ -81,6 +91,7 @@ class RegisterForm extends React.Component {
             })(<Input
               placeholder="Email"
               prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />}
+              disabled={sending}
             />)}
           </Form.Item>
           <Form.Item label="Password" hasFeedback>
@@ -89,7 +100,7 @@ class RegisterForm extends React.Component {
                 required: true,
                 message: 'Please enter a password!',
               }],
-            })(<Input.Password />)}
+            })(<Input.Password disabled={sending}/>)}
           </Form.Item>
           <Form.Item label="Confirm Password" hasFeedback>
             {getFieldDecorator('password_confirm', {
@@ -99,15 +110,47 @@ class RegisterForm extends React.Component {
               },{
                 validator: this.compareToFirstPassword
               }],
-            })(<Input.Password />)}
+            })(<Input.Password disabled={sending}/>)}
           </Form.Item>
           <Form.Item>
             <Button.Group>
-              <Button type="primary" style={{marginRight: '0.5em'}} htmlType="submit">Register</Button>
-              <Button type="danger" onClick={() => this.props.toggleRegister()}>Cancel</Button>
+              <Button type="primary" htmlType="submit" disabled={sending}>Register</Button>
+              <Button type="danger" onClick={() => this.props.toggleRegister()} disabled={sending}>Cancel</Button>
             </Button.Group>
           </Form.Item>
-        </Form>
+        </Form> : 
+        <div 
+          style={{
+            backgroundColor: 'white',
+            margin: 'auto',
+            maxWidth: '720px',
+            height: '100vh',
+            padding: '5em 2em'
+          }}
+        >
+          <Row type="flex" justify="center" style={{fontSize: '48px'}}>
+            <Icon type="check-circle" theme="filled" theme="twoTone" twoToneColor="#52c41a"/>
+          </Row>
+          <Row>
+            <p style={{fontSize: '24px', margin: '1em 0em', textAlign: 'center'}}>
+              Your account registeration has being confirmed. You should soon receive an email to
+              activate your account.
+            </p>
+            <p style={{fontSize: '18px', textAlign: 'center'}}>
+              <Button
+                onClick={() => this.props.toggleRegister()}
+                type="link"
+                style={{fontSize: '18px'}}
+              >Go Back</Button>
+              or
+              <Button
+                onClick={this.registerAgain}
+                type="link"
+                style={{fontSize: '18px'}}
+              >Register Again</Button> 
+            </p>
+          </Row>
+        </div>}
       </div>
     );
   }
