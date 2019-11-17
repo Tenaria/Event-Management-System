@@ -1,6 +1,13 @@
+import { Icon, message, Row, Spin } from 'antd';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import * as serviceWorker from './serviceWorker';
+import {
+  BrowserRouter as Router,
+  Redirect,
+  Route,
+  Switch
+} from "react-router-dom";
 
 import './index.scss';
 
@@ -11,6 +18,70 @@ import RouterComponent from './components/Router';
 
 // Import contexts
 import TokenContext from './context/TokenContext';
+
+class VerifyAccountParams extends React.Component {
+  state = { verified: false }
+
+  componentDidMount = async () => {
+    const token = this.props.match.params.token;
+    const user_id = this.props.match.params.user_id;
+
+    console.log(this.props.match);
+    console.log(this.props.match.user_id);
+
+    const res = await fetch('http://localhost:8000/verify_acc', {
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        verification_token: token,
+        user_id: user_id,
+      })
+    });
+
+    if (res.status === 200) {
+      this.setState({verified: true});
+      message.success('Successfully verified!');
+    } else {
+      message.error('Unable to verify your account. Please check your email for the verification link!');
+    }
+  }
+
+  render() {
+    const { verified } = this.state;
+    const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
+    let verifyObj = null;
+
+    if (verified) {
+      verifyObj = <Redirect to='/'/>
+    }
+
+    return (
+      <div className="form-wrapper">
+        {verifyObj}
+        <div 
+          style={{
+            backgroundColor: 'white',
+            margin: 'auto',
+            maxWidth: '720px',
+            height: '100vh',
+            padding: '5em 2em'
+          }}
+        >
+          <Row type="flex" justify="center" style={{fontSize: 48}}>
+            <Spin indicator={antIcon} />
+          </Row>
+          <Row>
+            <p style={{fontSize: '24px', margin: '1em 0em', textAlign: 'center'}}>
+              We are currently activating your account! Please do not leave this page.
+            </p>
+          </Row>
+        </div>
+      </div>
+    );
+  }
+}
 
 class Index extends React.Component {
   state = {
@@ -62,7 +133,14 @@ class Index extends React.Component {
           userEmail,
           userId
         }}>
-          {displayElm}
+          <Router>
+            <Switch>
+              <Route path='/verify/:user_id/:token' component={VerifyAccountParams} />
+              <Route path='/'>
+                {displayElm}
+              </Route>
+            </Switch>
+          </Router>
         </TokenContext.Provider>
       </React.Fragment>
     )

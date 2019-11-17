@@ -20,7 +20,9 @@ class eventAjaxController extends Controller
 	*/
 	public function verify_acc(Request $request, $user_id=0, $verification_token="") {
 		$verification_token = $request->input('verification_token'); // STRING; NOT EMPTY
-        $user_id = $request->input('user_id'); // INTEGER; NOT EMPTY
+				$user_id = $request->input('user_id'); // INTEGER; NOT EMPTY
+				
+		error_log($user_id);
 
 		DB::table('users')
 			->where([
