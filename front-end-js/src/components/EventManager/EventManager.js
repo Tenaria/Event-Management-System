@@ -120,10 +120,7 @@ class EventManager extends React.Component {
       /*
         Update the display of the elements and show the cards based on what the user selected
       */
-      let eventElms = ( events.length > 0 ?
-        [initialCard] :
-        <Empty description="Could not find any events ..." style={{margin: 'auto'}} />
-      );
+      let eventElms = [initialCard];
       // Loop through the upcoming events
       for (let i = 0; i < events.length; ++i) {
         const upcomingEvent = events[i];
