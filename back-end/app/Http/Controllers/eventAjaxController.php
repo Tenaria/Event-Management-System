@@ -1013,8 +1013,14 @@ class eventAjaxController extends Controller
 	}
 
 	/*
-	*	grab the details of an event such as locatoin, name, description, etc.
+	*	grab the details of an event such as location, name, description, etc.
+	*	@param
+	*		$request containing 'token' (string) and 'event_id' (int)
+	*	@return
+	*		HTTP 200 and 'events_name'(str),'event_public'(int 1 or 0), 'events_createdat' (int), 'event_desc'(str),'attributes' (str[]), 'tags'(str[]) and 'events_cancelled' (int 1 or 0) on success
+	*		HTTP 400 and 'error' (str) message otherwise
 	*/
+
 	public function get_event_details(Request $request) {
 		$token = $request->input('token'); // STRING; NOT EMPTY
 		$event_id = $request->input('event_id'); // INTEGER; NOT EMPTY
@@ -1133,7 +1139,11 @@ class eventAjaxController extends Controller
 	
 
 	/*
-		functoinality to cancel the entirety of an event
+	*	functionality to cancel the entirety of an event
+	*	@param
+	*		$request containing 'token' (string) and 'event_id' (int)
+	*	@return
+	*		HTTP 200 on success, and HTTP 400 with 'error' message (string) otherwise
 	*/
 	public function cancel_event(Request $request) {
 		$token = $request->input('token'); // STRING; NOT EMPTY
