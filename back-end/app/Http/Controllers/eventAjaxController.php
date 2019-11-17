@@ -1220,7 +1220,12 @@ class eventAjaxController extends Controller
 		return Response::json([], 400);
 	}
 	/*
-		uncancel event, the reverse of cancel event to uncancel an event in the case the user has accidently cancelled it or would like to revert a cancellation for some reason
+	*	uncancel event, the reverse of cancel event to uncancel an event in the case the user has accidently cancelled it or would like to revert a cancellation for some reason
+	*	@param
+	*		$request containing 'token' (string) and 'event_id' (int)
+	*	@return
+	*		HTTP 200 on success, and HTTP 400 with 'error' message (string) otherwise
+	*/
 	*/
 	public function uncancel_event(Request $request) {
 		$token = $request->input('token'); // STRING; NOT EMPTY
@@ -1300,7 +1305,11 @@ class eventAjaxController extends Controller
 	}
 
 	/*
-		function to get events created by the logged in user that have sessions in the future or do not have sessions set yet
+	*	function to get events created by the logged in user that have sessions in the future or do not have sessions set yet
+	*	@param
+	*		$request containing 'token' (string)
+	*	@return
+	*		HTTP 200 and 'events_id' (int), 'events_name' (str), 'events_desc' (str), 'events_status'(int 1 or 0), 'events_public' (int 1 or 0), 'events_cancelled' (int 1 or 0), 'events_attendees_count' (int) and 'events_tags' (str[]) on success, and HTTP 400 with 'error' message (string) otherwise
 	*/
 	public function get_upcoming_events(Request $request) {
 		$token = $request->input('token'); // STRING; NOT EMPTY
@@ -1379,7 +1388,11 @@ class eventAjaxController extends Controller
 	}
 
 	/*
-		function to return upcoming events (with a session in the future or no session set) that the logged in user is invited to but the logged in user is not the creator of
+	*	function to return upcoming events (with a session in the future or no session set) that the logged in user is invited to but the logged in user is not the creator of
+	*	@param
+	*		$request containing 'token' (string)
+	*	@return
+	*		HTTP 200 and 'events_id' (int), 'events_name' (str), 'events_desc' (str), 'events_status'(int 1 or 0), 'events_public' (int 1 or 0), 'events_cancelled' (int 1 or 0) and 'events_tags' (str[]) on success, and HTTP 400 with 'error' message (string) otherwise
 	*/
 	public function get_invited_events_upcoming(Request $request){
 		$token = $request->input('token'); // STRING; NOT EMPTY
@@ -1458,7 +1471,11 @@ class eventAjaxController extends Controller
 	}
 
 	/*
-		get events that a user has been invited to but did not create that has had a session in the past
+	*	get events that a user has been invited to but did not create that has had a session in the past
+	*	@param
+	*		$request containing 'token' (string)
+	*	@return
+	*		HTTP 200 and 'events_id' (int), 'events_name' (str), 'events_desc' (str), 'events_status'(int 1 or 0), 'events_public' (int 1 or 0), 'events_cancelled' (int 1 or 0) and 'events_tags' (str[]) on success, and HTTP 400 with 'error' message (string) otherwise
 	*/
 	public function get_invited_events_past(Request $request){
 		$token = $request->input('token'); // STRING; NOT EMPTY
@@ -1651,7 +1668,11 @@ class eventAjaxController extends Controller
 	// }
 
 	/*
-		given an event id, returns the attendees of the event
+	*	given an event id, returns the attendees of the event
+	*	@param
+	*		$request containing 'token' (string) and 'event_id' (int)
+	*	@return
+	*		HTTP 200 and 'attendees' (array containing 'email' (str) and 'id' (int)) on success, and HTTP 400 with 'error' message (string) otherwise
 	*/
 	public function get_attendees_of_event(Request $request) {
 		$token = $request->input('token'); // STRING; NOT EMPTY
