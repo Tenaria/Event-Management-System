@@ -265,6 +265,11 @@ class eventAjaxController extends Controller
 								'users_lname' => $lnameInput,
 								'users_password' => Hash::make($password)	
 							]);
+
+						$to_check = check_email_notication_blocked([$token_data['user_id']], 6);
+						if(isset($to_check) && !empty($to_check) && count($to_check) > 0) {
+							send_buttonless_email($user_data->users_email, 'Account Changes!', $user_data->users_fname,'You have succesfully made a change to your name and/or password. If you did not make this change, please contact a GoMeet administrator immediately.');
+						}
 					//otherwise we are editing other details not password related such as first name and last name
 					} else {
 						DB::table('users')
@@ -276,7 +281,14 @@ class eventAjaxController extends Controller
 								'users_fname' => $fnameInput, 
 								'users_lname' => $lnameInput
 							]);
+
+						$to_check = check_email_notication_blocked([$token_data['user_id']], 6);
+						if(isset($to_check) && !empty($to_check) && count($to_check) > 0) {
+							send_buttonless_email($user_data->users_email, 'Account Changes!', $user_data->users_fname,'You have succesfully made a change to your name. If you did not make this change, please change your password and contact a GoMeet administrator immediately.');
+						}
 					}
+
+
 					
 					return Response::json([], 200);
 				} else {
@@ -371,8 +383,19 @@ class eventAjaxController extends Controller
 						}
 
 						if(count($users_email) > 0) {
+							$to_check = [];
 							foreach($users_email as $users) {
-								send_generic_email($users->users_email, 'You Have Been Invited to an Event!', $users->users_fname, 'You have been invited to '.$event_name.' which is being hosted at '.$location.'. To view more details about the event, view the event on GoMeet!', '', 'Go to GoMeet!');
+								$to_check[] = $users->users_id;
+							}
+
+							$actual_affected = check_email_notication_blocked($to_check, 3);
+							
+							if(count($actual_affected) > 0) {
+								foreach($users_email as $users) {
+									if(in_array($users->users_id, $actual_affected)) {
+										send_generic_email($users->users_email, 'You Have Been Invited to an Event!', $users->users_fname, 'You have been invited to '.$event_name.' which is being hosted at '.$location.'. To view more details about the event, view the event on GoMeet!', '', 'Go to GoMeet!');
+									}
+								}
 							}
 						}
 					}
@@ -554,6 +577,33 @@ class eventAjaxController extends Controller
 											->whereIn('access_user_id', $old_attendees)
 											->update(['access_active' => 0]);
 
+							if(count($old_attendees) > 0) {
+								$users_email = DB::table('users')
+										->where([
+											['users_active', 1],
+											['users_email', '!=', $token_data['user_id']] //DO NOT EMAIL YOURSELF
+										])
+										->whereIn('users_id', $old_attendees)
+										->get();
+
+								if(count($users_email) > 0) {
+									$to_check = [];
+									foreach($users_email as $users) {
+										$to_check[] = $users->users_id;
+									}
+
+									$actual_affected = check_email_notication_blocked($to_check, 3);
+							
+									if(count($actual_affected) > 0) {
+										foreach($users_email as $users) {
+											if(in_array($users->users_id, $actual_affected)) {
+												send_generic_email($users->users_email, 'You Have Been Uninvited to an Event!', $users->users_fname, 'You have been uninvited to '.$new_event_name.' which is being hosted at '.$new_event_location.'. Sorry! If this was an error, please contact the host. To view more details about the event, view the event on GoMeet!','', 'Go to GoMeet!');
+											}
+										}
+									}
+								}
+							}
+
 							// ADD IN NEW ATTENDEES
 							$insert = [];
 							if(!empty($new_attendees)) {
@@ -565,7 +615,6 @@ class eventAjaxController extends Controller
 										->whereIn('users_id', $new_attendees)
 										->get();
 
-								//TODO: CLAIRE: EMAIL ATTENDEES EXCLUDE YOU
 								foreach($new_attendees as $new_attendee) {
 									$insert[] = [
 										'access_user_id' => $new_attendee,
@@ -578,8 +627,19 @@ class eventAjaxController extends Controller
 									->insert($insert);
 
 								if(count($users_email) > 0) {
+									$to_check = [];
 									foreach($users_email as $users) {
-										send_generic_email($users->users_email, 'You Have Been Invited to an Event!', $users->users_fname, 'You have been invited to '.$new_event_name.' which is being hosted at '.$new_event_location.'. To view more details about the event, view the event on GoMeet!','', 'Go to GoMeet!');
+										$to_check[] = $users->users_id;
+									}
+
+									$actual_affected = check_email_notication_blocked($to_check, 3);
+							
+									if(count($actual_affected) > 0) {
+										foreach($users_email as $users) {
+											if(in_array($users->users_id, $actual_affected)) {
+												send_generic_email($users->users_email, 'You Have Been Invited to an Event!', $users->users_fname, 'You have been invited to '.$new_event_name.' which is being hosted at '.$new_event_location.'. To view more details about the event, view the event on GoMeet!','', 'Go to GoMeet!');
+											}
+										}
 									}
 								}
 							}
@@ -801,7 +861,11 @@ class eventAjaxController extends Controller
 
 							//NOTIFY HOST IF NOT HOST MARKED AS ATTENDING
 							if($token_data['user_id'] != $event_data->events_createdby) {
-								send_generic_email($event_data->users_email, 'Someone is Going to Your Event: '.$event_data->events_name.'!', $event_data->users_fname, 'A user ('.$token_data['name'].') has marked themself as going to a session at the event '.$event_data->events_name.'! For more information, view the event on GoMeet!', '', 'Go to GoMeet!');
+								$actual_affected = check_email_notication_blocked([$event_data->events_createdby], 4);
+
+								if(isset($actual_affected) && !empty($actual_affected) && count($actual_affected) > 0) {
+									send_generic_email($event_data->users_email, 'Someone is Going to Your Event: '.$event_data->events_name.'!', $event_data->users_fname, 'A user ('.$token_data['name'].') has marked themself as going to a session at the event '.$event_data->events_name.'! For more information, view the event on GoMeet!', '', 'Go to GoMeet!');
+								}
 							}
 							
 							return Response::json([], 200);
@@ -841,7 +905,11 @@ class eventAjaxController extends Controller
 
 							//NOTIFY HOST IF NOT HOST MARKED AS ATTENDING
 							if($token_data['user_id'] != $event_data->events_createdby) {
-								send_generic_email($event_data->users_email, 'Someone is Going to Your Event: '.$event_data->events_name.'!', $event_data->users_fname, 'A user ('.$token_data['name'].') has marked themself as going to a session at the event '.$event_data->events_name.'! For more information, view the event on GoMeet!', '', 'Go to GoMeet!');
+								$actual_affected = check_email_notication_blocked([$event_data->events_createdby], 4);
+
+								if(isset($actual_affected) && !empty($actual_affected) && count($actual_affected) > 0) {
+									send_generic_email($event_data->users_email, 'Someone is Going to Your Event: '.$event_data->events_name.'!', $event_data->users_fname, 'A user ('.$token_data['name'].') has marked themself as going to a session at the event '.$event_data->events_name.'! For more information, view the event on GoMeet!', '', 'Go to GoMeet!');
+								}
 							}
 							
 							return Response::json([], 200);
@@ -925,7 +993,11 @@ class eventAjaxController extends Controller
 
 					//NOTIFY HOST IF NOT HOST MARKED AS ATTENDING
 					if($token_data['user_id'] != $access->events_createdby) {
-						send_generic_email($access->users_email, 'Someone is Not Going to Your Event Anymore: '.$access->events_name.'!', $access->users_fname, 'A user ('.$token_data['name'].') has marked themself as not going to a session at the event '.$access->events_name.'! For more information, view the event on GoMeet!', '', 'Go to GoMeet!');
+						$actual_affected = check_email_notication_blocked([$access->events_createdby], 4);
+
+						if(isset($actual_affected) && !empty($actual_affected) && count($actual_affected) > 0) {
+							send_generic_email($access->users_email, 'Someone is Not Going to Your Event Anymore: '.$access->events_name.'!', $access->users_fname, 'A user ('.$token_data['name'].') has marked themself as not going to a session at the event '.$access->events_name.'! For more information, view the event on GoMeet!', '', 'Go to GoMeet!');
+						}
 					}
 
 					return Response::json([], 200);
@@ -2184,20 +2256,31 @@ class eventAjaxController extends Controller
 										->insert($insert);
 
 				$affected_users = DB::table('events_access AS a')
-					->join('users AS u', 'u.users_id', '=', 'a.access_user_id')
-					->where([
-						['a.access_active', 1],
-						['a.access_archived', 0],
-						['a.access_events_id', $event_id],
-						['u.users_id', '!=', $token_data['user_id']],
-						['u.users_active', 1]
-					])
-					->get();
+										->join('users AS u', 'u.users_id', '=', 'a.access_user_id')
+										->where([
+											['a.access_active', 1],
+											['a.access_archived', 0],
+											['a.access_events_id', $event_id],
+											['u.users_id', '!=', $token_data['user_id']],
+											['u.users_active', 1]
+										])
+										->get();
 
 				$sessions_sentence = rtrim($sessions_sentence, ', ');
 				if(count($affected_users) > 0) {
-					foreach($affected_users as $users) {
-						send_generic_email($users->users_email, 'New Session(s) To Attend!', $users->users_fname, 'The host ('.$token_data['name'].') of the event '.$event_data->events_name.' has added new session(s)! The new session(s) are on '.$sessions_sentence.' If you are interested in attending these session(s), view the event on GoMeet!', '', 'Go to GoMeet!');
+					$to_pass_through = [];
+					foreach($affected_users as $affected) {
+						$to_pass_through[] = $affected->users_id;
+					}
+
+					$actual_affected = check_email_notication_blocked($to_pass_through, 5);
+
+					if(count($actual_affected) > 0) {
+						foreach($affected_users as $users) {
+							if(in_array($users->users_id, $actual_affected)) {
+								send_generic_email($users->users_email, 'New Session(s) To Attend!', $users->users_fname, 'The host ('.$token_data['name'].') of the event '.$event_data->events_name.' has added new session(s)! The new session(s) are on '.$sessions_sentence.' If you are interested in attending these session(s), view the event on GoMeet!', '', 'Go to GoMeet!');
+							}
+						}
 					}
 				}
 
@@ -2395,8 +2478,19 @@ class eventAjaxController extends Controller
 											->get();
 
 						if(count($affected_users) > 0) {
-							foreach($affected_users as $users) {
-								send_generic_email($users->users_email, 'A Session You Were Attending Has Been Cancelled!', $users->users_fname, 'You have marked yourself as going to a session for '.$event->events_name.'. Unfortunately, this session has been cancelled. Sorry! To view more details about the event, view the event on GoMeet!', '', 'Go to GoMeet!');
+							$to_pass_through = [];
+							foreach($affected_users as $affected) {
+								$to_pass_through[] = $affected->users_id;
+							}
+
+							$actual_affected = check_email_notication_blocked($to_pass_through, 2);
+
+							if(count($actual_affected) > 0) {
+								foreach($affected_users as $users) {
+									if(in_array($users->users_id, $actual_affected)) {
+										send_generic_email($users->users_email, 'A Session You Were Attending Has Been Cancelled!', $users->users_fname, 'You have marked yourself as going to a session for '.$event->events_name.'. Unfortunately, this session has been cancelled. Sorry! To view more details about the event, view the event on GoMeet!', '', 'Go to GoMeet!');
+									}
+								}
 							}
 						}
 
@@ -2463,6 +2557,38 @@ class eventAjaxController extends Controller
 								['sessions_id', $session_id]
 							])
 							->update(['sessions_status' => 0]);
+
+						$affected_users = DB::table('events_sessions_attendance AS sa')
+											->join('events_access AS a', 'a.access_id', '=', 'sa.sessions_attendance_access_id')
+											->join('users AS u', 'u.users_id', '=', 'a.access_user_id')
+											->where([
+												['sa.sessions_attendance_active', 1],
+												['sa.sessions_attendance_sessions_id', $session_id],
+												['sa.sessions_attendance_going', 1],
+												['a.access_active', 1],
+												['a.access_archived', 0],
+												['a.access_events_id', $events_id],
+												['u.users_id', '!=', $token_data['user_id']],
+												['u.users_active', 1]
+											])
+											->get();
+
+						if(count($affected_users) > 0) {
+							$to_pass_through = [];
+							foreach($affected_users as $affected) {
+								$to_pass_through[] = $affected->users_id;
+							}
+
+							$actual_affected = check_email_notication_blocked($to_pass_through, 2);
+
+							if(count($actual_affected) > 0) {
+								foreach($affected_users as $users) {
+									if(in_array($users->users_id, $actual_affected)) {
+										send_generic_email($users->users_email, 'A Session You Were Attending Has Been Uncancelled!', $users->users_fname, 'You have marked yourself as going to a session for '.$event->events_name.' that has previously been cancelled. Fortunately, this session has been uncancelled. Yay! To view more details about the event, view the event on GoMeet!', '', 'Go to GoMeet!');
+									}
+								}
+							}
+						}
 
 						return Response::json([],200);
 					}
