@@ -33,7 +33,7 @@ class RouterComponent extends React.PureComponent {
       <Router>
         <Layout>
           <Sider breakpoint="lg" collapsedWidth="0" style={{minHeight: '100vh'}}>
-            <div className="logo" />
+            <div className="logo">GoMeet</div>
             <Menu theme="dark" mode="inline" onClick={this.handleClick}>
               <Menu.Item key="1">
                 <Link to="/">
