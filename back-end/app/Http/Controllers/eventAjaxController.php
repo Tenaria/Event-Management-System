@@ -3156,6 +3156,7 @@ class eventAjaxController extends Controller
 	public function get_ah_timetable(Request $request) {
 		$token = $request->input('token'); // STRING; NOT NULL
 		$week = $request->input('week');
+		$user_id = $request->input('user_id');
 
 		if (!isset($token) || empty($token)) {
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
@@ -3185,7 +3186,7 @@ class eventAjaxController extends Controller
 				}
 			}
 
-			$data = DB::select('SELECT * FROM ah_timetable WHERE week = ? AND ?', array($week, $token_data['user_id']));
+			$data = DB::select('SELECT * FROM ah_timetable WHERE week = ? AND user_id = ?', array($week, $token_data['user_id']));
 			return Response::json($data, 200);
 		}
 		
