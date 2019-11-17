@@ -1172,6 +1172,34 @@ class eventAjaxController extends Controller
 								])
 								->update(['events_status' => 1]);
 
+					$affected_users = DB::table('events_access AS a')
+										->join('users AS u', 'u.users_id', '=', 'a.access_user_id')
+										->where([
+											['a.access_active', 1],
+											['a.access_events_id', $event_id],
+											['a.access_archived', 0],
+											['a.access_user_id', '!=', $token_data['user_id']],
+											['u.users_active', 1]
+										])
+										->get();
+
+					if(count($affected_users) > 0) {
+						$to_pass_through = [];
+						foreach($affected_users as $affected) {
+							$to_pass_through[] = $affected->users_id;
+						}
+
+						$actual_affected = check_email_notication_blocked($to_pass_through, 1);
+
+						if(count($actual_affected) > 0) {
+							foreach($affected_users as $users) {
+								if(in_array($users->users_id, $actual_affected)) {
+									send_generic_email($users->users_email, 'An Event You Have Been Interested In Has Been Cancelled!', $users->users_fname, 'You have marked yourself as interested in the event '.$event_data->events_name.'. Unfortunately, this event has been cancelled. Sorry! To view more details about the event, view the event on GoMeet!', '', 'Go to GoMeet!');
+								}
+							}
+						}
+					}
+
 					return Response::json([], 200);
 				} else {
 					return Response::json(['error' => 'event does not exist'], 400);
@@ -1221,6 +1249,34 @@ class eventAjaxController extends Controller
 									
 								])
 								->update(['events_status' => 0]);
+
+					$affected_users = DB::table('events_access AS a')
+										->join('users AS u', 'u.users_id', '=', 'a.access_user_id')
+										->where([
+											['a.access_active', 1],
+											['a.access_events_id', $event_id],
+											['a.access_archived', 0],
+											['a.access_user_id', '!=', $token_data['user_id']],
+											['u.users_active', 1]
+										])
+										->get();
+
+					if(count($affected_users) > 0) {
+						$to_pass_through = [];
+						foreach($affected_users as $affected) {
+							$to_pass_through[] = $affected->users_id;
+						}
+
+						$actual_affected = check_email_notication_blocked($to_pass_through, 1);
+
+						if(count($actual_affected) > 0) {
+							foreach($affected_users as $users) {
+								if(in_array($users->users_id, $actual_affected)) {
+									send_generic_email($users->users_email, 'An Event You Have Been Interested In Has Been Uncancelled!', $users->users_fname, 'You have marked yourself as interested in the event '.$event_data->events_name.' which has previously been cancelled. Fortunately, this event has been uncancelled. Yay! To view more details about the event, view the event on GoMeet!', '', 'Go to GoMeet!');
+								}
+							}
+						}
+					}
 
 					return Response::json([], 200);
 				} else {
