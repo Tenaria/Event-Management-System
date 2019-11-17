@@ -3119,10 +3119,87 @@ class eventAjaxController extends Controller
 						->where('timetable_show_owner', $token_data['user_id'])
 						->whereIn('timetable_show_owner', $to_remove)
 						->update(['timetable_show_active' => 0]);
+
+					$users_email = DB::table('users')
+									->where([
+										['users_active', 1],
+										['users_email', '!=', $token_data['user_id']] //DO NOT EMAIL YOURSELF
+									])
+									->whereIn('users_id', $to_remove)
+									->get();
+
+					//grab details about owner
+					$owner_email = DB::table('users')
+									->where([
+										['users_active', 1],
+										['users_email', $token_data['user_id']]
+									])
+									->first();
+
+					if(is_null($owner_email)) {
+						return Response::json(['error' => 'User logged in not found'], 400);
+					}
+
+					if(count($users_email) > 0) {
+						$to_check = [];
+						foreach($users_email as $users) {
+							$to_check[] = $users->users_id;
+						}
+
+						$actual_affected = check_email_notication_blocked($to_check, 3);
+				
+						if(count($actual_affected) > 0) {
+							foreach($users_email as $users) {
+								if(in_array($users->users_id, $actual_affected)) {
+									send_generic_email($users->users_email, 'Your Access To A Timetable Has Been Revoked!', $users->users_fname, 'Your access to view '.$owner_email->users_fname.' '.$owner_email->users_lname.' has been revoked. If this was an error, please contact that user. To view more details, view your timetable privacy settings on GoMeet!','', 'Go to GoMeet!');
+								}
+							}
+						}
+					}
 				}
 
 				//add id to show
-				foreach(array_diff($user_ids, $viewer) as $add){
+				$to_add = array_diff($user_ids, $viewer);
+				if(count($to_add) > 0) {
+					$users_email = DB::table('users')
+									->where([
+										['users_active', 1],
+										['users_email', '!=', $token_data['user_id']] //DO NOT EMAIL YOURSELF
+									])
+									->whereIn('users_id', $to_add)
+									->get();
+
+					//grab details about owner
+					$owner_email = DB::table('users')
+									->where([
+										['users_active', 1],
+										['users_email', $token_data['user_id']]
+									])
+									->first();
+
+					if(is_null($owner_email)) {
+						return Response::json(['error' => 'User logged in not found'], 400);
+					}
+
+					if(count($users_email) > 0) {
+						$to_check = [];
+						foreach($users_email as $users) {
+							$to_check[] = $users->users_id;
+						}
+
+						$actual_affected = check_email_notication_blocked($to_check, 3);
+				
+						if(count($actual_affected) > 0) {
+							foreach($users_email as $users) {
+								if(in_array($users->users_id, $actual_affected)) {
+									send_generic_email($users->users_email, 'You Now Have Access To A Timetable!', $users->users_fname, 'Your access to view '.$owner_email->users_fname.' '.$owner_email->users_lname.' has been added. To view more details, view your timetable privacy settings on GoMeet!','', 'Go to GoMeet!');
+								}
+							}
+						}
+					}
+				}
+
+				foreach($to_add as $add){
 					if(is_int($add)){
 						DB::table('timetable_show')
 							->updateOrInsert(
