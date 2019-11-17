@@ -3186,7 +3186,7 @@ class eventAjaxController extends Controller
 				}
 			}
 
-			$data = DB::select('SELECT * FROM ah_timetable WHERE week = ? AND ?', array($week, $token_data['user_id']));
+			$data = DB::select('SELECT * FROM ah_timetable WHERE week = ? AND user_id = ?', array($week, $token_data['user_id']));
 			return Response::json($data, 200);
 		}
 		
