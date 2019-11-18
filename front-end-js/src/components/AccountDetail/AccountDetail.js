@@ -126,7 +126,7 @@ class AccountDetail extends React.Component {
               style={{marginRight: '1em'}}
               onClick={(checked) => this.modifyEmailNotifications(1, checked)}
             />
-            Receive email about cancellations/uncancellations of events
+            Receive emails about cancellations/uncancellations of events
           </Row>
           <Row style={{marginBottom: '0.5em'}}>
             <Switch
@@ -134,7 +134,7 @@ class AccountDetail extends React.Component {
               style={{marginRight: '1em'}}
               onClick={(checked) => this.modifyEmailNotifications(2, checked)}
             />
-            Receive email about cancellations/uncancellations of sessions
+            Receive emails about cancellations/uncancellations of sessions
           </Row>
           <Row style={{marginBottom: '0.5em'}}>
             <Switch
@@ -142,7 +142,7 @@ class AccountDetail extends React.Component {
               style={{marginRight: '1em'}}
               onClick={(checked) => this.modifyEmailNotifications(3, checked)}
             />
-            Receive email when added / removed from an event
+            Receive emails when added / removed from an event
           </Row>
           <Row style={{marginBottom: '0.5em'}}>
             <Switch
@@ -150,7 +150,7 @@ class AccountDetail extends React.Component {
               style={{marginRight: '1em'}}
               onClick={(checked) => this.modifyEmailNotifications(4, checked)}
             />
-            Receive email when an user marks themselves as going / not going to one of your events
+            Receive emails when an user marks themselves as going / not going to one of your events
           </Row>
           <Row style={{marginBottom: '0.5em'}}>
             <Switch
@@ -158,7 +158,7 @@ class AccountDetail extends React.Component {
               style={{marginRight: '1em'}}
               onClick={(checked) => this.modifyEmailNotifications(5, checked)}
             />
-            Receive email when a session has being added to an event that you are interested in (Events that you have marked going to in general)
+            Receive emails when a session has being added to an event that you are interested in (Events that you have marked going to in general)
           </Row>
           <Row style={{marginBottom: '0.5em'}}>
             <Switch
@@ -166,7 +166,7 @@ class AccountDetail extends React.Component {
               style={{marginRight: '1em'}}
               onClick={(checked) => this.modifyEmailNotifications(6, checked)}
             />
-            Receive email when changes have been made to your account (Recommended for security)
+            Receive emails when changes have been made to your account (Recommended for security)
           </Row>
           <Row style={{marginBottom: '1em'}}>
             <Switch
@@ -174,7 +174,7 @@ class AccountDetail extends React.Component {
               style={{marginRight: '1em'}}
               onClick={(checked) => this.modifyEmailNotifications(7, checked)}
             />
-            Receive email access to someone else's timetable has being revoked
+            Receive emails when you have gained or have had your access to a timetable revoked
           </Row>
           <Button
             type="primary"
