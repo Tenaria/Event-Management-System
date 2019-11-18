@@ -1226,7 +1226,6 @@ class eventAjaxController extends Controller
 	*	@return
 	*		HTTP 200 on success, and HTTP 400 with 'error' message (string) otherwise
 	*/
-	*/
 	public function uncancel_event(Request $request) {
 		$token = $request->input('token'); // STRING; NOT EMPTY
 		$event_id = $request->input('event_id'); // INTEGER; NOT EMPTY
