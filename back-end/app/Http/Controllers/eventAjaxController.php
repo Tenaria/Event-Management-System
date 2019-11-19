@@ -1310,7 +1310,7 @@ class eventAjaxController extends Controller
 	*	@param
 	*		$request containing 'token' (string)
 	*	@return
-	*		HTTP 200 and array containing 'events_id' (int), 'events_name' (str), 'events_desc' (str), 'events_status'(int 1 or 0), 'events_public' (int 1 or 0), 'events_cancelled' (int 1 or 0), 'events_attendees_count' (int) and 'events_tags' (str[]) on success, and HTTP 400 with 'error' message (string) otherwise
+	*		HTTP 200 and 'events' array containing 'events_id' (int), 'events_name' (str), 'events_desc' (str), 'events_status'(int 1 or 0), 'events_public' (int 1 or 0), 'events_cancelled' (int 1 or 0), 'events_attendees_count' (int) and 'events_tags' (str[]) on success, and HTTP 400 with 'error' message (string) otherwise
 	*/
 	public function get_upcoming_events(Request $request) {
 		$token = $request->input('token'); // STRING; NOT EMPTY
@@ -1393,7 +1393,7 @@ class eventAjaxController extends Controller
 	*	@param
 	*		$request containing 'token' (string)
 	*	@return
-	*		HTTP 200 and array containing 'events_id' (int), 'events_name' (str), 'events_desc' (str), 'events_status'(int 1 or 0), 'events_public' (int 1 or 0), 'events_cancelled' (int 1 or 0) and 'events_tags' (str[]) on success, and HTTP 400 with 'error' message (string) otherwise
+	*		HTTP 200 and 'events' array containing 'events_id' (int), 'events_name' (str), 'events_desc' (str), 'events_status'(int 1 or 0), 'events_public' (int 1 or 0), 'events_cancelled' (int 1 or 0) and 'events_tags' (str[]) on success, and HTTP 400 with 'error' message (string) otherwise
 	*/
 	public function get_invited_events_upcoming(Request $request){
 		$token = $request->input('token'); // STRING; NOT EMPTY
@@ -1476,7 +1476,7 @@ class eventAjaxController extends Controller
 	*	@param
 	*		$request containing 'token' (string)
 	*	@return
-	*		HTTP 200 and array containing 'events_id' (int), 'events_name' (str), 'events_desc' (str), 'events_status'(int 1 or 0), 'events_public' (int 1 or 0), 'events_cancelled' (int 1 or 0) and 'events_tags' (str[]) on success, and HTTP 400 with 'error' message (string) otherwise
+	*		HTTP 200 and 'events' array containing 'events_id' (int), 'events_name' (str), 'events_desc' (str), 'events_status'(int 1 or 0), 'events_public' (int 1 or 0), 'events_cancelled' (int 1 or 0) and 'events_tags' (str[]) on success, and HTTP 400 with 'error' message (string) otherwise
 	*/
 	public function get_invited_events_past(Request $request){
 		$token = $request->input('token'); // STRING; NOT EMPTY
@@ -1887,8 +1887,7 @@ class eventAjaxController extends Controller
 	*	@param
 	*		$request containing 'token' (string)
 	*	@return
-	*		HTTP 200 and array containing 'events_id' (int), 'events_name' (str), 'events_desc' (str), 'events_status'(int 1 or 0), 'events_public' (int 1 or 0), 'events_cancelled' (int 1 or 0) and 'events_tags' (str[]) on success, and HTTP 400 with 'error' message (string) otherwise
-	*/
+	*		HTTP 200 and 'events' array containing 'events_id' (int), 'events_name' (str), 'events_desc' (str), 'events_status'(int 1 or 0), 'events_public' (int 1 or 0), 'events_cancelled' (int 1 or 0) and 'events_tags' (str[]) on success, and HTTP 400 with 'error' message (string) otherwise
 	*/
 	public function get_past_events(Request $request) {
 		$token = $request->input('token'); // STRINg; NOT EMPTY
@@ -1963,7 +1962,7 @@ class eventAjaxController extends Controller
 	*	@param
 	*		$request containing 'token' and 'search_term' (str)
 	*	@return
-	*		HTTP 200 and array containing 'id' (int) and 'tag' (str) on success, HTTP 400 with error othwerwise
+	*		HTTP 200 and 'results' array containing 'id' (int) and 'tag' (str) on success, HTTP 400 with error othwerwise
 	*/
 	public function get_tags(Request $request) {
 		$token = $request->input('token'); // STRING; NOT EMPTY
@@ -2014,7 +2013,7 @@ class eventAjaxController extends Controller
 	*	@param
 	*		$request containing 'token' and 'search_term' (str)
 	*	@return
-	*		HTTP 200 and array containing 'id' (int) and 'email' (str) on success, HTTP 400 with error othwerwise
+	*		HTTP 200 and 'results' array containing 'id' (int) and 'email' (str) on success, HTTP 400 with error othwerwise
 	*/
 	public function get_emails_exclude_user(Request $request) {
 		$token = $request->input('token'); // STRING; NOT EMPTY
@@ -2062,7 +2061,7 @@ class eventAjaxController extends Controller
 	*	@param
 	*		$request containing 'token' and 'search_term' (str)
 	*	@return
-	*		HTTP 200 and array containing 'events_id' (int), 'events_name' (str), 'events_desc'(str), 'events_attendees_count' (int) and 'events_tags'(str[]) on success, HTTP 400 with error othwerwise
+	*		HTTP 200 and 'results' array containing 'events_id' (int), 'events_name' (str), 'events_desc'(str), 'events_attendees_count' (int) and 'events_tags'(str[]) on success, HTTP 400 with error othwerwise
 	*/
 
 	public function search_public_event(Request $request){
@@ -2150,7 +2149,12 @@ class eventAjaxController extends Controller
 	}
 
 	/*
-		functoin to load all sessions (start date and end dates) for an event
+	*	function to load all sessions (start date and end dates) for an event
+	*	@param
+	*		$request containing 'token' (str) and 'event_id'(int)
+	*	@return
+	*		HTTP 200 with sessions array containing 'id' (int), 'start_timestamp'(int),'end_timestamp'(int), 'attendees_going'(array of 'access_id' (int), 'name'(str), 'email' (str)) and cancelled (int 1 or 0) on success
+	*		HTTP 400 with 'error' (str) otherwise
 	*/
 	public function load_event_sessions(Request $request) {
 		$token = $request->input('token'); // STRING; NOT EMPTY
@@ -2255,7 +2259,11 @@ class eventAjaxController extends Controller
 	}
 
 	/*
-		function that can create a session and attach it to an event
+	*	function that can create a session and attach it to an event
+	*	@param
+	*		$request containing 'token' (str), 'event_id'(int), 'start_timestamp' (int), 'end_timestamp' (int), 'recurring' (int) and 'recurring_descriptor' (str)
+	*	@return
+	*		HTTP 200 on success, HTTP 400 with 'error'(str) otherwise
 	*/
 	public function create_event_sessions(Request $request) {
 		$token = $request->input('token'); // STRING; NOT EMPTY
@@ -2408,7 +2416,11 @@ class eventAjaxController extends Controller
 	}
 
 	/*
-		edit event sessions
+	*	edit event sessions
+	*	@param
+	*		$request containing 'token' (str), 'session_id' (int), 'event_id'(int), 'start_timestamp' (int) and 'end_timestamp' (int)
+	*	@return
+	*		HTTP 200 on success, HTTP 400 with 'error'(str) otherwise
 	*/
 	public function edit_event_sessions(Request $request) {
 		$token = $request->input('token'); // STRING; NOT EMPTY
@@ -2471,7 +2483,11 @@ class eventAjaxController extends Controller
 	}
 
 	/*
-		given a session id, removes that session from the event. Used to remove errors completely from an event.
+	*	given a session id, removes that session from the event. Used to remove errors completely from an event.
+	*	@param
+	*		$request containing 'token' (str), 'session_id'(int) and 'event_id'(int)
+	*	@return
+	*		HTTP 200 on success, HTTP 400 with 'error'(str) otherwise
 	*/
 	public function remove_event_sessions(Request $request) {
 		$token = $request->input('token'); // STRING; NOT EMPTY
@@ -2524,7 +2540,11 @@ class eventAjaxController extends Controller
 	}
 
 	/*
-		cancel an event session; is different from remove as the session will still show in the event but in a cancelled status.
+	*	cancel an event session; is different from remove as the session will still show in the event but in a cancelled status.
+	*	@param
+	*		$request containing 'token' (str), 'session_id'(int) and 'event_id'(int)
+	*	@return
+	*		HTTP 200 on success, HTTP 400 with 'error'(str) otherwise
 	*/
 	public function cancel_event_sessions(Request $request){
 		$token = $request->input('token'); // STRING; NOT EMPTY
@@ -2620,7 +2640,11 @@ class eventAjaxController extends Controller
 	}
 
 	/*
-		cancel an event session; is different from remove as the session will still show in the event but in a cancelled status.
+	*	cancel an event session; is different from remove as the session will still show in the event but in a cancelled status.
+	*	@param
+	*		$request containing 'token' (str), 'session_id'(int) and 'event_id'(int)
+	*	@return
+	*		HTTP 200 on success, HTTP 400 with 'error'(str) otherwise
 	*/
 	public function uncancel_event_sessions(Request $request){
 		$token = $request->input('token'); // STRING; NOT EMPTY
@@ -2714,7 +2738,14 @@ class eventAjaxController extends Controller
 			
 		return Response::json([], 400);
 	}
-
+	/*
+	*	given a user and a week, show the regions and tags for rendering timetable on the front-end
+	*	@param
+	*		$request containing 'token' (str), 'week_start' (int) and 'user_id' (int)
+	*	@return
+	*		HTTP 200 with 'timetable_data' array containing 'coordinate_x', 'coordinate_y', 'duration' (int) and 'label' (str) on success
+	*		HTTP 400 with 'error' (str) otherwise
+	*/
 	public function get_timetable_details(Request $request) {
 		$token = $request->input('token');
 		$week_start = $request->input('week_start'); // INTEGER NOT NULL (EPOCH IN MILLISECONDS OF START OF WEEK)
@@ -2785,7 +2816,11 @@ class eventAjaxController extends Controller
 	}
 
 	/*
-		function to remove a timetable block given an id
+	*	function to remove a timetable block given an id
+	*	@param
+	*		$request containing 'token' (str) and 'timetable_id' (int)
+	*	@return
+	*		HTTP 200 on success, HTTP 400 with 'error'(str) otherwise
 	*/
 	public function remove_timetable_block(Request $request) {
 		$token = $request->input('token');
