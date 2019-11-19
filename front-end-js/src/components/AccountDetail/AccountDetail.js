@@ -188,14 +188,10 @@ class AccountDetail extends React.Component {
 
     return (
       <React.Fragment>
-        <Row gutter={24}>
-          <Col span={12}>
+        <Row style={{margin: '0em 1em'}}>
             {accountElm}
-          </Col>
-          <Col span={12}>
             <Divider orientation="left">Email Options</Divider>
             {emailElm}
-          </Col>
         </Row>
       </React.Fragment>
     );
