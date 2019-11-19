@@ -3503,7 +3503,7 @@ class eventAjaxController extends Controller
 					])
 					->update(array('week_data'=>json_encode($data), 'week'=>$week));
 			} else {
-				DB::table('ah_timetable')->insert(array('week_data'=>json_encode($data), 'week'=>$week));
+				DB::table('ah_timetable')->insert(array('week_data'=>json_encode($data), 'week'=>$week, 'user_id' => $token_data['user_id']));
 			}
 			
 			return Response::json([], 200);
