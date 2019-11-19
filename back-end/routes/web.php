@@ -62,6 +62,8 @@ Route::post('/remove_timetable_block', 'eventAjaxController@remove_timetable_blo
 Route::post('/update_timetable_privacy', 'eventAjaxController@update_timetable_privacy');
 Route::post('/get_timetable_privacy', 'eventAjaxController@get_timetable_privacy');
 
+Route::post('/get_event_clash', 'eventAjaxController@get_event_clash');
+
 // other routes
 Route::post('/get_summary_dashboard', 'eventAjaxController@get_summary_dashboard');
 

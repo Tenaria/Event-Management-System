@@ -727,11 +727,11 @@ class eventAjaxController extends Controller
 		$events_id = $request->input('events_id'); //int, not empty
 		$start_timestamp = $request->input('start_timestamp'); //bigint, not empty
 		$end_timestamp = $request->input('end_timestamp');//bigint, not empty
-		if(isset($token) && !empty($token)&& isset($start_timestamp)
-			&& !empty($end_timestamp) && isset($end_timestamp)&&!empty($end_timestamp)){
+		if(isset($token) && !empty($token)&& isset($start_timestamp) && !empty($end_timestamp) && isset($end_timestamp) &&!empty($end_timestamp)){
 			$token_data = validate_jwt($token);
 			if($token_data == true){
 				$user_id = $token_data["user_id"];
+
 				if(DB::table('events')->where([['events_id', $events_id], ['events_createdby', $user_id]])->exists()){
 					$attendees = DB::table('events_sessions as es')
 						->where([['es.sessions_events_id', $events_id],['es.sessions_status', 0]])
@@ -742,8 +742,8 @@ class eventAjaxController extends Controller
 						->select('ea.access_user_id')						
 						->get();
 					$clashlist = [];
-					if(isset($attendees) && !empty($attendees)){
 
+					if(isset($attendees) && !empty($attendees)){
 						foreach($attendees as $attendee){
 							$clash = DB::tables('events_access as ea')
 								->where([['ea.access_user_id', $attendee->access_user_id],['ea.access_active', 0], ['ea.access_archived', 0]])
@@ -757,15 +757,17 @@ class eventAjaxController extends Controller
 								$clashlist[] = ['sessions_id' => $clash->sessions_id];
 							}
 						}
-						
-
 					}
+
 					return Response::json(['clashes'=> $clashlist], 200);
 				}
+
 				return Response::json(['error' => "no such event"], 400);					
 			}
+
 			return Response::json(['error' => "invalid user token"], 400);	
 		}
+		
 		return Response::json([], 400);
 
 	}
