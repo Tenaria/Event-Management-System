@@ -1887,7 +1887,9 @@ class eventAjaxController extends Controller
 	*	@param
 	*		$request containing 'token' (string)
 	*	@return
-	*		HTTP 200 and 'events' array containing 'events_id' (int), 'events_name' (str), 'events_desc' (str), 'events_status'(int 1 or 0), 'events_public' (int 1 or 0), 'events_cancelled' (int 1 or 0) and 'events_tags' (str[]) on success, and HTTP 400 with 'error' message (string) otherwise
+
+	*		HTTP 200 and array containing 'events_id' (int), 'events_name' (str), 'events_desc' (str), 'events_status'(int 1 or 0), 'events_public' (int 1 or 0), 'events_cancelled' (int 1 or 0) and 'events_tags' (str[]) on success, and HTTP 400 with 'error' message (string) otherwise
+
 	*/
 	public function get_past_events(Request $request) {
 		$token = $request->input('token'); // STRINg; NOT EMPTY
