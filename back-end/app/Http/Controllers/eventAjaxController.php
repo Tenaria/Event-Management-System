@@ -3493,7 +3493,8 @@ class eventAjaxController extends Controller
 		$token_data = validate_jwt($token);
 		if($token_data == true) {
 			$existing_data = DB::table('ah_timetable')->where([
-				['week', $week]
+				['week', $week],
+				['user_id', $token_data['user_id']]
 			])->get();
 			if ($existing_data->count() > 0) {
 				DB::table('ah_timetable')
