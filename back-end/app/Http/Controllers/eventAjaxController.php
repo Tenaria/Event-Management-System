@@ -1553,6 +1553,7 @@ class eventAjaxController extends Controller
 	/*
 		 DO NOT USE: OLD CODE
 	*/
+
 	// public function get_upcoming_public_events(Request $request) {
 	// 	$token = $request->input('token'); // STRING; NOT EMPTY
 
@@ -1741,8 +1742,22 @@ class eventAjaxController extends Controller
 	}
 	
 	/*
-		function to get simple details including a count of how many events the user has attended in the past week and how many events the user will attend in the next week
+	*	function to get simple details including a count of how many events the user has attended in the past week and how many events the user will attend in the next week
+	*	@param
+	*		$request containing 'token' (str)
+	*	@return
+	*		HTTP 200 with 'last_week_attended_count', 'this_week_attend_count', 'next_week_attend_count' (int), 'tags_distribution', 'tags_last_week', 'tags_this_week' and 'tags_next_week' (str) on success
+	*		HTTP 400 with 'error' (str) otherwise
 	*/
+	return Response::json([
+					'last_week_attended_count' => $lastWk_event_number,
+					'this_week_attend_count' => $nextWk_event_number,
+					'next_week_attend_count' => $thisWk_event_number,
+					'tags_distribution' => $tags,
+					'tags_last_week' => $tags_last_week,
+					'tags_this_week' => $tags_this_week,
+					'tags_next_week' => $tags_next_week
+				], 200);
  	public function get_summary_dashboard(Request $request) {
  		$token = $request->input('token');
 
@@ -1876,7 +1891,12 @@ class eventAjaxController extends Controller
  	}
 
 	/*
-		function to get past events created by the logged in user
+	*	function to get past events created by the logged in user
+	*	@param
+	*		$request containing 'token' (string)
+	*	@return
+	*		HTTP 200 and 'events_id' (int), 'events_name' (str), 'events_desc' (str), 'events_status'(int 1 or 0), 'events_public' (int 1 or 0), 'events_cancelled' (int 1 or 0) and 'events_tags' (str[]) on success, and HTTP 400 with 'error' message (string) otherwise
+	*/
 	*/
 	public function get_past_events(Request $request) {
 		$token = $request->input('token'); // STRINg; NOT EMPTY
