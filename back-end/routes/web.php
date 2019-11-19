@@ -60,6 +60,7 @@ Route::post('/get_timetable_details', 'eventAjaxController@get_timetable_details
 Route::post('/add_timetable_block', 'eventAjaxController@add_timetable_block');
 Route::post('/remove_timetable_block', 'eventAjaxController@remove_timetable_block');
 Route::post('/update_timetable_privacy', 'eventAjaxController@update_timetable_privacy');
+Route::post('/get_timetable_privacy', 'eventAjaxController@get_timetable_privacy');
 
 // other routes
 Route::post('/get_summary_dashboard', 'eventAjaxController@get_summary_dashboard');

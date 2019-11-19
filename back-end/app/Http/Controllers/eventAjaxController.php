@@ -3253,6 +3253,49 @@ class eventAjaxController extends Controller
 	}
 
 	/*
+		function to grab presaved timetable privacy details
+	*/
+	public function get_timetable_privacy(Request $request) {
+		$token = $request->input('token'); // STRING; NOT NULL
+
+		//check variables are set as necessary
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+		
+		if(isset($token) && !empty($token)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				$users_can_see = [];
+
+				//grab all data from timetables table
+				$data = DB::table('timetable_show AS ts')
+							->join('users AS u', 'u.users_id', '=', 'ts.timetable_show_viewer')
+							->where([
+								['ts.timetable_show_owner', $token_data['user_id']],
+								['ts.timetable_show_active', 1]
+							])
+							->get();	
+
+				if(count($data) > 0) {
+					foreach($data as $d) {
+						$users_can_see[] = [
+							'user_id' => $d->users_id,
+							'users_email' => $d->users_email
+						];
+					}
+				}
+
+
+				return Response::json(['users_with_access' => $users_can_see], 200);
+
+			}
+		}
+		
+		return Response::json([], 400);
+	}
+
+	/*
 		function to save email notificatoin blocking changes
 	*/
 	public function save_email_notifications(Request $request) {
