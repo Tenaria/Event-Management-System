@@ -156,13 +156,13 @@ class Timetable extends React.Component {
       body: JSON.stringify({
         token,
         data: ttData,
-        week: moment().week().valueOf() + this.state.relativeWeek
+        week: moment().week().valueOf() + relativeWeek
       })
     });
 
     const data = await res.json();
     if (res.status === 200) {
-      console.log(data);
+      message.success('Successfully updated timetable!');
     } else {
       message.error(data.error);
     }
@@ -175,43 +175,43 @@ class Timetable extends React.Component {
     const { ttData, loading, mouseDown, relativeWeek } = this.state;
     const ttCols = [
       <Column key='time' title={true} name={'Time'} />,
-      <Column key='monday' name={'Monday'} selected={ttData.monday}
+      <Column key='monday' name={'Mon'} selected={ttData.monday}
         toggleCell={id => this.toggleCell('monday', id)}
         onMouseDown={(e, id) => this.mouseDown(e, 'monday', id)}
         onMouseUp={this.mouseUp}
         mouseDown={mouseDown}
       />,
-      <Column key='tuesday' name={'Tuesday'} selected={ttData.tuesday}
+      <Column key='tuesday' name={'Tue'} selected={ttData.tuesday}
         toggleCell={id => this.toggleCell('tuesday', id)}
         onMouseDown={(e, id) => this.mouseDown(e, 'tuesday', id)}
         onMouseUp={this.mouseUp}
         mouseDown={mouseDown}
       />,
-      <Column key='wednesday' name={'Wednesday'} selected={ttData.wednesday}
+      <Column key='wednesday' name={'Wed'} selected={ttData.wednesday}
         toggleCell={id => this.toggleCell('wednesday', id)}
         onMouseDown={(e, id) => this.mouseDown(e, 'wednesday', id)}
         onMouseUp={this.mouseUp}
         mouseDown={mouseDown}
       />,
-      <Column key='thursday' name={'Thursday'} selected={ttData.thursday}
+      <Column key='thursday' name={'Thu'} selected={ttData.thursday}
         toggleCell={id => this.toggleCell('thursday', id)}
         onMouseDown={(e, id) => this.mouseDown(e, 'thursday', id)}
         onMouseUp={this.mouseUp}
         mouseDown={mouseDown}
       />,
-      <Column key='friday' name={'Friday'} selected={ttData.friday}
+      <Column key='friday' name={'Fri'} selected={ttData.friday}
         toggleCell={id => this.toggleCell('friday', id)}
         onMouseDown={(e, id) => this.mouseDown(e, 'friday', id)}
         onMouseUp={this.mouseUp}
         mouseDown={mouseDown}
       />,
-      <Column key='saturday' name={'Saturday'} selected={ttData.saturday}
+      <Column key='saturday' name={'Sat'} selected={ttData.saturday}
         toggleCell={id => this.toggleCell('saturday', id)}
         onMouseDown={(e, id) => this.mouseDown(e, 'saturday', id)}
         onMouseUp={this.mouseUp}
         mouseDown={mouseDown}
       />,
-      <Column key='sunday' name={'Sunday'} selected={ttData.sunday}
+      <Column key='sunday' name={'Sun'} selected={ttData.sunday}
         toggleCell={id => this.toggleCell('sunday', id)}
         onMouseDown={(e, id) => this.mouseDown(e, 'sunday', id)}
         onMouseUp={this.mouseUp}
