@@ -168,8 +168,8 @@ class Timetable extends React.Component {
     }
   }
 
-  advanceWeek = () => this.changeWeek(1);
-  retreatWeek = () => this.changeWeek(-1);
+  advanceWeek = () => this.changeWeek(7);
+  retreatWeek = () => this.changeWeek(-7);
   resetWeek = () => {
     this.setState({
       ttData : {
