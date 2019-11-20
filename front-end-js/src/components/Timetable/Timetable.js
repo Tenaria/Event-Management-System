@@ -168,8 +168,8 @@ class Timetable extends React.Component {
     }
   }
 
-  advanceWeek = () => this.changeWeek(7);
-  retreatWeek = () => this.changeWeek(-7);
+  advanceWeek = () => this.changeWeek(1);
+  retreatWeek = () => this.changeWeek(-1);
   resetWeek = () => {
     this.setState({
       ttData : {
@@ -232,8 +232,8 @@ class Timetable extends React.Component {
       />
     ];
 
-    const startDate = moment().weekday(relativeWeek);
-    const endDate = moment().weekday(relativeWeek + 6);
+    const startDate = moment().weekday(0).add(relativeWeek, 'w');
+    const endDate = moment().weekday(6).add(relativeWeek, 'w');
     return (
       <React.Fragment>
         <Row
