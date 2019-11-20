@@ -20,8 +20,9 @@ import Timetable from '../Timetable/Timetable';
 const {  Content, Sider } = Layout;
 
 class RouterComponent extends React.PureComponent {
+  state = { activeMenu: '' };
+
   handleClick = e => {
-    console.log('click ', e);
     if (e.key === 'logout') {
       sessionStorage.removeItem('token');
       window.location.reload();
@@ -29,12 +30,18 @@ class RouterComponent extends React.PureComponent {
   };
 
   render() {
+    const { activeMenu } = this.state;
     return (
       <Router>
         <Layout>
           <Sider breakpoint="lg" collapsedWidth="0" style={{minHeight: '100vh'}}>
             <div className="logo">GoMeet</div>
-            <Menu theme="dark" mode="inline" onClick={this.handleClick}>
+            <Menu
+              selectedKeys={[activeMenu]}
+              theme="dark"
+              mode="inline"
+              onClick={this.handleClick}
+            >
               <Menu.Item key="1">
                 <Link to="/">
                   <Icon type="home" />
@@ -83,27 +90,32 @@ class RouterComponent extends React.PureComponent {
                   <Route path='/test'>
                     <Test />
                   </Route>
-                  <Route path='/timetable'>
-                    <Timetable />
-                  </Route>
+                  <Route path='/timetable' children={({match}) => {
+                    if (match) this.setState({activeMenu: 'timetable'});
+                    return <Timetable />;
+                  }} />
                   <Route path='/event'>
                     <Event />
                   </Route>
                   <Route path='/event_details'>
                     <EventDetails />
                   </Route>
-                  <Route path='/events_viewer'>
-                    <EventViewer />
-                  </Route>
-                  <Route path='/events_manager'>
-                    <EventManager />
-                  </Route>
-                  <Route path='/account'>
-                    <AccountDetail />
-                  </Route>
-                  <Route path='/'>
-                    <Dashboard />
-                  </Route>
+                  <Route path='/events_viewer' children={({match}) => {
+                    if (match) this.setState({activeMenu: '2'});
+                    return <EventViewer />;
+                  }} />
+                  <Route path='/events_manager' children={({match}) => {
+                    if (match) this.setState({activeMenu: '3'});
+                    return <EventManager />;
+                  }} />
+                  <Route path='/account' children={({match}) => {
+                    if (match) this.setState({activeMenu: '4'});
+                    return <AccountDetail />;
+                  }} />
+                  <Route path='/' children={({match}) => {
+                    if (match) this.setState({activeMenu: '1'});
+                    return <Dashboard />;
+                  }} />
                 </Switch>
               </div>
             </Content>
