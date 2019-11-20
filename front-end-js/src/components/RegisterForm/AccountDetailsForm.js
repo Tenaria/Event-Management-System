@@ -129,7 +129,7 @@ class RegisterForm extends React.Component {
           }}
         >
           <Row type="flex" justify="center" style={{fontSize: '48px'}}>
-            <Icon type="check-circle" theme="filled" theme="twoTone" twoToneColor="#52c41a"/>
+            <Icon type="check-circle" theme="twoTone" twoToneColor="#52c41a"/>
           </Row>
           <Row>
             <p style={{fontSize: '24px', margin: '1em 0em', textAlign: 'center'}}>

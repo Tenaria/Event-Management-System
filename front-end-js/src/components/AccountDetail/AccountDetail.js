@@ -1,12 +1,9 @@
-import { Button, message, Row, Col, Skeleton, Switch, Typography, Divider } from 'antd';
+import { Button, message, Row, Skeleton, Switch, Divider } from 'antd';
 import React from 'react';
 
 import AccountEdit from './AccountEdit';
-import AccountInfo from './AccountInfo';
 
 import TokenContext from '../../context/TokenContext';
-
-const { Title } = Typography;
 
 class AccountDetail extends React.Component {
   state = {

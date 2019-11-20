@@ -2,7 +2,7 @@
   This is a component that is responsible for managing your event. So you are able to view a list
   of events you host.
  */
-import { Button, Card, Empty, Icon, Menu, Row, Spin, Tag, Tooltip, Typography } from 'antd';
+import { Button, Card, Icon, Menu, Row, Spin, Tag, Tooltip, Typography } from 'antd';
 import React from 'react';
 import { Redirect } from "react-router-dom";
 
@@ -73,7 +73,7 @@ class EventManager extends React.Component {
     // Sets an event to be cancelled
     const { token } = this.context;
 
-    const res = await fetch('http://localhost:8000/cancel_event', {
+    await fetch('http://localhost:8000/cancel_event', {
       method: 'POST',
       mode: 'cors',
       cache: 'no-cache',
@@ -89,7 +89,7 @@ class EventManager extends React.Component {
     // Sets an event to be cancelled
     const { token } = this.context;
 
-    const res = await fetch('http://localhost:8000/uncancel_event', {
+    await fetch('http://localhost:8000/uncancel_event', {
       method: 'POST',
       mode: 'cors',
       cache: 'no-cache',

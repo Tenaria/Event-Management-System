@@ -38,16 +38,9 @@ class Dashboard extends React.Component {
     });
 
     Promise.all([
-      loadData('http://localhost:8000/get_upcoming_events'),
-      loadData('http://localhost:8000/get_invited_events_upcoming'),
-      loadData('http://localhost:8000/search_public_event'),
+      loadData('http://localhost:8000/get_summary_dashboard')
     ]).then(values => {
-      this.setState({
-        upcomingEventsMe: values[0].events,
-        upcomingEventsInvited: values[1].events,
-        upcomingEventsPublic: values[2].results,
-        loaded: true
-      });
+      console.log(values);
     })
   }
 

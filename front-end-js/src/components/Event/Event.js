@@ -82,7 +82,7 @@ class Event extends React.Component {
   }
 
   render() {
-    const { contactAttendees, id, name, desc, created, event_public, loaded, location, valid, tags } = this.state;
+    const { contactAttendees, id, name, desc, event_public, loaded, location, valid, tags } = this.state;
     const { token } = this.context;
     const spinStyle = {
       padding: '2em',
