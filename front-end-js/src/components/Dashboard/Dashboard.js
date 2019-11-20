@@ -148,7 +148,7 @@ class Dashboard extends React.Component {
     return (
       <Row type="flex" justify="space-around">
         <div style={{textAlign: 'center', marginBottom: '1em', width: 300}}>
-          <Title level={4}>Attendence</Title>
+          <Title level={4}>Attendence For Events You Organised</Title>
           <BarChart
             width={300}
             height={300}
@@ -164,7 +164,7 @@ class Dashboard extends React.Component {
           </BarChart>
         </div>
         <div style={{textAlign: 'center', width: 375}}>
-          <Title level={4}>Tag Information</Title>
+          <Title level={4}>Tag Information For Events You Organised</Title>
           <Row>
             <Button.Group>
               <Button
@@ -190,7 +190,7 @@ class Dashboard extends React.Component {
               activeIndex={this.state.activeIndex}
               activeShape={renderActiveShape} 
               data={parsedTags} 
-              cx={200} 
+              cx={180} 
               cy={125} 
               innerRadius={60}
               outerRadius={80} 
