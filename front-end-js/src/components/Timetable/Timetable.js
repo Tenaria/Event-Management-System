@@ -168,8 +168,21 @@ class Timetable extends React.Component {
     }
   }
 
-  advanceWeek = () => this.changeWeek(1);
-  retreatWeek = () => this.changeWeek(-1);
+  advanceWeek = () => this.changeWeek(7);
+  retreatWeek = () => this.changeWeek(-7);
+  resetWeek = () => {
+    this.setState({
+      ttData : {
+        'monday' : [],
+        'tuesday' : [],
+        'wednesday' : [],
+        'thursday' : [],
+        'friday' : [],
+        'saturday' : [],
+        'sunday' : []
+      }
+    });
+  }
 
   render() {
     const { ttData, loading, mouseDown, relativeWeek } = this.state;
@@ -246,11 +259,23 @@ class Timetable extends React.Component {
             onClick={this.advanceWeek}
             disabled={loading}
           />
-          <Button
-            style={{left: 0, position: 'absolute'}}
-            type="primary"
-            onClick={this.setWeek}
-          >Update Timetable</Button>
+        </Row>
+        <Row
+          type="flex"
+          align="middle"
+          justify="center"
+          style={{margin: '0em 0em 1em 0em'}}
+        >
+          <Button.Group>
+            <Button
+              type="primary"
+              onClick={this.setWeek}
+            >Update Timetable</Button>
+            <Button
+              type="danger"
+              onClick={this.resetWeek}
+            >Reset Timetable</Button>
+          </Button.Group>
         </Row>
         <div className="timetable">
           {ttCols}
