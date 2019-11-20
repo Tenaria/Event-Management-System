@@ -1,7 +1,7 @@
 /*
   Edit the sessions of an event
  */
-import { Button, Icon, List, message, Spin } from 'antd';
+import { Button, Icon, List, Spin } from 'antd';
 import React from 'react';
 
 import AddSession from './AddSession';

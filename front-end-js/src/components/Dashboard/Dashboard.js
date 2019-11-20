@@ -1,7 +1,7 @@
 import { message, Row, Typography, Button } from 'antd';
 import React from 'react';
 import {
-  BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Sector
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Sector
 } from 'recharts';
 
 import TokenContext from '../../context/TokenContext';

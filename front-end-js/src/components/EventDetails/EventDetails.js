@@ -140,7 +140,7 @@ class EventDetails extends React.Component {
 
   render() {
     const {
-      id, name, desc, created, event_public, location, attendees, sessions, valid, loaded
+      id, name, desc, location, attendees, sessions, valid, loaded
     } = this.state;
     const { userEmail } = this.context;
     const attendeeElm = attendees.map(a =>

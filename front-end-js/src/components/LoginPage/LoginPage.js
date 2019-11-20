@@ -83,9 +83,9 @@ class LoginPage extends React.Component {
             >
               Log in
             </Button>
-            <a className="login-form-forgot">
-              Forgot password
-            </a> Or <a onClick={() => this.props.toggleRegister()}>register now!</a>
+            <Button type="link" onClick={() => this.props.toggleRegister()}>
+              Register now!
+            </Button>
           </Form.Item>
         </Form>
       </div>

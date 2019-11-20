@@ -1,4 +1,4 @@
-import { Form, Checkbox, Icon, Input, message, Modal, Row, Select, Typography} from 'antd';
+import { Form, Icon, Input, message, Modal, Row, Typography} from 'antd';
 import React from 'react';
 
 import TokenContext from '../../../context/TokenContext';

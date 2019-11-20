@@ -23,7 +23,7 @@ class AccountEdit extends React.Component {
           fname: values.fname,
           lname: values.lname,
           password: (values.password ? values.password : null),
-          password: (values.password_confirm ? values.password_confirm : null),
+          password_confirm: (values.password_confirm ? values.password_confirm : null),
           token
         }
 
