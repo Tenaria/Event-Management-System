@@ -2856,7 +2856,11 @@ class eventAjaxController extends Controller
 	}
 
 	/*
-		function to add a timetable block given data indicated below
+	*	function to add a timetable block given data indicated below
+	*	@param
+	*		$request containing 'token' (str), 'coordinate_x', 'coordinate_y' (int), 'week_start' (int), 'duration' (int), 'recurring' (int), 'recurring_descriptor' (string), 'labelling' (str) and 'ignore_clashes' (int 1 or 0)
+	*	@return
+	*		HTTP 200 on success, HTTP 400 with 'error'(str) otherwise
 	*/
 	public function add_timetable_block(Request $request) {
 		$token = $request->input('token');
@@ -3021,8 +3025,9 @@ class eventAjaxController extends Controller
 	}
 
 	/*
-		IGNORE THIS FOR NOW
+		@unused
 	*/
+	/*
 	public function save_timetable_details(Request $request) {
 		$token = $request->input('token');
 		$week_start = $request->input('week_start'); // INTEGER NOT NULL (EPOCH IN MILLISECONDS OF START OF WEEK)
@@ -3184,9 +3189,13 @@ class eventAjaxController extends Controller
 		
 		return Response::json(['error' => 'invalid or expired JWT token'], 400);
 	}
-
+	*/
 	/*
-		function to update for a user which other users can view their timetable/ event clashes
+	*	function to update for a user which other users can view their timetable/ event clashes
+	*	@param
+	*		$request containing 'token' (str) and 'user_ids' (int[])
+	*	@return
+	*		HTTP 200 on success, HTTP 400 with 'error'(str) otherwise
 	*/
 	public function update_timetable_privacy(Request $request){
 		$token = $request->input('token'); // STRING; NOT NULL
@@ -3316,7 +3325,11 @@ class eventAjaxController extends Controller
 	}
 
 	/*
-		function to grab presaved timetable privacy details
+	*	function to grab presaved timetable privacy details
+	*	@param
+	*		$request containing 'token' (str)
+	*	@return
+	*		HTTP 200 with 'users_with_access' containing 'user_id' (int) and 'users_email' (str) on success, HTTP 400 with 'error'(str) otherwise
 	*/
 	public function get_timetable_privacy(Request $request) {
 		$token = $request->input('token'); // STRING; NOT NULL
@@ -3359,7 +3372,11 @@ class eventAjaxController extends Controller
 	}
 
 	/*
-		function to save email notificatoin blocking changes
+	*	function to save email notification blocking changes
+	*	@param
+	*		$request containing 'token' (str) and 'email_blocks' (int[])
+	*	@return
+	*		HTTP 200 on success, HTTP 400 with 'error'(str) otherwise
 	*/
 	public function save_email_notifications(Request $request) {
 		$token = $request->input('token'); // STRING; NOT NULL
@@ -3415,7 +3432,11 @@ class eventAjaxController extends Controller
 	}
 
 	/*
-		function to return what email notifications have been blocked
+	*	function to return what email notifications have been blocked
+	*	@param
+	*		$request containing 'token' (str)
+	*	@return
+	*		HTTP 200 with 'email_blocked_data' array containing 1, 2, 3, 4, 5, 6, 7 (boolean) on success, HTTP 400 with 'error'(str) otherwise
 	*/
 	public function get_email_notifications(Request $request) {
 		$token = $request->input('token'); // STRING; NOT NULL
@@ -3451,7 +3472,11 @@ class eventAjaxController extends Controller
 	}
 
 	/*
-		function to send out an email to all users attending an event
+	*	function to send out an email to all users attending an event
+	*	@param
+	*		$request containing 'token' (str), 'subject', 'body' (str) and 'event_id' (int)
+	*	@return
+	*		HTTP 200 on success, HTTP 400 with 'error'(str) otherwise
 	*/
 	public function notify_attendees(Request $request) {
 		$token = $request->input('token'); // STRING; NOT NULL
