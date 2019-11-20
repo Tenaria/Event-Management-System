@@ -140,7 +140,7 @@ class EditAttendees extends React.Component {
       displayElm = (
         <React.Fragment>
           <Row>
-              <Select
+            <Select
               showSearch
               value={value}
               placeholder="Enter name of the person you want to invite ..."

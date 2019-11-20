@@ -1,10 +1,10 @@
-import { Button, Input, message, Row, Spin } from 'antd';
+import { Button, message, Row, Select, Spin } from 'antd';
 import React from 'react';
 import moment from 'moment';
 
 import TokenContext from '../../../context/TokenContext';
 
-const { Search } = Input;
+const { Option } = Select;
 const NUM_OF_HOURS = 24;
 
 moment.updateLocale("en", { week: {
@@ -14,7 +14,7 @@ moment.updateLocale("en", { week: {
 
 class Column extends React.Component {
   render() {
-    const { title, name, selected } = this.props;
+    const { name, title, selected } = this.props;
     const cells = [
       <div key={'title'} className="timetable-cell title">{name}</div>
     ];
@@ -55,7 +55,9 @@ class Timetable extends React.Component {
       'sunday' : []
     },
     loading: true,
-    relativeWeek: 0
+    relativeWeek: 0,
+    users: [],
+    selectedUser: null
   }
 
   componentDidMount = () => this.changeWeek(0);
@@ -100,11 +102,44 @@ class Timetable extends React.Component {
     }
   }
 
+  handleSearch = value => {
+    /*
+      Once an user has entered more than 2 characters in the search bar, we will perform an ajax
+      request for a list of users that has an email that contains the character specified.
+    */
+    const { token } = this.context;
+
+    if (value.length <= 2) return;
+
+    fetch('http://localhost:8000/get_emails_exclude_user', {
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        search_term: value,
+        token
+      })
+    }).then(async res => {
+      const data = await res.json();
+      this.setState({users: data.results});
+    });
+  }
+  handleChange = value => {
+    this.setState({ selectedUser: value });
+  }
+
+  onSelect = (value, elm) => {
+    console.log(value, elm);
+  }
+
   advanceWeek = () => this.changeWeek(1);
   retreatWeek = () => this.changeWeek(-1);
 
   render() {
-    const { ttData, loading, relativeWeek } = this.state;
+    const { users, ttData, loading, relativeWeek, selectedUser } = this.state;
     const ttCols = [
       <Column key='time' title={true} name={'Time'} />,
       <Column key='monday' name={'Mon'} selected={ttData.monday} />,
@@ -115,17 +150,28 @@ class Timetable extends React.Component {
       <Column key='saturday' name={'Sat'} selected={ttData.saturday} />,
       <Column key='sunday' name={'Sun'} selected={ttData.sunday} />
     ];
-
     const startDate = moment().weekday(0).add(relativeWeek, 'w');
     const endDate = moment().weekday(6).add(relativeWeek, 'w');
+    const options = users.map(d => <Option key={d.id}>{d.email}</Option>);
+  
     return (
       <React.Fragment>
         <Row style={{marginBottom: '1em'}}>
-          <Search
-            placeholder="Serch for user's timetable"
-            onSearch={value => console.log(value)}
-            enterButton
-          />
+          <Select
+            showSearch
+            value={selectedUser}
+            placeholder="Name of person you want to view"
+            style={{ width: '100%' }}
+            defaultActiveFirstOption={false}
+            showArrow={false}
+            filterOption={false}
+            onSearch={this.handleSearch}
+            onChange={this.handleChange}
+            onSelect={this.onSelect}
+            notFoundContent={null}
+          >
+            {options}
+          </Select>
         </Row>
         <Row
           type="flex"
