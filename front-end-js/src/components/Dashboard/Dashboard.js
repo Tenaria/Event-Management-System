@@ -148,7 +148,7 @@ class Dashboard extends React.Component {
     return (
       <Row type="flex" justify="space-around">
         <div style={{textAlign: 'center', marginBottom: '1em', width: 300}}>
-          <Title level={4}>Attendence For Events You Organised</Title>
+          <Title level={4}>Attendance For Events You Organised</Title>
           <BarChart
             width={300}
             height={300}
