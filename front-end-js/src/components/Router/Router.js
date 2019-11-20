@@ -15,7 +15,8 @@ import Event from '../Event';
 import EventViewer from '../EventViewer';
 import EventDetails from '../EventDetails';
 import Test from '../Test';
-import Timetable from '../Timetable/Timetable';
+import Timetable from '../Timetable';
+import TimetableManager from '../TimetableManager';
 
 const {  Content, Sider } = Layout;
 
@@ -92,7 +93,7 @@ class RouterComponent extends React.PureComponent {
                   </Route>
                   <Route path='/timetable' children={({match}) => {
                     if (match) this.setState({activeMenu: 'timetable'});
-                    return <Timetable />;
+                    return <TimetableManager />;
                   }} />
                   <Route path='/event'>
                     <Event />
