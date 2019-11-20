@@ -1,17 +1,31 @@
-import { Menu, Icon } from 'antd';
+import { Menu, Icon, Typography } from 'antd';
 import React from 'react';
 
-const { SubMenu } = Menu;
+import Timetable from './Timetable';
+import OtherTimetable from './OtherTimetable';
+
+const { Title } = Typography;
 
 class TimetableManager extends React.PureComponent {
-  constructor(props) {
-    super(props);
-  }
+  state = { yourMenu: true };
+
+  handleClick = e => this.setState({yourMenu: e.key === 'your'});
 
   render() {
+    const { yourMenu } = this.state;
+
     return (
       <div>
-        <Menu defaultSelectedKeys={['your']} mode="horizontal">
+        <div>
+          <Title level={2}>Timetable Manager</Title>
+          <p>Manage your timetable and view other people's public timetable.</p>
+        </div>
+        <Menu
+          defaultSelectedKeys={['your']}
+          onClick={this.handleClick}
+          mode="horizontal"
+          style={{marginBottom: '1em'}}
+        >
           <Menu.Item key="your">
             <Icon type="user" />
             Your Timetable
@@ -21,6 +35,7 @@ class TimetableManager extends React.PureComponent {
             Other's Timetable
           </Menu.Item>
         </Menu>
+        <div>{yourMenu ? <Timetable /> : <OtherTimetable />}</div>
       </div>
     );
   }

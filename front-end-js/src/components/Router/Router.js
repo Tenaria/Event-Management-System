@@ -15,7 +15,6 @@ import Event from '../Event';
 import EventViewer from '../EventViewer';
 import EventDetails from '../EventDetails';
 import Test from '../Test';
-import Timetable from '../Timetable';
 import TimetableManager from '../TimetableManager';
 
 const {  Content, Sider } = Layout;

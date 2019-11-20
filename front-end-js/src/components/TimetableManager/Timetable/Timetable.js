@@ -3,7 +3,7 @@ import React from 'react';
 
 import moment from 'moment';
 
-import TokenContext from '../../context/TokenContext';
+import TokenContext from '../../../context/TokenContext';
 
 const NUM_OF_HOURS = 24;
 const NUM_OF_DAYS = 7;
@@ -117,7 +117,7 @@ class Timetable extends React.Component {
       },
       body: JSON.stringify({
         token,
-        week: moment().week().valueOf() + this.state.relativeWeek + change
+        week: moment().week().valueOf() + relativeWeek + change
       })
     });
 
