@@ -2,7 +2,7 @@
   This is a component that is responsible for managing your event. So you are able to view a list
   of events you host.
  */
-import { Button, Card, Icon, Menu, Row, Spin, Tag, Tooltip, Typography } from 'antd';
+import { Button, Card, Icon, message, Menu, Row, Spin, Tag, Tooltip, Typography } from 'antd';
 import React from 'react';
 import { Redirect } from "react-router-dom";
 
@@ -73,7 +73,7 @@ class EventManager extends React.Component {
     // Sets an event to be cancelled
     const { token } = this.context;
 
-    await fetch('http://localhost:8000/cancel_event', {
+    const res = await fetch('http://localhost:8000/cancel_event', {
       method: 'POST',
       mode: 'cors',
       cache: 'no-cache',
@@ -82,7 +82,14 @@ class EventManager extends React.Component {
       },
       body: JSON.stringify({ token, event_id: id })
     });
-    this.loadData();
+    
+    const data = await res.json();
+    if (res.status === 200) {
+      message.success('Successfully cancelled event!');
+      this.loadData();
+    } else {
+      message.error(data.error);
+    }
   }
 
   uncancelEvent = async id => {
@@ -102,6 +109,28 @@ class EventManager extends React.Component {
   }
 
   changeMenu = e => this.setState({currentMenu: e.key})
+  removeEvent = async id => {
+    // Sets an event to be cancelled
+    const { token } = this.context;
+
+    const res = await fetch('http://localhost:8000/remove_event', {
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ token, event_id: id })
+    });
+
+    const data = await res.json();
+    if (res.status === 200) {
+      message.success('Successfully removed event!');
+      this.loadData();
+    } else {
+      message.error(data.error);
+    }
+  }
 
   render() {
     const {
@@ -161,27 +190,43 @@ class EventManager extends React.Component {
               right: '1em',
               bottom: '1em'
             }}>
-              <Button
-                icon="edit"
-                style={{
-                  background: '#38B2AC',
-                  border: 'none',
-                  color: 'white',
-                  marginRight: (upcomingEvent.events_cancelled ? '0.5em' : '0.5em')
-                }}
-                onClick={() => this.selectEvent(upcomingEvent.events_id)}
-              />
               {upcomingEvent.events_cancelled ?
-                <Button
-                  type="dashed"
-                  icon="undo"
-                  onClick={() => this.uncancelEvent(upcomingEvent.events_id)}
-                /> :
-                <Button
-                  type="danger"
-                  icon="stop"
-                  onClick={() => this.cancelEvent(upcomingEvent.events_id)}
-                />
+                <React.Fragment>
+                  <Button
+                    type="danger"
+                    icon="delete"
+                    style={{
+                      marginRight: '0.5em'
+                    }}
+                    onClick={() => this.removeEvent(upcomingEvent.events_id)}
+                  />
+                  <Button
+                    type="dashed"
+                    icon="undo"
+                    onClick={() => this.uncancelEvent(upcomingEvent.events_id)}
+                  />
+                </React.Fragment> :
+                <React.Fragment>
+                  <Button
+                    icon="edit"
+                    style={{
+                      background: '#38B2AC',
+                      border: 'none',
+                      color: 'white',
+                      marginRight: (upcomingEvent.events_cancelled ? '0.5em' : '0.5em')
+                    }}
+                    onClick={() => this.selectEvent(upcomingEvent.events_id)}
+                  />
+                  <Button
+                    type="danger"
+                    icon="stop"
+                    style={{
+                      backgroundColor: '#742A2A',
+                      border: 'none'
+                    }}
+                    onClick={() => this.cancelEvent(upcomingEvent.events_id)}
+                  />
+                </React.Fragment>
               }
             </Row>
           </Card>
