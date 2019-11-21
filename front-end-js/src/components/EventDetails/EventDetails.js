@@ -52,6 +52,31 @@ class EventDetails extends React.Component {
     }
   }
 
+  updateEventAttendees = async () => {
+    const eventID = sessionStorage.getItem('event_id');
+    const { token } = this.context;
+    const res = await fetch('http://localhost:8000/get_attendees_of_event', {
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        event_id: eventID,
+        token
+      })
+    });
+
+    const data = await res.json();
+    if (res.status === 200) {
+      this.setState({attendees: []});
+      this.setState({attendees: data.attendees});
+    } else {
+      message.error(data.error);
+    }
+  }
+
   componentDidMount = async () => {
     // The instant the element is added to the DOM, load the information
     const eventID = sessionStorage.getItem('event_id');
@@ -136,7 +161,10 @@ class EventDetails extends React.Component {
     }
   }
 
-  updateSessionCB = () => this.updateSessions();
+  updateSessionCB = () => {
+    this.updateSessions();
+    this.updateEventAttendees();
+  }
 
   render() {
     const {
