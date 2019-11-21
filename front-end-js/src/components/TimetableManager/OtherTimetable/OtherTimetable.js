@@ -1,4 +1,4 @@
-import { Button, message, Row, Select, Spin } from 'antd';
+import { Button, Empty, message, Row, Select, Spin } from 'antd';
 import React from 'react';
 import moment from 'moment';
 
@@ -60,11 +60,9 @@ class Timetable extends React.Component {
     selectedUser: null
   }
 
-  componentDidMount = () => this.changeWeek(0);
-
   changeWeek = async (change) => {
     const { token } = this.context;
-    const { relativeWeek } = this.state;
+    const { relativeWeek, selectedUser } = this.state;
 
     this.setState({loading: true});
 
@@ -77,13 +75,13 @@ class Timetable extends React.Component {
       },
       body: JSON.stringify({
         token,
-        week: moment().week().valueOf() + relativeWeek + change
+        week: moment().week().valueOf() + relativeWeek + change,
+        user_id: selectedUser
       })
     });
 
     const data = await res.json();
     if (res.status === 200) {
-      console.log(data);
       this.setState({
         ttData: (data[0] ? JSON.parse(data[0].week_data) : {
           'monday' : [],
@@ -128,12 +126,11 @@ class Timetable extends React.Component {
     });
   }
   handleChange = value => {
-    this.setState({ selectedUser: value });
+    this.setState({ selectedUser: value }, () => {
+      this.changeWeek(0);
+    });
   }
-
-  onSelect = (value, elm) => {
-    console.log(value, elm);
-  }
+  onSelect = (value, elm) => {}
 
   advanceWeek = () => this.changeWeek(1);
   retreatWeek = () => this.changeWeek(-1);
@@ -156,22 +153,27 @@ class Timetable extends React.Component {
   
     return (
       <React.Fragment>
-        <Row style={{marginBottom: '1em'}}>
-          <Select
-            showSearch
-            value={selectedUser}
-            placeholder="Name of person you want to view"
-            style={{ width: '100%' }}
-            defaultActiveFirstOption={false}
-            showArrow={false}
-            filterOption={false}
-            onSearch={this.handleSearch}
-            onChange={this.handleChange}
-            onSelect={this.onSelect}
-            notFoundContent={null}
-          >
-            {options}
-          </Select>
+        <Row style={{marginBottom: '1em'}} type="flex">
+          <Row style={{paddingRight: '1em'}} type="flex" justify="center" align="middle">
+            Search for the person's timetable you want to view: 
+          </Row>
+          <div style={{flexGrow: 1}}>
+            <Select
+              showSearch
+              value={selectedUser}
+              placeholder="Name of person"
+              style={{ width: '100%' }}
+              defaultActiveFirstOption={false}
+              showArrow={false}
+              filterOption={false}
+              onSearch={this.handleSearch}
+              onChange={this.handleChange}
+              onSelect={this.onSelect}
+              notFoundContent={null}
+            >
+              {options}
+            </Select>
+          </div>
         </Row>
         <Row
           type="flex"
@@ -197,7 +199,7 @@ class Timetable extends React.Component {
             disabled={loading}
           />
         </Row>
-        <div className="timetable">
+        {selectedUser ? <div className="timetable">
           {ttCols}
           {loading ?
             <div className="timetable-loader">
@@ -205,7 +207,11 @@ class Timetable extends React.Component {
             </div> :
             null
           }
-        </div>
+        </div> : <Empty description={
+          <span>
+            Please select an user to view!
+          </span>
+        } />}
       </React.Fragment>
     );
   }
