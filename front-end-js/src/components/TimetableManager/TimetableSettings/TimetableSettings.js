@@ -70,7 +70,7 @@ class TimetableSettings extends React.Component {
     const { allowedUsers } = this.state;
 
     for (let i = 0; i < allowedUsers.length; ++i) {
-      if (allowedUsers[i].id === value) return;
+      if (allowedUsers[i].id === parseInt(value)) return;
     }
 
     allowedUsers.push({

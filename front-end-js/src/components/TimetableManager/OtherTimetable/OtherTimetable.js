@@ -65,6 +65,8 @@ class Timetable extends React.Component {
     const { token } = this.context;
     const { relativeWeek, selectedUser } = this.state;
 
+    console.log(selectedUser);
+
     this.setState({loading: true});
 
     const res = await fetch('http://localhost:8000/get_ah_timetable', {
