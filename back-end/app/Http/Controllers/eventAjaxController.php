@@ -3360,8 +3360,8 @@ class eventAjaxController extends Controller
 				if(count($data) > 0) {
 					foreach($data as $d) {
 						$users_can_see[] = [
-							'user_id' => $d->users_id,
-							'users_email' => $d->users_email
+							'id' => $d->users_id,
+							'email' => $d->users_email
 						];
 					}
 				}

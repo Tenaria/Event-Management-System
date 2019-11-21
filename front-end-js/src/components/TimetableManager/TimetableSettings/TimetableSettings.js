@@ -85,8 +85,6 @@ class TimetableSettings extends React.Component {
 
     const userIds = allowedUsers.map(e => parseInt(e.id));
 
-    console.log(userIds);
-
     const res = await fetch('http://localhost:8000/update_timetable_privacy', {
       method: 'POST',
       mode: 'cors',
@@ -145,7 +143,11 @@ class TimetableSettings extends React.Component {
           </div>
         </Row>
         <Row style={{marginBottom: '1em', textAlign: 'center'}}>
-          <Button type="primary" onClick={this.updateTimetable}>Update Timetable</Button>
+          <Button
+            onClick={this.updateTimetable}
+            type="primary"
+            disabled={!loaded}
+          >Update Timetable</Button>
         </Row>
         <Row>
           <List
