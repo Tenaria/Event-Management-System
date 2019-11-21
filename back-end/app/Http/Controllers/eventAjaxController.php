@@ -3238,7 +3238,7 @@ class eventAjaxController extends Controller
 					$owner_email = DB::table('users')
 									->where([
 										['users_active', 1],
-										['users_email', $token_data['user_id']]
+										['users_id', $token_data['user_id']]
 									])
 									->first();
 
