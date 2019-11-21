@@ -2,7 +2,14 @@
 
 use Firebase\JWT\JWT;
 use Postmark\PostmarkClient;
-
+/*
+*   validates a user token
+*	@param
+*   	$token (str)
+*	@return
+*		returns $decoded (see Laravel Documentation of JWT for more information) on a valid token
+*		return false otherwise
+*/
 if(!function_exists('validate_jwt')) {
     function validate_jwt($token=null) {
         if(isset($token) && !empty($token) && !is_null($token)) {
@@ -17,13 +24,27 @@ if(!function_exists('validate_jwt')) {
         return false;
     }
 }
-
+/*
+*	checks if a string is truly non-empty (i.e. not just spaces)
+*	@param
+*		$string (string)
+*	@return
+*		true if it contain non-space characters, false otherwise
+*/
 if(!function_exists('proper_empty_check')) {
     function proper_empty_check($string="") {
         return (str_replace(' ', '', $string) != '');
     }
 }
 
+
+/*
+*	returns the primary keys of event_attributes
+*	@param
+*		none
+*	@return
+*		array $attribute_array mapping $primary_key to $name
+*/
 if(!function_exists('get_event_attributes_pk')) {
     function get_event_attributes_pk() {
         $attributes_array = [];
@@ -41,7 +62,13 @@ if(!function_exists('get_event_attributes_pk')) {
         return $attributes_array;
     }
 }
-
+/*
+*	Send an email with a response button
+*	@param
+*		$email (str), $email_subject (str), $to_name (str), $text_block (str), $button_url (str), $button_name (str)
+*	@return
+*		none
+*/
 if(!function_exists('send_generic_email')) {
     //e.g you have been added to an event, click here to view it!
     function send_generic_email($email, $email_subject, $to_name, $text_block, $button_url, $button_name) {
@@ -63,7 +90,13 @@ if(!function_exists('send_generic_email')) {
         );
     }
 }
-
+/*
+*	send an email without a response button
+*	@param
+*		$email (str), $email_subject (str), $to_name (str), $text_block (str)
+*	@return
+*		none
+*/
 if(!function_exists('send_buttonless_email')) {
     //e.g you have been removed from the event blah by Claire. Sorry!
     function send_buttonless_email($email, $email_subject, $to_name, $text_block) {
@@ -84,6 +117,13 @@ if(!function_exists('send_buttonless_email')) {
     }
 }
 
+/*
+*	check if there is a clash
+*	@param
+*		$taken_dates_array (int[]), $given_date_x (int), $given_date_y (int), $given_date_duration (int), $given_date_week()
+*	@return
+*		$clash_detected (boolean)
+*/
 if(!function_exists('timetable_check_clash')) {
     // helper function to check if there is a clash
     function timetable_check_clash($taken_dates_array, $given_date_x, $given_date_y, $given_date_duration, $given_date_week) {
@@ -101,7 +141,13 @@ if(!function_exists('timetable_check_clash')) {
         return $clash_detected;
     }
 }
-
+/*
+*	check if the time descriptor is valid
+*	@param
+*		$start_timestamp (int), $end_timestamp (int), $descriptor (string "weekly", "monthly", or "yearly"), recurrence (int)
+*	@return
+*		false if invalid, true otherwise
+*/
 if(!function_exists('check_valid_time_descriptor')) {
     //returns false if something went wrong, otherwise whether the given timestamps can recurr "weekly", "monthly" or "yearly"
     function check_valid_time_descriptor($start_timestamp, $end_timestamp, $descriptor, $recurrence) {
@@ -157,6 +203,13 @@ if(!function_exists('check_valid_time_descriptor')) {
     }
 }
 
+/*
+*	check if the email notification is blocked
+*	@param
+*		$user_ids (int[]), $notification_type (int)
+*	@return
+*		array of users that aren't blocked
+*/
 if(!function_exists('check_email_notication_blocked')) {
     // helper function given an array of user ids, returns the users that should receive the notification
     function check_email_notication_blocked($user_ids=[], $notification_type=0) {
@@ -171,7 +224,13 @@ if(!function_exists('check_email_notication_blocked')) {
         return array_diff($user_ids, $data);
     }
 }
-
+/*
+*	generates a random string of lenght 13 
+*	@param
+*		$user_ids (int[]), $notification_type (int) (although unused)
+*	@return
+*		string of alphanumeric characters of length 13		
+*/
 if(!function_exists('generate_random_string')) {
     // helper function to generate random alphanumeric string
     // referenced from: https://code.tutsplus.com/tutorials/generate-random-alphanumeric-strings-in-php--cms-32132
