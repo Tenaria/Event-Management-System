@@ -3602,8 +3602,8 @@ class eventAjaxController extends Controller
 			if($user_id != $token_data['user_id']) {
 				$check_access = DB::table('timetable_show')
 									->where([
-										['timetable_show_owner', $token_data['user_id']],
-										['timetable_show_viewer', $user_id],
+										['timetable_show_owner', $user_id],
+										['timetable_show_viewer', $token_data['user_id']],
 										['timetable_show_active', 1]
 									])
 									->first();
@@ -3613,7 +3613,7 @@ class eventAjaxController extends Controller
 				}
 			}
 
-			$data = DB::select('SELECT * FROM ah_timetable WHERE week = ? AND user_id = ?', array($week, $token_data['user_id']));
+			$data = DB::select('SELECT * FROM ah_timetable WHERE week = ? AND user_id = ?', array($week, $user_id));
 			return Response::json($data, 200);
 		}
 		
