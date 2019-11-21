@@ -3203,7 +3203,11 @@ class eventAjaxController extends Controller
 		if (!isset($token) || empty($token)) {
 			return Response::json(['error' => 'JWT is either not set or null'], 400);
 		}
-		$user_ids = [];
+
+		if (!isset($user_ids) || empty($user_ids)) {
+			$user_ids = [];
+		}
+		
 		if(isset($token) && !empty($token)) {
 			$token_data = validate_jwt($token);
 			if($token_data == true) {
