@@ -1771,11 +1771,20 @@ class eventAjaxController extends Controller
 				$thisWk_private = 0;
 				
  				//getting last week events
-				$event_data = DB::table('events AS e')
-								->select('e.*', DB::raw("IFNULL((SELECT s.sessions_start_time FROM events_sessions AS s WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start_time ASC LIMIT 1), 2147483647) as 'earliest_date'"), DB::raw("IFNULL((SELECT s.sessions_end_time FROM events_sessions AS s  WHERE s.sessions_events_id=e.events_id AND s.sessions_active=1 ORDER BY s.sessions_start_time ASC LIMIT 1), 2147483647) as 'latest_date'"), DB::raw("(SELECT GROUP_CONCAT(DISTINCT CONCAT(t.tags_linking_value) SEPARATOR '~') FROM events_tags_linking AS t WHERE t.tags_linking_events_id=e.events_id AND t.tags_linking_active=1) as 'tags'"))
-								->where ([
+				$event_data = DB::table('events_sessions_attendance AS sa')
+								->select('sa.*', 'a.*', 'e.*', 's.*', DB::raw("(SELECT count(a.access_user_id) FROM events_access AS a WHERE a.access_events_id=e.events_id) as 'num_attendees'"), DB::raw("(SELECT GROUP_CONCAT(DISTINCT CONCAT(t.tags_linking_value) SEPARATOR '~') FROM events_tags_linking AS t WHERE t.tags_linking_events_id=e.events_id AND t.tags_linking_active=1) as 'tags'"))
+								->join('events_access AS a', 'a.access_id', '=', 'sa.sessions_attendance_access_id')
+								->join('events_sessions AS s', 's.sessions_id', '=', 'sa.sessions_attendance_sessions_id')
+								->join('events AS e', 'e.events_id', '=', 's.sessions_events_id')
+								->where([
+									['a.access_user_id', $token_data['user_id']],
+									['a.access_active', 1],
+									['sa.sessions_attendance_going', 1],
+									['sa.sessions_attendance_active', 1],
+									['s.sessions_active', 1],
+									['s.sessions_status', 0],
 									['e.events_active', 1],
-									['e.events_createdby', $token_data['user_id']]
+									['e.events_status', 0]
 								])
 								->get();
 				
@@ -1784,8 +1793,6 @@ class eventAjaxController extends Controller
 				$tags_this_week = [];
 				$tags_next_week = [];			
 				if(!is_null($event_data)) {
-					
-					
 					foreach($event_data as $events) {
 						// checking last week events
 						if(isset($events->tags) && !is_null($events->tags)) {
@@ -1799,7 +1806,13 @@ class eventAjaxController extends Controller
 							}
 						}
 						
-						if(($events->earliest_date > round(microtime(true) * 1000)) - (7 * 24 * 60 * 60 * 1000) && ($events->earliest_date < round(microtime(true) * 1000))) {
+
+						$d = strtotime("-1 week +1 day");
+						$start_week = strtotime("last sunday midnight",$d);
+						$end_week = strtotime("next sunday midnight",$d);
+						$start = $start_week * 1000; 
+						$end = $end_week * 1000;
+						if(($events->sessions_start_time > $start && $events->sessions_start_time < $end) || ($events->sessions_end_time > $start && $events->sessions_end_time < $end)) {
 							if ($events->events_public == 1) {
 								$lastWk_public++;
 							} else {
@@ -1819,8 +1832,13 @@ class eventAjaxController extends Controller
 							}
 						}
 						
+						$d = strtotime("+1 week -1 day");
+						$start_week = strtotime("last sunday midnight",$d);
+						$end_week = strtotime("next sunday midnight",$d);
+						$start = $start_week * 1000; 
+						$end = $end_week * 1000;
 						//checking for next week events
-						if(($events->latest_date = 0 OR $events->latest_date > (round(microtime(true) * 1000)) +  (7 * 24 * 60 * 60 * 1000)) && ($events->latest_date OR $events->latest_date > round(microtime(true) * 1000))) {
+						if(($events->sessions_start_time > $start && $events->sessions_start_time < $end) || ($events->sessions_end_time > $start && $events->sessions_end_time < $end)) {
 							//$nextWk_event_number++;
 							if ($events->events_public == 1) {
 								$nextWk_public++;
@@ -1839,9 +1857,15 @@ class eventAjaxController extends Controller
 								}
 							}
 						}
-						
+
+						$d = strtotime("today");
+						$start_week = strtotime("last sunday midnight",$d);
+						$end_week = strtotime("next sunday midnight",$d);
+						$start = $start_week * 1000; 
+						$end = $end_week * 1000; 
+
 						//checking for this week events
-						if(($events->latest_date = 0 OR $events->latest_date < (round(microtime(true) * 1000))) && ($events->earliest_date > round(microtime(true) * 1000))) {
+						if(($events->sessions_start_time > $start && $events->sessions_start_time < $end) || ($events->sessions_end_time > $start && $events->sessions_end_time < $end)) {
 							//$thisWk_event_number++;
 							if ($events->events_public == 1) {
 								$thisWk_public++;
@@ -1852,7 +1876,7 @@ class eventAjaxController extends Controller
 							if(isset($events->tags) && !is_null($events->tags)) {
 								$tag_data = explode('~', $events->tags);
 								foreach($tag_data AS $tag) {
-									if(!isset($tags_last_week[$tag])) {
+									if(!isset($tags_this_week[$tag])) {
 										$tags_this_week[$tag] = 1;
 									} else {
 										$tags_this_week[$tag]++;
@@ -1862,6 +1886,7 @@ class eventAjaxController extends Controller
 						}
 						
 					}
+
 					$lastWk_event_number = $lastWk_private + $lastWk_public;
 					$nextWk_event_number = $nextWk_private + $nextWk_public;
 					$thisWk_event_number = $thisWk_private + $thisWk_public;
@@ -1879,6 +1904,7 @@ class eventAjaxController extends Controller
 				], 200);
 			}
  		}
+
 		return Response::json([], 400);
  	}
 
