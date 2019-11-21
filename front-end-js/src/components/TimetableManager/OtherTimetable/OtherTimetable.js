@@ -1,4 +1,4 @@
-import { Button, Empty, message, Row, Select, Spin } from 'antd';
+import { Button, Empty, Icon, message, Row, Select, Spin } from 'antd';
 import React from 'react';
 import moment from 'moment';
 
@@ -45,6 +45,7 @@ class Column extends React.Component {
 class Timetable extends React.Component {
   state = {
     addModal: false,
+    blocked: false,
     ttData: {
       'monday' : [],
       'tuesday' : [],
@@ -97,6 +98,9 @@ class Timetable extends React.Component {
       });
     } else {
       message.error(data.error);
+      if (res.status === 400) {
+        this.setState({blocked: true});
+      }
     }
   }
 
@@ -136,7 +140,7 @@ class Timetable extends React.Component {
   retreatWeek = () => this.changeWeek(-1);
 
   render() {
-    const { users, ttData, loading, relativeWeek, selectedUser } = this.state;
+    const { blocked, users, ttData, loading, relativeWeek, selectedUser } = this.state;
     const ttCols = [
       <Column key='time' title={true} name={'Time'} />,
       <Column key='monday' name={'Mon'} selected={ttData.monday} />,
@@ -150,6 +154,70 @@ class Timetable extends React.Component {
     const startDate = moment().weekday(0).add(relativeWeek, 'w');
     const endDate = moment().weekday(6).add(relativeWeek, 'w');
     const options = users.map(d => <Option key={d.id}>{d.email}</Option>);
+
+    let timetableElm = null;
+
+    if (blocked) {
+      timetableElm = (
+        <div style={{textAlign: 'center'}}>
+          <Icon
+            type="stop"
+            theme="twoTone"
+            twoToneColor="#ff0000"
+            style={{fontSize: 64, margin: '1em'}}
+          />
+          <p>You do not have permission to look at this person's timetable!</p>
+        </div>
+      );
+    } else {
+      if (selectedUser) {
+        timetableElm = (
+          <React.Fragment>
+            <Row
+              type="flex"
+              align="middle"
+              justify="center"
+              style={{margin: '0em 0em 1em 0em', position: 'relative'}}
+            >
+              <Button
+                icon="left"
+                shape="circle"
+                type="primary"
+                onClick={this.retreatWeek}
+                disabled={loading}
+              />
+              <div className="timetable-dates" style={{margin: '0em 1em'}}>
+                {startDate.format('DD/MM/YYYY')} - {endDate.format('DD/MM/YYYY')}
+              </div>
+              <Button
+                icon="right"
+                shape="circle"
+                type="primary"
+                onClick={this.advanceWeek}
+                disabled={loading}
+              />
+            </Row>
+            <div className="timetable">
+              {ttCols}
+              {loading ?
+                <div className="timetable-loader">
+                  <Spin tip="Loading..." />
+                </div> :
+                null
+              }
+            </div>
+          </React.Fragment>
+        );
+      } else {
+        timetableElm = (
+          <Empty description={
+            <span>
+              Please select an user to view!
+            </span>
+          } />
+        );
+      }
+    }
   
     return (
       <React.Fragment>
@@ -161,7 +229,7 @@ class Timetable extends React.Component {
             <Select
               showSearch
               value={selectedUser}
-              placeholder="Name of person"
+              placeholder="Email of the person"
               style={{ width: '100%' }}
               defaultActiveFirstOption={false}
               showArrow={false}
@@ -175,43 +243,7 @@ class Timetable extends React.Component {
             </Select>
           </div>
         </Row>
-        <Row
-          type="flex"
-          align="middle"
-          justify="center"
-          style={{margin: '0em 0em 1em 0em', position: 'relative'}}
-        >
-          <Button
-            icon="left"
-            shape="circle"
-            type="primary"
-            onClick={this.retreatWeek}
-            disabled={loading}
-          />
-          <div className="timetable-dates" style={{margin: '0em 1em'}}>
-            {startDate.format('DD/MM/YYYY')} - {endDate.format('DD/MM/YYYY')}
-          </div>
-          <Button
-            icon="right"
-            shape="circle"
-            type="primary"
-            onClick={this.advanceWeek}
-            disabled={loading}
-          />
-        </Row>
-        {selectedUser ? <div className="timetable">
-          {ttCols}
-          {loading ?
-            <div className="timetable-loader">
-              <Spin tip="Loading..." />
-            </div> :
-            null
-          }
-        </div> : <Empty description={
-          <span>
-            Please select an user to view!
-          </span>
-        } />}
+        { timetableElm }
       </React.Fragment>
     );
   }
