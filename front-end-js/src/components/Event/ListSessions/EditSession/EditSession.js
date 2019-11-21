@@ -142,9 +142,6 @@ class EditSession extends React.Component {
 
     return (
       <List.Item className={cancelled ? 'cancelled-session' : ''} style={{display: 'flex'}}>
-        <div style={{paddingRight: '0.5em'}}>
-          
-        </div>
         <div style={{flexGrow: 1}}>
           <RangePicker
             defaultValue={[

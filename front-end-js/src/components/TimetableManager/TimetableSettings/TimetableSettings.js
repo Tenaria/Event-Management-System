@@ -105,6 +105,26 @@ class TimetableSettings extends React.Component {
       message.error(data.error);
     }
   }
+  deleteUser = id => {
+    const { allowedUsers } = this.state;
+    let indexOfData = -1;
+
+    for (let i = 0; i < allowedUsers.length; ++i) {
+      if (allowedUsers[i].id === id){
+        indexOfData = i;
+        break;
+      }
+    }
+
+    if (indexOfData > -1) {
+      allowedUsers.splice(indexOfData, 1);
+    }
+
+    console.log(allowedUsers);
+
+    this.setState({ allowedUsers: [] });
+    this.setState({ allowedUsers });
+  }
 
   render() {
     const { allowedUsers, loaded, users, selectedUser } = this.state;
@@ -155,8 +175,15 @@ class TimetableSettings extends React.Component {
             dataSource={allowedUsers}
             header="People who have access to your timetable"
             renderItem = {item => (
-              <List.Item>
-                <div key={item.id}>{item.email}</div>
+              <List.Item key={item.id} style={{display: 'flex'}}>
+                <div style={{flexGrow: 1}}>{item.email}</div>
+                <div style={{paddingLeft: '0.5em', textAlign: 'right'}}>
+                  <Button
+                    type="danger"
+                    icon="delete"
+                    onClick={() => this.deleteUser(item.id)}
+                  />
+                </div>
               </List.Item>
             )}
           >
