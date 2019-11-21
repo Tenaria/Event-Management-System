@@ -88,10 +88,10 @@
       font-weight: bold;
     }
     .timetable-cell.selected {
-      background-color: #68D391;
+      background-color: #9AE6B4;
     }
     .timetable-cell.selected:nth-child(even) {
-      background-color: #48BB78;
+      background-color: #68D391;
     }
     .timetable-cell.selected-overlay {
       background-color: #805AD5;
@@ -100,10 +100,10 @@
       background-color: #6B46C1;
     }
     .timetable-cell.selected-other {
-      background-color: #3182CE;
+      background-color: #90CDF4;
     }
     .timetable-cell.selected-other:nth-child(even) {
-      background-color: #2B6CB0;
+      background-color: #63B3ED;
     }
   }
   .timetable-loader {
