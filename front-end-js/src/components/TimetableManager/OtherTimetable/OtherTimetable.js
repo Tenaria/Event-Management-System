@@ -184,7 +184,7 @@ class Timetable extends React.Component {
     });
   }
   handleChange = value => {
-    this.setState({ selectedUser: value }, () => {
+    this.setState({ blocked: false, selectedUser: value }, () => {
       this.changeWeek(0);
     });
   }
