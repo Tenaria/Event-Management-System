@@ -3223,7 +3223,7 @@ class eventAjaxController extends Controller
 					//remove id from show
 					DB::table('timetable_show')
 						->where('timetable_show_owner', $token_data['user_id'])
-						->whereIn('timetable_show_owner', $to_remove)
+						->whereIn('timetable_show_viewer', $to_remove)
 						->update(['timetable_show_active' => 0]);
 
 					$users_email = DB::table('users')
