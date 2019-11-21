@@ -93,6 +93,18 @@
     .timetable-cell.selected:nth-child(even) {
       background-color: #48BB78;
     }
+    .timetable-cell.selected-overlay {
+      background-color: #805AD5;
+    }
+    .timetable-cell.selected-overlay:nth-child(even) {
+      background-color: #6B46C1;
+    }
+    .timetable-cell.selected-other {
+      background-color: #3182CE;
+    }
+    .timetable-cell.selected-other:nth-child(even) {
+      background-color: #2B6CB0;
+    }
   }
   .timetable-loader {
     background: rgba(255, 255, 255, 0.9);

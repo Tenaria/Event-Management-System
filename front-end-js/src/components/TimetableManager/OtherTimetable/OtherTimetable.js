@@ -14,13 +14,25 @@ moment.updateLocale("en", { week: {
 
 class Column extends React.Component {
   render() {
-    const { name, title, selected } = this.props;
+    const { name, title, selected, yourSelected } = this.props;
     const cells = [
       <div key={'title'} className="timetable-cell title">{name}</div>
     ];
 
     for (let i = 0; i < NUM_OF_HOURS; ++i) {
-      if (!title && selected.includes(i)) {
+      if (!title && selected.includes(i) && yourSelected.includes(i)) {
+        const cell = (
+          <div key={name + '-' + i} className="timetable-cell selected-overlay">
+          </div>
+        );
+        cells.push(cell);
+      } else if (!title && selected.includes(i)) {
+        const cell = (
+          <div key={name + '-' + i} className="timetable-cell selected-other">
+          </div>
+        );
+        cells.push(cell);
+      } else if (!title && yourSelected.includes(i)) {
         const cell = (
           <div key={name + '-' + i} className="timetable-cell selected">
           </div>
@@ -55,17 +67,25 @@ class Timetable extends React.Component {
       'saturday' : [],
       'sunday' : []
     },
+    yourttData: {
+      'monday' : [],
+      'tuesday' : [],
+      'wednesday' : [],
+      'thursday' : [],
+      'friday' : [],
+      'saturday' : [],
+      'sunday' : []
+    },
     loading: true,
     relativeWeek: 0,
     users: [],
+    overlay: true,
     selectedUser: null
   }
 
   changeWeek = async (change) => {
     const { token } = this.context;
-    const { relativeWeek, selectedUser } = this.state;
-
-    console.log(selectedUser);
+    const { overlay, relativeWeek, selectedUser } = this.state;
 
     this.setState({loading: true});
 
@@ -83,10 +103,39 @@ class Timetable extends React.Component {
       })
     });
 
+    let yourttData = null;
+    let yourRes = null;
+
+    if (overlay) {
+      yourRes = await fetch('http://localhost:8000/get_ah_timetable', {
+        method: 'POST',
+        mode: 'cors',
+        cache: 'no-cache',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          token,
+          week: moment().week().valueOf() + relativeWeek + change
+        })
+      });
+
+      yourttData = await yourRes.json();
+    }
+
     const data = await res.json();
-    if (res.status === 200) {
+    if (res.status === 200 && yourRes.status === 200) {
       this.setState({
         ttData: (data[0] ? JSON.parse(data[0].week_data) : {
+          'monday' : [],
+          'tuesday' : [],
+          'wednesday' : [],
+          'thursday' : [],
+          'friday' : [],
+          'saturday' : [],
+          'sunday' : []
+        }),
+        yourttData: (yourttData ? JSON.parse(yourttData[0].week_data) : {
           'monday' : [],
           'tuesday' : [],
           'wednesday' : [],
@@ -99,7 +148,8 @@ class Timetable extends React.Component {
         loading: false
       });
     } else {
-      message.error(data.error);
+      if (res.status !== 200) message.error(data.error);
+      if (yourRes.status !== 200) message.error(yourttData.error);
       if (res.status === 400) {
         this.setState({blocked: true});
       }
@@ -142,16 +192,16 @@ class Timetable extends React.Component {
   retreatWeek = () => this.changeWeek(-1);
 
   render() {
-    const { blocked, users, ttData, loading, relativeWeek, selectedUser } = this.state;
+    const { blocked, users, ttData, yourttData, loading, relativeWeek, selectedUser } = this.state;
     const ttCols = [
       <Column key='time' title={true} name={'Time'} />,
-      <Column key='monday' name={'Mon'} selected={ttData.monday} />,
-      <Column key='tuesday' name={'Tue'} selected={ttData.tuesday} />,
-      <Column key='wednesday' name={'Wed'} selected={ttData.wednesday} />,
-      <Column key='thursday' name={'Thu'} selected={ttData.thursday} />,
-      <Column key='friday' name={'Fri'} selected={ttData.friday} />,
-      <Column key='saturday' name={'Sat'} selected={ttData.saturday} />,
-      <Column key='sunday' name={'Sun'} selected={ttData.sunday} />
+      <Column key='monday' name={'Mon'} selected={ttData.monday} yourSelected={yourttData.monday} />,
+      <Column key='tuesday' name={'Tue'} selected={ttData.tuesday} yourSelected={yourttData.tuesday} />,
+      <Column key='wednesday' name={'Wed'} selected={ttData.wednesday} yourSelected={yourttData.wednesday} />,
+      <Column key='thursday' name={'Thu'} selected={ttData.thursday} yourSelected={yourttData.thursday} />,
+      <Column key='friday' name={'Fri'} selected={ttData.friday} yourSelected={yourttData.friday} />,
+      <Column key='saturday' name={'Sat'} selected={ttData.saturday} yourSelected={yourttData.saturday} />,
+      <Column key='sunday' name={'Sun'} selected={ttData.sunday} yourSelected={yourttData.sunday} />
     ];
     const startDate = moment().weekday(0).add(relativeWeek, 'w');
     const endDate = moment().weekday(6).add(relativeWeek, 'w');
@@ -198,6 +248,26 @@ class Timetable extends React.Component {
                 onClick={this.advanceWeek}
                 disabled={loading}
               />
+            </Row>
+            <Row>
+              <Row type="flex" align="middle" style={{margin: '0.5em 0em'}}>
+                <div style={{
+                  backgroundColor: '#48BB78', width: 24, height: 24, marginRight: '1em'
+                }}></div>
+                Your Timetable
+              </Row>
+              <Row type="flex" align="middle" style={{margin: '0.5em 0em'}}>
+                <div style={{
+                  backgroundColor: '#2B6CB0', width: 24, height: 24, marginRight: '1em'
+                }}></div>
+                Other Person's Timetable
+              </Row>
+              <Row type="flex" align="middle" style={{margin: '0.5em 0em'}}>
+                <div style={{
+                  backgroundColor: '#6B46C1', width: 24, height: 24, marginRight: '1em'
+                }}></div>
+                Overlap
+              </Row>
             </Row>
             <div className="timetable">
               {ttCols}
