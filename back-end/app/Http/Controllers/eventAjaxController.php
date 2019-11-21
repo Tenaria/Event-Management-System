@@ -3270,7 +3270,7 @@ class eventAjaxController extends Controller
 					$users_email = DB::table('users')
 									->where([
 										['users_active', 1],
-										['users_email', '!=', $token_data['user_id']] //DO NOT EMAIL YOURSELF
+										['users_id', '!=', $token_data['user_id']] //DO NOT EMAIL YOURSELF
 									])
 									->whereIn('users_id', $to_add)
 									->get();
