@@ -68,7 +68,7 @@ const renderActiveShape = (props) => {
 class Dashboard extends React.Component {
   state = {
     activeIndex: 0,
-    tagIndex: 0,
+    tagIndex: 2,
     data: null,
     loaded: false
   }
@@ -138,7 +138,7 @@ class Dashboard extends React.Component {
       for (let k in tagData) {
         parsedTags.push({
           name: k,
-          value: parseInt(data.tags_last_week[k]),
+          value: parseInt(tagData[k]),
           colour: colourCombo[i % colourCombo.length]
         });
         i++;
