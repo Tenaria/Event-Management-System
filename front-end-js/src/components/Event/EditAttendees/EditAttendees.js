@@ -87,6 +87,17 @@ class EditAttendees extends React.Component {
     this.setState({attendees})
   }
 
+  removeAttendee = id => {
+    const { attendees } = this.state;
+    for (let i = 0; i < attendees.length; ++i) {
+      if (attendees[i].id === id) {
+        attendees.splice(i, 1);
+        break;
+      }
+    }
+    this.setState({attendees});
+  }
+
   updateAttendees = async () => {
     /*
       We are going to update the attendees by hijacking the general edit event URL. This url will
@@ -95,7 +106,9 @@ class EditAttendees extends React.Component {
     const { id, name, desc, event_public, location, token } = this.context;
     const { attendees } = this.state;
 
-    const attendeeIDs = attendees.map(a => a.id);
+    const attendeeIDs = attendees.map(a => parseInt(a.id));
+
+    console.log(attendeeIDs);
 
     const res = await fetch('http://localhost:8000/edit_event', {
       method: 'POST',
@@ -122,13 +135,26 @@ class EditAttendees extends React.Component {
   }
 
   render() {
+    const { userId } = this.context;
     const { attendees, data, value, loaded } = this.state;
     const options = data.map(d => <Option key={d.id}>{d.email}</Option>);
-    const attendeeElm = attendees.map(a =>
+    const attendeeElm = attendees.map(a => (userId === a.id ?
       <Tooltip key={a.id} title={a.email}>
-        <Avatar icon="user" style={{margin: '1em 0.5em 0em 0em'}} />
-      </Tooltip>
-    );
+        <div style={{display: 'inline-block', margin: '1em 0.5em 0em 0em'}}>
+          <Avatar icon="user" />
+        </div>
+      </Tooltip> :
+      <Tooltip key={a.id} title={a.email}>
+        <div
+          className="attendee"
+          style={{margin: '1em 0.5em 0em 0em'}}
+          onClick={() => this.removeAttendee(a.id)}
+        >
+          <Icon className="delete" type="close-circle" theme="twoTone" twoToneColor="#ff0000"/>
+          <Avatar icon="user" />
+        </div>
+    </Tooltip>
+    ));
     const spinStyle = {
       padding: '2em',
       textAlign: 'center',

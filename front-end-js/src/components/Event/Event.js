@@ -83,7 +83,7 @@ class Event extends React.Component {
 
   render() {
     const { contactAttendees, id, name, desc, event_public, loaded, location, valid, tags } = this.state;
-    const { token } = this.context;
+    const { token, userId } = this.context;
     const spinStyle = {
       padding: '2em',
       textAlign: 'center',
@@ -95,7 +95,7 @@ class Event extends React.Component {
       if (valid) {
         eventElm =  (
           <EventContext.Provider value={{
-            id, name, desc, event_public, location, tags, token
+            id, name, desc, event_public, location, tags, token, userId
           }}>
             <Collapse defaultActiveKey={['2', '3']}>
               <Panel header="General Information" key="1">
