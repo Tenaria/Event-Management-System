@@ -2,17 +2,25 @@ import { Menu, Icon, Typography } from 'antd';
 import React from 'react';
 
 import Timetable from './Timetable';
+import TimetableSettings from './TimetableSettings';
 import OtherTimetable from './OtherTimetable';
 
 const { Title } = Typography;
 
 class TimetableManager extends React.PureComponent {
-  state = { yourMenu: true };
+  state = { menu: 'settings' };
 
-  handleClick = e => this.setState({yourMenu: e.key === 'your'});
+  handleClick = e => this.setState({menu: e.key});
 
   render() {
-    const { yourMenu } = this.state;
+    const { menu } = this.state;
+
+    let displayElm = <Timetable />;
+    if (menu === 'other') {
+      displayElm = <OtherTimetable />;
+    } else if (menu === 'settings') {
+      displayElm = <TimetableSettings />;
+    }
 
     return (
       <div>
@@ -21,7 +29,7 @@ class TimetableManager extends React.PureComponent {
           <p>Manage your timetable and view other people's public timetable.</p>
         </div>
         <Menu
-          defaultSelectedKeys={['your']}
+          defaultSelectedKeys={[menu]}
           onClick={this.handleClick}
           mode="horizontal"
           style={{marginBottom: '1em'}}
@@ -34,8 +42,12 @@ class TimetableManager extends React.PureComponent {
             <Icon type="usergroup-add" />
             Other's Timetable
           </Menu.Item>
+          <Menu.Item key="settings">
+            <Icon type="setting" />
+            Timetable Settings
+          </Menu.Item>
         </Menu>
-        <div>{yourMenu ? <Timetable /> : <OtherTimetable />}</div>
+        <div>{displayElm}</div>
       </div>
     );
   }
