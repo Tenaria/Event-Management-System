@@ -2542,6 +2542,49 @@ class eventAjaxController extends Controller
 	}
 
 	/*
+	*	given an event, removes the event completely.
+	*	@param
+	*		$request containing 'token' (str) and 'event_id'(int)
+	*	@return
+	*		HTTP 200 on success, HTTP 400 with 'error'(str) otherwise
+	*/
+	public function remove_event(Request $request) {
+		$token = $request->input('token'); // STRING; NOT EMPTY
+		$event_id = $request->input('event_id'); // INTEGER; NOT EMPTY
+
+		// check all parameters are set as necessart
+		if (!isset($token) || empty($token)) {
+			return Response::json(['error' => 'JWT is either not set or null'], 400);
+		}
+
+		if (!isset($event_id) || empty($event_id)) {
+			return Response::json(['error' => 'event id is either not set or null'], 400);
+		}
+		
+		if(isset($token) && !empty($token)) {
+			$token_data = validate_jwt($token);
+			if($token_data == true) {
+				// check event exists, is not cancelled and belongs to user
+				$event_data = DB::table('events')
+								->where ([
+									['events_active', 1],
+									['events_id', $event_id],
+									['events_createdby', $token_data['user_id']],
+								])
+								->update(['events_active' => 0]);
+
+				if($event_data) {
+					return Response::json([], 200);
+				} else {
+					return Response::json(['error' => 'event does not exist or has already been removed'], 400);
+				}
+			}
+		}
+		
+		return Response::json([], 400);
+	}
+
+	/*
 	*	cancel an event session; is different from remove as the session will still show in the event but in a cancelled status.
 	*	@param
 	*		$request containing 'token' (str), 'session_id'(int) and 'event_id'(int)

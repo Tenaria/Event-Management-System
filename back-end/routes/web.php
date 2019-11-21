@@ -25,6 +25,7 @@ Route::post('/verify_acc', 'eventAjaxController@verify_acc');
 // event modification routes
 Route::post('/create_event', 'eventAjaxController@create_event');
 Route::post('/edit_event', 'eventAjaxController@edit_event');
+Route::post('/remove_event', 'eventAjaxController@remove_event');
 Route::post('/cancel_event', 'eventAjaxController@cancel_event');
 Route::post('/uncancel_event', 'eventAjaxController@uncancel_event');
 Route::post('/mark_as_going','eventAjaxController@mark_as_going');
