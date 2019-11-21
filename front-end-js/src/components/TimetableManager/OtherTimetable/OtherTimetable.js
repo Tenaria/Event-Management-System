@@ -103,7 +103,7 @@ class Timetable extends React.Component {
       })
     });
 
-    let yourttData = null;
+    let yourttData = [];
     let yourRes = null;
 
     if (overlay) {
@@ -123,6 +123,8 @@ class Timetable extends React.Component {
       yourttData = await yourRes.json();
     }
 
+    console.log(yourttData);
+
     const data = await res.json();
     if (res.status === 200 && yourRes.status === 200) {
       this.setState({
@@ -135,7 +137,7 @@ class Timetable extends React.Component {
           'saturday' : [],
           'sunday' : []
         }),
-        yourttData: (yourttData ? JSON.parse(yourttData[0].week_data) : {
+        yourttData: (yourttData[0] ? JSON.parse(yourttData[0].week_data) : {
           'monday' : [],
           'tuesday' : [],
           'wednesday' : [],
