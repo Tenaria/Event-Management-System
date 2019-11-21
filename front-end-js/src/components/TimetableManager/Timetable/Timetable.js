@@ -29,6 +29,7 @@ class Column extends React.Component {
             onMouseDown={!title ? e => this.props.onMouseDown(e, i) : null}
             onMouseEnter={!title & mouseDown ? () => toggleCell(i) : null}
             onMouseUp={this.props.onMouseUp}
+            style={{cursor: 'default'}}
           >
           </div>
         );
@@ -41,6 +42,7 @@ class Column extends React.Component {
             onMouseDown={!title ? e => this.props.onMouseDown(e, i) : null}
             onMouseEnter={!title & mouseDown ? () => toggleCell(i) : null}
             onMouseUp={this.props.onMouseUp}
+            style={{cursor: (!title ? 'pointer' : 'default')}}
           >
             {title ? i+':00' : ''}
           </div>

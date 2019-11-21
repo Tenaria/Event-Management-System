@@ -8,7 +8,7 @@ import OtherTimetable from './OtherTimetable';
 const { Title } = Typography;
 
 class TimetableManager extends React.PureComponent {
-  state = { menu: 'other' };
+  state = { menu: 'your' };
 
   handleClick = e => this.setState({menu: e.key});
 
