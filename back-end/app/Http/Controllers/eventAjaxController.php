@@ -3602,8 +3602,8 @@ class eventAjaxController extends Controller
 			if($user_id != $token_data['user_id']) {
 				$check_access = DB::table('timetable_show')
 									->where([
-										['timetable_show_owner', $token_data['user_id']],
-										['timetable_show_viewer', $user_id],
+										['timetable_show_owner', $user_id],
+										['timetable_show_viewer', $token_data['user_id']],
 										['timetable_show_active', 1]
 									])
 									->first();
