@@ -2231,6 +2231,7 @@ class eventAjaxController extends Controller
 											['s.sessions_active', 1],
 											['s.sessions_events_id', $event_id]
 										])
+										->orderBy('s.sessions_start_time', 'asc')
 										->get();
 
 					if(!is_null($session_data)) {
