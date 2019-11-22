@@ -1,12 +1,10 @@
-import { Button, Icon, PageHeader, Row, Spin, Tooltip, Typography } from 'antd';
+import { Button, Icon, PageHeader, Row, Spin, Tooltip } from 'antd';
 import React from 'react';
 import { Redirect } from "react-router-dom";
 import moment from 'moment';
 
 import Column from './Column';
 import TokenContext from '../../context/TokenContext';
-
-const { Title } = Typography;
 
 moment.updateLocale("en", { week: {
   dow: 1, // First day of week is Monday
@@ -24,6 +22,49 @@ const colourCombo = [
   '#9F7AEA',
   '#ED64A6'
 ];
+
+const getTimetable = (userId, userEmail, token, change) => new Promise(async (resolve, reject) => {
+  const res = await fetch('http://localhost:8000/get_ah_timetable', {
+    method: 'POST',
+    mode: 'cors',
+    cache: 'no-cache',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      token,
+      week: moment().week().valueOf() + change,
+      user_id: userId
+    })
+  });
+
+  const returnData = {};
+  const data = await res.json();
+  if (res.status === 200) {
+    returnData[userEmail] = (
+      data[0] ? JSON.parse(data[0].week_data) : {
+        'monday' : [],
+        'tuesday' : [],
+        'wednesday' : [],
+        'thursday' : [],
+        'friday' : [],
+        'saturday' : [],
+        'sunday' : [],
+        'allowed' : false
+      });
+    returnData[userEmail].allowed = true;
+  } else {
+    returnData[userEmail] = {
+      'monday' : [],
+      'tuesday' : [],
+      'wednesday' : [],
+      'thursday' : [],
+      'friday' : [],
+      'saturday' : [],
+      'sunday' : [],
+      'allowed' : false
+    };
+  }
+  resolve(returnData);
+});
 
 class Timetable extends React.Component {
   state = {
@@ -52,39 +93,6 @@ class Timetable extends React.Component {
         token
       })
     });
-    
-    const getTimetable = (userId, userEmail) => new Promise(async (resolve, reject) => {
-      const res = await fetch('http://localhost:8000/get_ah_timetable', {
-        method: 'POST',
-        mode: 'cors',
-        cache: 'no-cache',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          token,
-          week: moment().week().valueOf(),
-          user_id: userId
-        })
-      });
-
-      const returnData = {};
-      const data = await res.json();
-      if (res.status === 200) {
-        returnData[userEmail] = JSON.parse(data[0].week_data);
-        returnData[userEmail].allowed = true;
-      } else {
-        returnData[userEmail] = {
-          'monday' : [],
-          'tuesday' : [],
-          'wednesday' : [],
-          'thursday' : [],
-          'friday' : [],
-          'saturday' : [],
-          'sunday' : [],
-          'allowed' : false
-        };
-      }
-      resolve(returnData);
-    });
 
     const data = await res.json();
     const attendees = data.attendees;
@@ -92,7 +100,7 @@ class Timetable extends React.Component {
 
     for (let k in attendees) {
       const attendee = attendees[k];
-      timetableCalls.push(getTimetable(attendee.id, attendee.email));
+      timetableCalls.push(getTimetable(attendee.id, attendee.email, token, 0));
     }
 
     Promise.all(timetableCalls).then(values => {
@@ -104,37 +112,34 @@ class Timetable extends React.Component {
         }
         ttData = Object.assign(ttData, values[i]);
       }
-      this.setState({ttData, loaded: true});
+      this.setState({attendees, ttData, loaded: true});
     })
   }
 
   changeWeek = async (change) => {
     const { token } = this.context;
-    const { overlay, relativeWeek, selectedUser } = this.state;
+    const { attendees, relativeWeek } = this.state;
 
     this.setState({loaded: false});
 
-    const res = await fetch('http://localhost:8000/get_ah_timetable', {
-      method: 'POST',
-      mode: 'cors',
-      cache: 'no-cache',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        token,
-        week: moment().week().valueOf() + relativeWeek + change,
-        user_id: selectedUser
-      })
-    });
+    const timetableCalls = [];
 
-    const data = await res.json();
-    if (res.status === 200) {
-      this.setState({
-        relativeWeek: this.state.relativeWeek + change,
-        loaded: true
-      });
+    for (let k in attendees) {
+      const attendee = attendees[k];
+      timetableCalls.push(getTimetable(attendee.id, attendee.email, token, relativeWeek + change));
     }
+
+    Promise.all(timetableCalls).then(values => {
+      let ttData = {};
+      for (let i = 0; i < values.length; ++i) {
+        for (let k in values[i]) {
+          if (values[i][k].allowed)
+            values[i][k].colour = colourCombo[i % colourCombo.length];
+        }
+        ttData = Object.assign(ttData, values[i]);
+      }
+      this.setState({attendees, relativeWeek: relativeWeek + change, ttData, loaded: true});
+    })
   }
 
   advanceWeek = () => this.changeWeek(1);
