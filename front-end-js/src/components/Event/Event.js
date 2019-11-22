@@ -3,7 +3,8 @@
   the two actual forms that are able to edit an event. Essentially, all this component does is
   load information and send it to the two separate forms.
  */
-import { Button, Collapse, Divider, Empty, Icon, Spin, Typography } from 'antd';
+import { Button, Collapse, Empty, Icon, PageHeader, Spin, Typography } from 'antd';
+import { Redirect } from "react-router-dom";
 import React from 'react';
 
 import EditEventForm from './EditEventForm';
@@ -28,7 +29,8 @@ class Event extends React.Component {
     event_public: false,
     location: '',
     loaded: false,
-    valid: false
+    valid: false,
+    goBack: false
   };
 
   componentDidMount = async () => {
@@ -80,9 +82,12 @@ class Event extends React.Component {
     this.setState({contactAttendees: false});
     //this.loadData(); //TODO: ASK ALENG ABOUT THIS
   }
+  goBack = () => this.setState({goBack: true});
 
   render() {
-    const { contactAttendees, id, name, desc, event_public, loaded, location, valid, tags } = this.state;
+    const {
+      contactAttendees, id, name, desc, event_public, loaded, location, valid, tags, goBack
+    } = this.state;
     const { token, userId } = this.context;
     const spinStyle = {
       padding: '2em',
@@ -91,7 +96,9 @@ class Event extends React.Component {
     };
     let eventElm = <div style={spinStyle}><Spin indicator={spinIcon}/></div>;
 
-    if (loaded) {
+    if (goBack) {
+      eventElm = <Redirect to="/events_manager" />;
+    } else if (loaded) {
       if (valid) {
         eventElm =  (
           <EventContext.Provider value={{
@@ -117,14 +124,17 @@ class Event extends React.Component {
 
     return (
       <React.Fragment>
-        <Title level={2}>Edit Event</Title>
-        <p>View a single event and edit it.</p>
-        <div style={{textAlign: 'right'}}>
-        <Button 
-          onClick={this.toggleAddForm}
-        >Contact Attendees</Button>
-        </div>
-        <Divider orientation="left">Event</Divider>
+        <PageHeader
+          title="Edit Event"
+          subTitle="View a single event and edit it"
+          extra={[
+            <Button
+              type="primary"
+              onClick={this.toggleAddForm}
+            >Contact Attendees</Button>
+          ]}
+          onBack={this.goBack}
+        />
         <div>
           { eventElm }
         </div>
