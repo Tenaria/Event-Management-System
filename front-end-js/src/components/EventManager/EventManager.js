@@ -2,7 +2,7 @@
   This is a component that is responsible for managing your event. So you are able to view a list
   of events you host.
  */
-import { Button, Card, Icon, message, Menu, Row, Spin, Tag, Tooltip, Typography } from 'antd';
+import { Button, Card, Icon, message, Menu, PageHeader, Row, Spin, Tag, Tooltip, Typography } from 'antd';
 import React from 'react';
 import { Redirect } from "react-router-dom";
 
@@ -284,8 +284,11 @@ class EventManager extends React.Component {
 
     return (
       <div>
-        <Title level={2}>Event Manager</Title>
-        <p>Manage the events you have made.</p>
+        <PageHeader
+          title="Event Manager"
+          subTitle="Manage the events you have made"
+          backIcon={false}
+        />
         {displayElm}
         <AddEventForm visible={addEvent} onCancel={this.closeAddForm} />
       </div>

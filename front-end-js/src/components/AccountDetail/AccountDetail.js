@@ -1,4 +1,4 @@
-import { Button, message, Row, Skeleton, Switch, Divider } from 'antd';
+import { Button, message, PageHeader, Row, Skeleton, Switch, Divider } from 'antd';
 import React from 'react';
 
 import AccountEdit from './AccountEdit';
@@ -185,11 +185,14 @@ class AccountDetail extends React.Component {
 
     return (
       <React.Fragment>
-        <Row style={{margin: '0em 1em'}}>
-            {accountElm}
-            <Divider orientation="left">Email Options</Divider>
-            {emailElm}
-        </Row>
+        <PageHeader
+          title="Edit Account"
+          subTitle="Manage your account details"
+          backIcon={false}
+        />
+        {accountElm}
+        <Divider orientation="left">Email Options</Divider>
+        {emailElm}
       </React.Fragment>
     );
   }

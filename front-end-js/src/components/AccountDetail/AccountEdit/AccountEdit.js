@@ -67,7 +67,6 @@ class AccountEdit extends React.Component {
     return (
       <div>
         <Form onSubmit={this.handleSubmit}>
-          <Title level={2}>Edit Account</Title>
           <Row gutter={24}>
             <Col span={12}>
               <Form.Item label="First Name">

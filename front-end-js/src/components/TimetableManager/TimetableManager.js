@@ -1,4 +1,4 @@
-import { Menu, Icon, Typography } from 'antd';
+import { Menu, Icon, PageHeader, Typography } from 'antd';
 import React from 'react';
 
 import Timetable from './Timetable';
@@ -24,10 +24,11 @@ class TimetableManager extends React.PureComponent {
 
     return (
       <div>
-        <div>
-          <Title level={2}>Timetable Manager</Title>
-          <p>Manage your timetable and view other people's public timetable.</p>
-        </div>
+        <PageHeader
+          title="Timetable Manager"
+          subTitle="Manage your timetable and view other people's public timetable"
+          backIcon={false}
+        />
         <Menu
           defaultSelectedKeys={[menu]}
           onClick={this.handleClick}

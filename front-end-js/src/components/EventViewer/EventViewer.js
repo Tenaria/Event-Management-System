@@ -1,7 +1,7 @@
 /*
   This allows you to view the events that are available for the user
  */
-import { Button, Card, Empty, Icon, Input, Menu, Row, Spin, Tag, Typography } from 'antd';
+import { Button, Card, Empty, Icon, Input, Menu, PageHeader, Row, Spin, Tag, Typography } from 'antd';
 import { Redirect } from "react-router-dom";
 import React from 'react';
 
@@ -171,8 +171,11 @@ class EventViewer extends React.Component {
 
     return (
       <React.Fragment>
-        <Title level={2}>Event Viewer</Title>
-        <p>View a list of upcoming events made by other users. You can also search for events here and also view past events.</p>
+        <PageHeader
+          title="Event Viewer"
+          subTitle="View a list of upcoming events made by other users. You can also search for events here and also view past events"
+          backIcon={false}
+        />
         {displayElm}
       </React.Fragment>
     );

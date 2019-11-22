@@ -2,7 +2,7 @@
   This allows you to view the events that are available for the user
  */
 import {
-  Avatar, Divider, Empty, Icon, List, message, Row, Col, Spin, Tooltip, Typography
+  Avatar, Empty, Icon, List, message, PageHeader, Row, Col, Spin, Tooltip, Typography
 } from 'antd';
 import React from 'react';
 
@@ -235,9 +235,11 @@ class EventDetails extends React.Component {
 
     return (
       <React.Fragment>
-        <Title level={2}>Event Details</Title>
-        <p>View details about a single event.</p>
-        <Divider></Divider>
+        <PageHeader
+          title="Event Details"
+          subTitle="View details about a single event"
+          backIcon={false}
+        />
         {displayElm}
       </React.Fragment>
     );
