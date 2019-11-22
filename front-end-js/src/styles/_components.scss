@@ -139,3 +139,19 @@
     opacity: 1;
   }
 }
+
+.timetable-legend {
+  display: flex;
+  .legend {
+    display: flex;
+    align-items: center;
+    margin: 0.5em 0em;
+    flex-grow: 1;
+    .colour-indicator {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      margin-right: 1em;
+    }
+  }
+}

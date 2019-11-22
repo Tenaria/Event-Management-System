@@ -1,9 +1,12 @@
-import { Button, Empty, Icon, message, Row, Spin } from 'antd';
+import { Button, Icon, PageHeader, Row, Spin, Tooltip, Typography } from 'antd';
 import React from 'react';
+import { Redirect } from "react-router-dom";
 import moment from 'moment';
 
 import Column from './Column';
 import TokenContext from '../../context/TokenContext';
+
+const { Title } = Typography;
 
 moment.updateLocale("en", { week: {
   dow: 1, // First day of week is Monday
@@ -29,6 +32,7 @@ class Timetable extends React.Component {
     overlay: true,
     relativeWeek: 0,
     ttData: [],
+    goBack: false
   }
 
   componentDidMount = async () => {
@@ -65,7 +69,8 @@ class Timetable extends React.Component {
       const returnData = {};
       const data = await res.json();
       if (res.status === 200) {
-        returnData[userEmail] = JSON.parse(data[0].week_data)
+        returnData[userEmail] = JSON.parse(data[0].week_data);
+        returnData[userEmail].allowed = true;
       } else {
         returnData[userEmail] = {
           'monday' : [],
@@ -74,7 +79,8 @@ class Timetable extends React.Component {
           'thursday' : [],
           'friday' : [],
           'saturday' : [],
-          'sunday' : []
+          'sunday' : [],
+          'allowed' : false
         };
       }
       resolve(returnData);
@@ -93,7 +99,8 @@ class Timetable extends React.Component {
       let ttData = {};
       for (let i = 0; i < values.length; ++i) {
         for (let k in values[i]) {
-          values[i][k].colour = colourCombo[i % colourCombo.length];
+          if (values[i][k].allowed)
+            values[i][k].colour = colourCombo[i % colourCombo.length];
         }
         ttData = Object.assign(ttData, values[i]);
       }
@@ -132,10 +139,10 @@ class Timetable extends React.Component {
 
   advanceWeek = () => this.changeWeek(1);
   retreatWeek = () => this.changeWeek(-1);
+  goBack = () => this.setState({goBack: true});
 
   render() {
-    const { ttData, loaded, relativeWeek } = this.state;
-    console.log(ttData);
+    const { ttData, loaded, relativeWeek, goBack } = this.state;
     const ttCols = [
       <Column key='time' title={true} name={'Time'} />,
       <Column key='monday' name="Mon" time="monday" data={ttData}/>,
@@ -150,8 +157,34 @@ class Timetable extends React.Component {
     const endDate = moment().weekday(6).add(relativeWeek, 'w');
 
     let timetableElm = null;
-
+    
     if (loaded) {
+      let legendElms = [];
+      for (let k in ttData) {
+        if (ttData[k].allowed) {
+          legendElms.push(
+            <div key={k} className="legend">
+              <div className="colour-indicator" style={{backgroundColor: ttData[k].colour}}/>
+              {k}
+            </div>
+          );
+        } else {
+          legendElms.push(
+            <Tooltip
+              key={k}
+              title="This user did not allow you to view their timetable"
+              placement="topLeft"
+            >
+              <div className="legend">
+                <div className="colour-indicator" style={{backgroundColor: ttData[k].colour}}>
+                  <Icon type="stop" theme="twoTone" style={{fontSize: 25}} twoToneColor="#ff0000"/>
+                </div>
+                <strike>{k}</strike>
+              </div>
+            </Tooltip>
+          );
+        }
+      }
       timetableElm = (
         <React.Fragment>
           <Row
@@ -179,6 +212,10 @@ class Timetable extends React.Component {
           <div className="timetable">
             {ttCols}
           </div>
+          <div style={{border: '1px solid grey', padding: '0.5em', margin: '0.5em 0em'}}>
+            <div style={{fontWeight: 'bold'}}>Timetable Legend</div>
+            <div className="timetable-legend">{legendElms}</div>
+          </div>
         </React.Fragment>
       );
     } else {
@@ -191,6 +228,12 @@ class Timetable extends React.Component {
   
     return (
       <React.Fragment>
+        {goBack ? <Redirect to="/events_manager" /> : null}
+        <PageHeader
+          onBack={this.goBack}
+          title="Event Timetable"
+          subTitle="This will show the timetables for all of the attendees that made theirs public!"
+        />
         { timetableElm }
       </React.Fragment>
     );

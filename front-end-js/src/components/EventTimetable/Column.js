@@ -12,11 +12,9 @@ class Column extends React.Component {
     for (let i = 0; i < NUM_OF_HOURS; ++i) {
       let overlay = 0;
       for (let k in data) {
-        console.log(name, i, data[k][time]);
         if (data[k][time].indexOf(i) >= 0) {
           overlay += 1;
         }
-        console.log(overlay);
       }
       if (overlay > 1) {
         const cell = (

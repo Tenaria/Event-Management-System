@@ -21,6 +21,7 @@ class EventManager extends React.Component {
     pastEvents: null,
     upcomingEvents: null,
     editingEvent: false,
+    viewTimetable: false
   }
 
   componentDidMount = () => { this.loadData(); }
@@ -67,6 +68,13 @@ class EventManager extends React.Component {
     // the user to the event editor view where you can edit a single event.
     sessionStorage.setItem('event_id', id);
     this.setState({ editingEvent: true });
+  }
+
+  viewTimetable = id => {
+    // This function will remember the id of the event selected in the session memory then redirect
+    // the user to the event editor view where you can edit a single event.
+    sessionStorage.setItem('event_id', id);
+    this.setState({ viewTimetable: true });
   }
   
   cancelEvent = async id => {
@@ -134,7 +142,7 @@ class EventManager extends React.Component {
 
   render() {
     const {
-      addEvent, currentMenu, loaded, pastEvents, upcomingEvents, editingEvent
+      addEvent, currentMenu, loaded, pastEvents, upcomingEvents, editingEvent, viewTimetable
     } = this.state;
     const cardStyle = {
       margin: '1%',
@@ -208,12 +216,19 @@ class EventManager extends React.Component {
                 </React.Fragment> :
                 <React.Fragment>
                   <Button
+                    icon="calendar"
+                    style={{
+                      marginRight: '0.5em'
+                    }}
+                    onClick={() => this.viewTimetable(upcomingEvent.events_id)}
+                  />
+                  <Button
                     icon="edit"
                     style={{
                       background: '#38B2AC',
                       border: 'none',
                       color: 'white',
-                      marginRight: (upcomingEvent.events_cancelled ? '0.5em' : '0.5em')
+                      marginRight: '0.5em'
                     }}
                     onClick={() => this.selectEvent(upcomingEvent.events_id)}
                   />
@@ -254,6 +269,8 @@ class EventManager extends React.Component {
 
     if (editingEvent) {
       displayElm = <Redirect to="/event" />
+    } else if (viewTimetable) {
+      displayElm = <Redirect to="/event_timetable" />
     } else if (loaded && currentMenu === 'current') {
       displayElm = updateDisplay(
         <Card key={-1} className="add-event-card" style={cardStyle} onClick={this.toggleAddForm}>
