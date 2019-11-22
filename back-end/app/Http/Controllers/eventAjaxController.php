@@ -3373,20 +3373,20 @@ class eventAjaxController extends Controller
 							}
 						}
 					}
-				}
 
-				foreach($to_add as $add){
-					if(is_int($add)){
-						DB::table('timetable_show')
-							->updateOrInsert(
-								[
-									'timetable_show_owner' => $token_data['user_id'],
-									'timetable_show_viewer' => $add
-								],
-								[
-									'timetable_show_active' => 1
-								]
-							);
+					foreach($to_add as $add){
+						if(is_int($add)){
+							DB::table('timetable_show')
+								->updateOrInsert(
+									[
+										'timetable_show_owner' => $token_data['user_id'],
+										'timetable_show_viewer' => $add
+									],
+									[
+										'timetable_show_active' => 1
+									]
+								);
+						}
 					}
 				}
 
