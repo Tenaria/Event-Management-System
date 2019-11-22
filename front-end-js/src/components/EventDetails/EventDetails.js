@@ -4,6 +4,7 @@
 import {
   Avatar, Empty, Icon, List, message, PageHeader, Row, Col, Spin, Tooltip, Typography
 } from 'antd';
+import { Redirect } from "react-router-dom";
 import React from 'react';
 
 import BookSession from './BookSession';
@@ -24,7 +25,8 @@ class EventDetails extends React.Component {
     attendees: [],
     sessions: [],
     loaded: false,
-    valid: false
+    valid: false,
+    goBack: false
   };
 
   updateSessions = async () => {
@@ -166,9 +168,11 @@ class EventDetails extends React.Component {
     this.updateEventAttendees();
   }
 
+  goBack = () => this.setState({goBack: true});
+
   render() {
     const {
-      id, name, desc, location, attendees, sessions, valid, loaded
+      id, name, desc, location, attendees, sessions, valid, loaded, goBack
     } = this.state;
     const { userEmail } = this.context;
     const attendeeElm = attendees.map(a =>
@@ -183,7 +187,9 @@ class EventDetails extends React.Component {
     };
     let displayElm = <div style={spinStyle}><Spin indicator={spinIcon}/></div>;
 
-    if (loaded && valid) {
+    if (goBack) {
+      displayElm = <Redirect to="/events_viewer" />;
+    } else if (loaded && valid) {
       displayElm = (
         <React.Fragment>
           <Row gutter={32} type="flex">
@@ -238,7 +244,7 @@ class EventDetails extends React.Component {
         <PageHeader
           title="Event Details"
           subTitle="View details about a single event"
-          backIcon={false}
+          onBack={this.goBack}
         />
         {displayElm}
       </React.Fragment>
